@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcomSphere</title>
+    <!-- <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" /> -->
+    <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
+    
+        <script>
+    function saveCartToSession() {
+        let cartData = JSON.parse(localStorage.getItem('cart')) || [];
+
+        fetch('checkout.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cart: cartData })
+        }).then(response => {
+            return response.text();
+        }).then(data => {
+            console.log("Cart saved:", data);
+            window.location.href = "checkout.php"; // Redirect to checkout
+        }).catch(error => console.error("Error:", error));
+    }
+</script>
+
+    
+    <style>
+        table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+img {
+    width: 50px;
+    height: auto;
+    border-radius: 5px;
+}
+
+button.remove-item {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button.remove-item:hover {
+    background-color: #cc0000;
+}
+button.increase-qty, button.decrease-qty {
+  padding: 5px 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+  margin: 0 5px;
+}
+
+button.decrease-qty {
+  background-color: #ff4d4d;
+}
+
+button.increase-qty:hover {
+  background-color: #0056b3;
+}
+
+button.decrease-qty:hover {
+  background-color: #cc0000;
+}
+
+button.remove-item {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  
+
+    <section id="header">
+        <a href="#"><img src="img/logo1.png" class="logo" alt="" height="60"></a>
+        <div>
+            <ul id="navbar">
+                <li><a href="index.php">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="profile.php">profile</a></li>
+                <li id="lg-bag"><a class="active" href="cart.html"><img src="img/cart.png" class="cart" alt=""
+                            height="30"></a></li>
+                <a href="#" id="close" type="input"><img src="img/close.svg" height="30" alt=""></a>
+            </ul>
+        </div>
+        <div id="mobile">
+            <a href="#"><img src="img/cart.svg" height="20" alt=""></i></a>
+            <i id="bar"><img src="img/menu.svg" height="20" width="30" alt=""></i>
+
+        </div>
+    </section>
+
+    <section id="page-header" class="about-header">
+        <h2>#let's talk</h2>
+        <p>LEAVE A MESSAGE, We love to hear from you!</p>
+    </section>
+    <section id="cart" class="section-p1">
+        <table width="100%">
+            <thead>
+                <tr>
+                    <td>Remove</td>
+                    <td>Image</td>
+                    <td>Products</td>
+                    <td>price</td>
+                    <td>Quantity</td>
+                    <td>Subtotal</td>
+                </tr>
+            </thead>
+            <tbody id="cart-items">
+
+            </tbody>
+
+        </table>
+    </section>
+
+    <section id="cart-add" class="section-p1">
+        <div id="coupon">
+            <h3>Apply Coupon</h3>
+            <div>
+                <input type="text" placeholder="Enter Your Coupon">
+                <button class="normal">Apply</button>
+            </div>
+        </div>
+        <div id="subtotal">
+            <h3>Cart Total</h3>
+            <table>
+                <tr>
+                    <td>Cart Subtotal</td>
+                    <td id="cart-subtotal">Rs.0</td>
+                </tr>
+                <tr>
+                    <td>Shipping</td>
+                    <td>Free</td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td id="cart-total"><strong>Rs.0</strong></td>
+                </tr>
+
+            </table>
+           <a href="checkout.php"> <button class="normal" id="checkout-btn">Proceed To Checkout</button></a>
+
+        </div>
+    </section>
+
+    <section id="contact-details" class="section-p1">
+        <div class="details">
+            <span>GET IN TOUCH</span>
+            <h2>Visit one of our agency locations or contact us today</h2>
+            <h3>Head Office</h3>
+            <div>
+                <li>
+                    <i class="fa-regular fa-map"></i>
+                    <p>56 Glassford Street Glasgow GI IUL New York.</p>
+                </li>
+                <li>
+                    <i class="fa-regular fa-envelope"></i>
+                    <p>harshmoradiya111@gmail.com </p>
+                    <p>harshdonda@gmail.com</p>
+
+                </li>
+                <li>
+                    <i class="fa-solid fa-phone"></i>
+                    <p>+91 8160730726</p>
+                    <p>+91 6359401196</p>
+                </li>
+                <li>
+                    <i class="fa-regular fa-clock"></i>
+                    <p>Monday to Saturday:9.00am to 16.00pm</p>
+                </li>
+
+            </div>
+            <div class="map">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14822.442578617198!2d72.
+                    13409008715817!3d21.756615300000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!
+                    1s0x395f5a71debc932f%3A0x559b68ba35316a59!2sSsccs%20(Shree%20Swaminarayan%20College%
+                    20Of%20Computer%20Science%20)!5e0!3m2!1sen!2sin!4v1737275587065!5m2!1sen!2sin" width="600"
+                    height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    </section>
+
+
+
+    <section id="form-details">
+        <form action="">
+            <span>LEAVE A MESSAGE</span>
+            <h2>We love to hear from you</h2>
+            <input type-"text" placeholder="Your Name">
+            <input type-"text" placeholder="E-mail">
+            <input type-"text" placeholder="subject">
+            <textarea name="" id="" cols="30" rows="10" placeholder="Your Message"></textarea>
+            <button class="normal">Submit</button>
+        </form>
+        <div class="people">
+            <div>
+                <img src="img/2.png" alt="">
+                <p><span>Harsh Moradiya</span>Senior Marketing Manager <br>Phone: +91
+                    8160730726<br>E-mail:harshmoradiya111@gmail.com</p>
+            </div>
+            <div>
+                <img src="img/3.png" alt="">
+                <p><span>Harsh Donda</span>Senior Marketing Manager <br>Phone: +91
+                    6359401196<br>E-mail:harshdonda012@gmail.com</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="newsletter" class="section-p1 section-m1">
+        <div class="newstext">
+            <h4>Sign Up For Newsletter</h4>
+            <p>Get E-mail updates about our latest shop and <span>special offer.</span></p>
+        </div>
+        <div class="form">
+            <input type="text" placeholder="Your E-mail address">
+            <button class="normal">Sign Up</button>
+        </div>
+    </section>
+
+
+    <footer class="section-p1">
+        <div class="col">
+            <img class="logo" src="img/logo1.png" height="50" alt="">
+            <h4>Contact</h4>
+            <p><strong>Address:</strong>38/D fulsar,bhavnagar-364005</p>
+            <p><strong>Phone:</strong>+91 9898989898</p>
+            <p><strong>Hours:</strong>10:00 - 18:00,Mon - Sat</p>
+            <div class="follow">
+                <h4>Follow Us</h4>
+                <div class="icon">
+                    <!-- //icon for facebook,instagram -->
+                    <i id="insta"><a href="#"><img src="img/facebook.svg" class="ins" height="20" alt=""></a></i>
+                    <i id="insta"><a href="#"><img src="img/insta.svg" class="ins" height="20" alt=""></a></i>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <h4>About</h4>
+            <a href="#">About us</a>
+            <a href="#">Delivery Information</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms & Conditions</a>
+            <a href="#">Contact Us</a>
+        </div>
+        <div class="col">
+            <h4>My Account</h4>
+            <a href="#">Sign In</a>
+            <a href="#">View Cart</a>
+            <a href="#">My Wishlist</a>
+            <a href="#">Track My Order</a>
+            <a href="#">Help</a>
+        </div>
+        <div class="col install">
+            <h4>Install App</h4>
+            <p>From App Store or Google Play</p>
+            <div class="row">
+                <img src="img/pay/app.jpg" alt="">
+                <img src="img/pay/play.jpg" alt="">
+            </div>
+            <p>Secure Payment Gateway</p>
+            <img src="img/pay/pay.png" alt="">
+        </div>
+        <div class="copyright">
+            <p>2025, EcomSphere</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="cart.js"></script>
+</body>
+
+</html>

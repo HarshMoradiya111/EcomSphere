@@ -1,0 +1,205 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 30px auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+}
+
+h1 {
+    color: #333;
+}
+
+/* Button Styles */
+.add-btn, .logout-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px;
+    text-decoration: none;
+    color: #fff;
+    background: #032f68;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.add-btn:hover {
+    background: #c3e2ca;
+}
+
+.logout-btn {
+    background: #bb4c56;
+}
+
+.logout-btn:hover {
+    background: #ded3d5;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+}
+
+td img {
+    border-radius: 5px;
+}
+
+/* Action Buttons */
+.edit-btn {
+    color: #ffc107;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.delete-btn {
+    color: #dc3545;
+    text-decoration: none;
+}
+
+.edit-btn:hover {
+    text-decoration: underline;
+}
+
+.delete-btn:hover {
+    text-decoration: underline;
+}
+/* Admin Login Styles */
+.login-container {
+    width: 300px;
+    margin: 100px auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.login-container input {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-container button:hover {
+    background: #0056b3;
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+/* Add New Product Form */
+.form-container {
+    width: 50%;
+    margin: 50px auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.form-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-container label {
+    display: block;
+    font-size: 16px;
+    margin-top: 10px;
+    text-align: left;
+}
+
+.form-container input {
+    width: 95%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.form-container button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background: #169ccd;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.product-img {
+    width: 80px; /* Fixed width */
+    height: 80px; /* Fixed height */
+    object-fit: cover; /* Ensures images are cropped, not stretched */
+    border-radius: 5px; /* Optional: rounded corners */
+    display: block;
+    margin: auto; /* Centers the image in the cell */
+}
+
+
+.form-container button:hover {
+    background: #218838;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: white;
+    background: #007bff;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.back-btn:hover {
+    background: #0056b3;
+}
