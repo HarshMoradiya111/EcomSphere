@@ -86,11 +86,13 @@ const postRegister = async (req, res) => {
       return res.redirect('/auth/register');
     }
 
-    // Create new user
+    // Create new user with random profile image
+    const randomAvatar = Math.floor(Math.random() * 5) + 1; // 1 to 5
     const user = new User({
       username: username.trim(),
       email: email.toLowerCase().trim(),
       password,
+      profilePhoto: `/img/rprofile/${randomAvatar}.jpg`,
     });
 
     await user.save();

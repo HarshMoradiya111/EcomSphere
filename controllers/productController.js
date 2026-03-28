@@ -1,6 +1,8 @@
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
+const path = require('path');
+const fs = require('fs');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
@@ -120,9 +122,42 @@ const getProfile = async (req, res) => {
   }
 };
 
+// POST /profile/photo - User profile photo upload
+const postProfilePhoto = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('/profile');
+    }
+
+    if (!req.file) {
+      req.flash('error', 'Please select a valid image file');
+      return res.redirect('/profile');
+    }
+
+    // Delete old profile photo if it exists and is custom
+    if (user.profilePhoto && !user.profilePhoto.startsWith('/img/rprofile/')) {
+      const p = path.join(__dirname, '../public', user.profilePhoto);
+      if (fs.existsSync(p)) fs.unlink(p, () => {});
+    }
+
+    user.profilePhoto = '/uploads/' + req.file.filename;
+    await user.save();
+
+    req.flash('success', 'Profile photo updated successfully!');
+    res.redirect('/profile');
+  } catch (error) {
+    console.error('Profile photo upload error:', error);
+    req.flash('error', 'Failed to update profile photo');
+    res.redirect('/profile');
+  }
+};
+
 module.exports = {
   getHomepage,
   getShop,
   getSingleProduct,
   getProfile,
+  postProfilePhoto,
 };

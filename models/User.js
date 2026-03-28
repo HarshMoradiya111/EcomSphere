@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
     minlength: [3, 'Username must be at least 3 characters'],
     maxlength: [50, 'Username cannot exceed 50 characters'],
   },
+  profilePhoto: {
+    type: String,
+    default: '/img/rprofile/1.jpg'
+  },
   email: {
     type: String,
     required: [true, 'Email is required'],

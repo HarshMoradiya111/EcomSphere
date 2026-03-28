@@ -20,6 +20,7 @@ const getCart = async (req, res) => {
         name: item.name,
         price: item.price,
         image: item.image,
+        size: item.size,
         quantity: item.quantity,
         subtotal: item.price * item.quantity,
       })),
@@ -44,7 +45,7 @@ const getCartPage = (req, res) => {
 // POST /api/cart/add - Add item to cart
 const addToCart = async (req, res) => {
   try {
-    const { productId, quantity = 1 } = req.body;
+    const { productId, quantity = 1, size = null } = req.body;
 
     if (!productId) {
       return res.status(400).json({ success: false, error: 'Product ID is required' });
@@ -61,9 +62,9 @@ const addToCart = async (req, res) => {
       cart = new Cart({ userId: req.session.userId, items: [] });
     }
 
-    // Check if item already in cart
+    // Check if item already in cart with the same size
     const existingItemIndex = cart.items.findIndex(
-      (item) => item.productId.toString() === productId
+      (item) => item.productId.toString() === productId && item.size === size
     );
 
     if (existingItemIndex > -1) {
@@ -74,6 +75,7 @@ const addToCart = async (req, res) => {
         name: product.name,
         price: product.price,
         image: product.image,
+        size: size,
         quantity: parseInt(quantity),
       });
     }

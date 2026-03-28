@@ -21,9 +21,14 @@
   <section id="user-profile" class="section-p1">
     <div class="profile-container">
       <div class="profile-info">
-        <div class="avatar">
-          <img src="/img/user-avatar.png" alt="User Avatar" onerror="this.src='/img/placeholder.jpg'">
-          <h4><%= user.username %></h4>
+        <div class="avatar" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+          <img src="<%= user.profilePhoto || '/img/placeholder.jpg' %>" alt="User Avatar" onerror="this.src='/img/placeholder.jpg'" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          <h4 style="margin-top: 15px; margin-bottom: 5px;"><%= user.username %></h4>
+          
+          <form action="/profile/photo" method="POST" enctype="multipart/form-data" id="profilePhotoForm" style="margin-top: 10px;">
+            <label for="profilePhoto" style="cursor: pointer; font-size: 13px; color: #088178; text-decoration: underline;">Change Photo</label>
+            <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*" style="display: none;" onchange="if(this.files[0]) document.getElementById('profilePhotoForm').submit();">
+          </form>
         </div>
         <div class="details">
           <p><strong>Username:</strong> <span><%= user.username %></span></p>
