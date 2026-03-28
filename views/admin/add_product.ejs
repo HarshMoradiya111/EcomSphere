@@ -37,9 +37,15 @@
     </div>
 
     <div class="form-group">
-      <label for="prod-image">Product Image <span class="required">*</span></label>
+      <label for="prod-image">Main Image (Banner) <span class="required">*</span></label>
       <input type="file" id="prod-image" name="image" accept="image/*" required>
       <small style="color:#94a3b8; font-size:12px;">Accepted: JPG, PNG, GIF, WEBP (max 5MB)</small>
+    </div>
+
+    <div class="form-group">
+      <label for="prod-additional-images">Additional Images</label>
+      <input type="file" id="prod-additional-images" name="additionalImages" accept="image/*" multiple>
+      <small style="color:#94a3b8; font-size:12px;">You can select multiple images to show on the details page.</small>
     </div>
 
     <div style="margin-top:20px; display:flex; gap:12px;">

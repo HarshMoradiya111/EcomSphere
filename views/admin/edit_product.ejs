@@ -13,12 +13,22 @@
     <a href="/admin/products" class="admin-btn btn-secondary btn-sm">← Back</a>
   </div>
 
-  <!-- Current Image -->
+  <!-- Current Images -->
   <div style="text-align:center; margin:20px 0;">
-    <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
-      style="width:150px; height:150px; object-fit:cover; border-radius:10px; border:2px solid #334155;"
-      onerror="this.src='/img/placeholder.jpg'">
-    <p style="color:#94a3b8; font-size:13px; margin-top:8px;">Current image</p>
+    <div>
+      <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
+        style="width:150px; height:150px; object-fit:cover; border-radius:10px; border:2px solid #334155;"
+        onerror="this.src='/img/placeholder.jpg'">
+      <p style="color:#94a3b8; font-size:13px; margin-top:8px;">Current main image</p>
+    </div>
+    <% if (product.additionalImages && product.additionalImages.length > 0) { %>
+    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+      <% product.additionalImages.forEach(img => { %>
+        <img src="/uploads/<%= img %>" alt="<%= product.name %>" style="width:80px; height:80px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;" onerror="this.style.display='none'">
+      <% }) %>
+    </div>
+    <p style="color:#94a3b8; font-size:13px; margin-top:8px;">Current additional images</p>
+    <% } %>
   </div>
 
   <form action="/admin/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data" class="admin-form">
@@ -47,9 +57,15 @@
     </div>
 
     <div class="form-group">
-      <label for="edit-image">New Image (optional)</label>
+      <label for="edit-image">New Main Image (Banner) (optional)</label>
       <input type="file" id="edit-image" name="image" accept="image/*">
       <small style="color:#94a3b8; font-size:12px;">Leave blank to keep current image</small>
+    </div>
+
+    <div class="form-group">
+      <label for="edit-additional-images">Add Additional Images (optional)</label>
+      <input type="file" id="edit-additional-images" name="additionalImages" accept="image/*" multiple>
+      <small style="color:#94a3b8; font-size:12px;">Appends to existing additional images.</small>
     </div>
 
     <div style="margin-top:20px; display:flex; gap:12px;">

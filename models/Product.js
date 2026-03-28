@@ -24,6 +24,10 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Product image is required'],
     default: 'placeholder.jpg',
   },
+  additionalImages: {
+    type: [String],
+    default: [],
+  },
   category: {
     type: String,
     required: [true, 'Category is required'],

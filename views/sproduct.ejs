@@ -23,11 +23,22 @@
       <div class="small-img-group">
         <div class="small-img-col">
           <img src="/uploads/<%= product.image %>"
-               alt=""
+               alt="Main Image"
                class="small-img active-thumb"
                onerror="this.src='/img/placeholder.jpg'"
-               onclick="document.getElementById('main-product-image').src=this.src">
+               onclick="changeImage(this)">
         </div>
+        <% if (product.additionalImages && product.additionalImages.length > 0) { %>
+          <% product.additionalImages.forEach(img => { %>
+            <div class="small-img-col">
+              <img src="/uploads/<%= img %>"
+                   alt="Additional Image"
+                   class="small-img"
+                   onerror="this.style.display='none'"
+                   onclick="changeImage(this)">
+            </div>
+          <% }) %>
+        <% } %>
       </div>
     </div>
 
@@ -95,6 +106,26 @@
 
   <script src="/js/script.js"></script>
   <script>
+    function changeImage(element) {
+      const mainImg = document.getElementById('main-product-image');
+      
+      // Don't animate if clicking the already active image
+      if (mainImg.src === element.src) return;
+
+      // Start fade out
+      mainImg.style.opacity = 0;
+      
+      // Update active thumbnail styling
+      document.querySelectorAll('.small-img').forEach(el => el.classList.remove('active-thumb'));
+      element.classList.add('active-thumb');
+
+      // Swap source and fade in after a tiny delay
+      setTimeout(() => {
+        mainImg.src = element.src;
+        mainImg.style.opacity = 1;
+      }, 150); // matches half of the CSS transition time for a smooth crossfade effect
+    }
+
     // Handle quantity-aware add to cart for single product page
     document.getElementById('add-to-cart-btn').addEventListener('click', function(e) {
       e.preventDefault();

@@ -144,17 +144,21 @@ const postAddProduct = async (req, res) => {
       return res.redirect('/admin/products/add');
     }
 
-    if (!req.file) {
-      req.flash('error', 'Product image is required');
+    if (!req.files || !req.files.image || req.files.image.length === 0) {
+      req.flash('error', 'Main product image is required');
       return res.redirect('/admin/products/add');
     }
+
+    const mainImage = req.files.image[0].filename;
+    const additionalImages = req.files.additionalImages ? req.files.additionalImages.map(f => f.filename) : [];
 
     const product = new Product({
       name: name.trim(),
       description: description.trim(),
       price: parseFloat(price),
       category,
-      image: req.file.filename,
+      image: mainImage,
+      additionalImages: additionalImages,
     });
 
     await product.save();
@@ -164,8 +168,9 @@ const postAddProduct = async (req, res) => {
   } catch (error) {
     console.error('Add product error:', error);
     // Remove uploaded file if product save fails
-    if (req.file) {
-      fs.unlink(req.file.path, () => {});
+    if (req.files) {
+      if (req.files.image) fs.unlink(req.files.image[0].path, () => {});
+      if (req.files.additionalImages) req.files.additionalImages.forEach(f => fs.unlink(f.path, () => {}));
     }
     req.flash('error', 'Failed to add product. Please try again.');
     res.redirect('/admin/products/add');
@@ -209,12 +214,18 @@ const postEditProduct = async (req, res) => {
     }
 
     // If new image uploaded, delete old one
-    if (req.file) {
+    if (req.files && req.files.image && req.files.image.length > 0) {
       const oldImagePath = path.join(__dirname, '../public/uploads', product.image);
       if (fs.existsSync(oldImagePath)) {
         fs.unlink(oldImagePath, () => {});
       }
-      product.image = req.file.filename;
+      product.image = req.files.image[0].filename;
+    }
+
+    // Add new additional images
+    if (req.files && req.files.additionalImages && req.files.additionalImages.length > 0) {
+      const newAdditionalImages = req.files.additionalImages.map(f => f.filename);
+      product.additionalImages = product.additionalImages.concat(newAdditionalImages);
     }
 
     product.name = name ? name.trim() : product.name;
@@ -247,6 +258,16 @@ const deleteProduct = async (req, res) => {
     const imagePath = path.join(__dirname, '../public/uploads', product.image);
     if (fs.existsSync(imagePath)) {
       fs.unlink(imagePath, () => {});
+    }
+
+    // Delete additional images
+    if (product.additionalImages && product.additionalImages.length > 0) {
+      product.additionalImages.forEach(img => {
+        const imgPath = path.join(__dirname, '../public/uploads', img);
+        if (fs.existsSync(imgPath)) {
+          fs.unlink(imgPath, () => {});
+        }
+      });
     }
 
     await Product.findByIdAndDelete(req.params.id);

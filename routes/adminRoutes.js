@@ -60,9 +60,9 @@ router.get('/dashboard', isAdminAuthenticated, getDashboard);
 // Products
 router.get('/products', isAdminAuthenticated, getProducts);
 router.get('/products/add', isAdminAuthenticated, getAddProduct);
-router.post('/products/add', isAdminAuthenticated, upload.single('image'), postAddProduct);
+router.post('/products/add', isAdminAuthenticated, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'additionalImages', maxCount: 10 }]), postAddProduct);
 router.get('/products/edit/:id', isAdminAuthenticated, getEditProduct);
-router.post('/products/edit/:id', isAdminAuthenticated, upload.single('image'), postEditProduct);
+router.post('/products/edit/:id', isAdminAuthenticated, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'additionalImages', maxCount: 10 }]), postEditProduct);
 router.post('/products/delete/:id', isAdminAuthenticated, deleteProduct);
 
 // Orders
