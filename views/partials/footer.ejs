@@ -1,52 +1,58 @@
 <%# Footer partial - shared footer %>
-<footer class="section-p1">
-  <div class="col">
-    <img class="logo" src="/img/logo1.png" height="50" alt="EcomSphere Logo">
-    <h4>Contact</h4>
-    <p><strong>Address:</strong> SSCCS</p>
-    <p><strong>Phone:</strong> +91 8160730726, +91 6359401196</p>
-    <p><strong>Hours:</strong> 10:00 - 18:00, Mon - Sat</p>
-    <div class="follow">
-      <h4>Follow Us</h4>
-      <div class="icon">
-        <i id="insta"><a href="#"><img src="/img/facebook.svg" class="ins" height="20" alt="Facebook"></a></i>
-        <i id="insta"><a href="#"><img src="/img/insta.svg" class="ins" height="20" alt="Instagram"></a></i>
+  <footer class="section-p1">
+    <div class="col">
+      <!-- <img class="logo" src="<%= locals.settings ? locals.settings.logo : '/img/logo1.png' %>" height="50" alt="EcomSphere Logo"> -->
+      <h4>Contact</h4>
+      <p><strong>Address:</strong>
+        <%= locals.settings ? locals.settings.address : 'SSCCS' %>
+      </p>
+      <p><strong>Phone:</strong>
+        <%= locals.settings ? locals.settings.phone : '+91 8160730726, +91 6359401196' %>
+      </p>
+      <p><strong>Hours:</strong>
+        <%= locals.settings ? locals.settings.hours : '10:00 - 18:00, Mon - Sat' %>
+      </p>
+      <div class="follow">
+        <h4>Follow Us</h4>
+        <div class="icon">
+          <i id="insta"><a href="#"><img src="/img/facebook.svg" class="ins" height="20" alt="Facebook"></a></i>
+          <i id="insta"><a href="#"><img src="/img/insta.svg" class="ins" height="20" alt="Instagram"></a></i>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="col">
-    <h4>About</h4>
-    <a href="/about">About us</a>
-    <a href="#">Delivery Information</a>
-    <a href="#">Privacy Policy</a>
-    <a href="#">Terms & Conditions</a>
-    <a href="/contact">Contact Us</a>
-  </div>
-  <div class="col">
-    <h4>My Account</h4>
-    <% if (locals.sessionUser) { %>
-      <a href="/profile">My Profile</a>
-      <a href="/cart">View Cart</a>
-      <a href="/profile">Track My Order</a>
-      <a href="/auth/logout">Logout</a>
-    <% } else { %>
-      <a href="/auth/login">Sign In</a>
-      <a href="/cart">View Cart</a>
-      <a href="/auth/register">Register</a>
-      <a href="#">Help</a>
-    <% } %>
-  </div>
-  <div class="col install">
-    <h4>Install App</h4>
-    <p>From App Store or Google Play</p>
-    <div class="row">
-      <img src="/img/pay/app.jpg" alt="App Store">
-      <img src="/img/pay/play.jpg" alt="Google Play">
+    <div class="col">
+      <h4>About</h4>
+      <a href="/about">About us</a>
+      <a href="#">Delivery Information</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms & Conditions</a>
+      <a href="/contact">Contact Us</a>
     </div>
-    <p>Secure Payment Gateway</p>
-    <img src="/img/pay/pay.png" alt="Payment Methods">
-  </div>
-  <div class="copyright">
-    <p>2025, EcomSphere &copy; All Rights Reserved</p>
-  </div>
-</footer>
+    <div class="col">
+      <h4>My Account</h4>
+      <% if (locals.sessionUser) { %>
+        <a href="/profile">My Profile</a>
+        <a href="/cart">View Cart</a>
+        <a href="/profile">Track My Order</a>
+        <a href="/auth/logout">Logout</a>
+        <% } else { %>
+          <a href="/auth/login">Sign In</a>
+          <a href="/cart">View Cart</a>
+          <a href="/auth/register">Register</a>
+          <a href="#">Help</a>
+          <% } %>
+    </div>
+    <div class="col install">
+      <h4>Install App</h4>
+      <p>From App Store or Google Play</p>
+      <div class="row">
+        <img src="/img/pay/app.jpg" alt="App Store">
+        <img src="/img/pay/play.jpg" alt="Google Play">
+      </div>
+      <p>Secure Payment Gateway</p>
+      <img src="/img/pay/pay.png" alt="Payment Methods">
+    </div>
+    <div class="copyright">
+      <p>2025, EcomSphere &copy; All Rights Reserved</p>
+    </div>
+  </footer>

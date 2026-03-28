@@ -40,10 +40,10 @@
         </button>
       </form>
       <div style="margin-top:30px; padding-top:20px; border-top:1px solid #eee;">
-        <p><i class="fa-solid fa-location-dot" style="color:#088178; margin-right:8px;"></i> SSCCS</p>
-        <p><i class="fa-solid fa-phone" style="color:#088178; margin-right:8px;"></i> +91 8160730726</p>
-        <p><i class="fa-solid fa-envelope" style="color:#088178; margin-right:8px;"></i> support@ecomsphere.com</p>
-        <p><i class="fa-solid fa-clock" style="color:#088178; margin-right:8px;"></i> Mon - Sat: 10:00 - 18:00</p>
+        <p><i class="fa-solid fa-location-dot" style="color:#088178; margin-right:8px;"></i> <%= locals.settings ? locals.settings.address : 'SSCCS' %></p>
+        <p><i class="fa-solid fa-phone" style="color:#088178; margin-right:8px;"></i> <%= locals.settings ? locals.settings.phone : '+91 8160730726' %></p>
+        <p><i class="fa-solid fa-envelope" style="color:#088178; margin-right:8px;"></i> <%= locals.settings ? locals.settings.email : 'support@ecomsphere.com' %></p>
+        <p><i class="fa-solid fa-clock" style="color:#088178; margin-right:8px;"></i> <%= locals.settings ? locals.settings.hours : 'Mon - Sat: 10:00 - 18:00' %></p>
       </div>
     </div>
   </section>
