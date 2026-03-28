@@ -15,6 +15,43 @@
     </a>
   </div>
 
+  <div class="admin-filter-bar" style="background: #1e293b; padding: 15px 20px; border-bottom: 1px solid #334155; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+    <form action="/admin/products" method="GET" style="display: flex; gap: 15px; width: 100%; align-items: center; flex-wrap: wrap;">
+      
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="category" style="color: #cbd5e1; font-size: 14px; font-weight: 500;">Category:</label>
+        <select name="category" id="category" class="admin-input" style="width: auto; padding: 8px 12px;">
+          <option value="All" <%= selectedCategory === 'All' ? 'selected' : '' %>>All Categories</option>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat %>" <%= selectedCategory === cat ? 'selected' : '' %>><%= cat %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="sort" style="color: #cbd5e1; font-size: 14px; font-weight: 500;">Sort By:</label>
+        <select name="sort" id="sort" class="admin-input" style="width: auto; padding: 8px 12px;">
+          <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest First</option>
+          <option value="oldest" <%= selectedSort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
+          <option value="price_desc" <%= selectedSort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+          <option value="price_asc" <%= selectedSort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+          <option value="name_asc" <%= selectedSort === 'name_asc' ? 'selected' : '' %>>Name: A to Z</option>
+          <option value="name_desc" <%= selectedSort === 'name_desc' ? 'selected' : '' %>>Name: Z to A</option>
+        </select>
+      </div>
+
+      <button type="submit" class="admin-btn btn-primary" style="padding: 8px 20px;">
+        <i class="fa-solid fa-filter"></i> Filter
+      </button>
+
+      <% if (selectedCategory !== 'All' || selectedSort !== 'newest') { %>
+        <a href="/admin/products" class="admin-btn btn-warning" style="padding: 8px 15px; margin-left: auto;">
+          <i class="fa-solid fa-xmark"></i> Clear Filters
+        </a>
+      <% } %>
+    </form>
+  </div>
+
   <% if (products.length > 0) { %>
     <table class="admin-table">
       <thead>

@@ -88,12 +88,31 @@ const getDashboard = async (req, res) => {
 // GET /admin/products
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const { category, sort } = req.query;
+
+    // Filter logic
+    const filter = {};
+    if (category && category !== 'All') {
+      filter.category = category;
+    }
+
+    // Sort logic
+    let sortQuery = { createdAt: -1 }; // Default: Newest first
+    if (sort === 'oldest') sortQuery = { createdAt: 1 };
+    else if (sort === 'price_asc') sortQuery = { price: 1 };
+    else if (sort === 'price_desc') sortQuery = { price: -1 };
+    else if (sort === 'name_asc') sortQuery = { name: 1 };
+    else if (sort === 'name_desc') sortQuery = { name: -1 };
+
+    const products = await Product.find(filter).sort(sortQuery);
 
     res.render('admin/products', {
       title: 'Products - Admin',
       adminUsername: req.session.adminUsername,
       products,
+      categories: CATEGORIES,
+      selectedCategory: category || 'All',
+      selectedSort: sort || 'newest',
       errors: req.flash('error'),
       success: req.flash('success'),
     });
