@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('./partials/header') %>
+
+  <section id="page-header" class="blog-header">
+    <h2>Our Blog</h2>
+    <p>Latest news, fashion tips and trends</p>
+  </section>
+
+  <section id="blog" class="section-p1">
+    <div class="blog-box">
+      <div class="blog-img">
+        <img src="/img/blog/b1.jpg" alt="Blog Post" onerror="this.src='/img/placeholder.jpg'">
+      </div>
+      <div class="blog-details">
+        <h1>01</h1>
+        <h4>Top 10 Fashion Trends for 2025</h4>
+        <p>Discover the hottest fashion trends dominating runways and streets this season.</p>
+        <a href="#">Read More</a>
+      </div>
+    </div>
+    <div class="blog-box">
+      <div class="blog-img">
+        <img src="/img/blog/b2.jpg" alt="Blog Post" onerror="this.src='/img/placeholder.jpg'">
+      </div>
+      <div class="blog-details">
+        <h1>02</h1>
+        <h4>How to Choose the Perfect Footwear</h4>
+        <p>A comprehensive guide to selecting shoes that match your style and comfort needs.</p>
+        <a href="#">Read More</a>
+      </div>
+    </div>
+    <div class="blog-box">
+      <div class="blog-img">
+        <img src="/img/blog/b3.jpg" alt="Blog Post" onerror="this.src='/img/placeholder.jpg'">
+      </div>
+      <div class="blog-details">
+        <h1>03</h1>
+        <h4>Skincare Essentials for Every Season</h4>
+        <p>Learn which cosmetics and skincare products to use throughout the year.</p>
+        <a href="#">Read More</a>
+      </div>
+    </div>
+  </section>
+
+  <%- include('./partials/footer') %>
+  <script src="/js/script.js"></script>
+</body>
+</html>

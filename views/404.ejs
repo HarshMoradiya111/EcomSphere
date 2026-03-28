@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found | EcomSphere</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .error-page { display: flex; justify-content: center; align-items: center; min-height: 70vh; flex-direction: column; text-align: center; padding: 40px; }
+    .error-code { font-size: 120px; font-weight: 900; color: #088178; line-height: 1; }
+    .error-page h2 { font-size: 32px; color: #333; margin: 10px 0; }
+    .error-page p { color: #666; font-size: 17px; margin-bottom: 25px; }
+    .btn-home { background: #088178; color: #fff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; }
+    .btn-home:hover { background: #066b64; }
+  </style>
+</head>
+<body>
+  <%- include('./partials/header') %>
+
+  <section class="error-page">
+    <div class="error-code">404</div>
+    <h2>Page Not Found</h2>
+    <p>The page you're looking for doesn't exist or has been moved.</p>
+    <a href="/" class="btn-home">← Back to Home</a>
+  </section>
+
+  <%- include('./partials/footer') %>
+</body>
+</html>

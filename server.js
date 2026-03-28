@@ -1,0 +1,124 @@
+require('dotenv').config();
+
+const express = require('express');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const flash = require('connect-flash');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const methodOverride = require('method-override');
+const path = require('path');
+
+const connectDB = require('./config/db');
+
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
+const app = express();
+
+// Connect to MongoDB
+connectDB();
+
+// Security middleware
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
+
+// Logging middleware
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// View engine setup
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Method override for PUT/DELETE via forms
+app.use(methodOverride('_method'));
+
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'ecomsphere_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/ecomsphere',
+      touchAfter: 24 * 60 * 60, // lazy session update
+    }),
+    cookie: {
+      maxAge: parseInt(process.env.SESSION_MAX_AGE) || 30 * 60 * 1000, // 30 minutes
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    },
+  })
+);
+
+// Flash messages
+app.use(flash());
+
+// Global template variables middleware
+app.use((req, res, next) => {
+  res.locals.sessionUser = req.session.username || null;
+  res.locals.sessionUserId = req.session.userId || null;
+  res.locals.isAdmin = !!req.session.adminId;
+  res.locals.adminUsername = req.session.adminUsername || null;
+  next();
+});
+
+// Routes
+app.use('/auth', authRoutes);
+app.use('/', productRoutes);
+app.use('/', cartRoutes);
+app.use('/', orderRoutes);
+app.use('/admin', adminRoutes);
+
+// Redirect root to login if not authenticated
+app.get('/admin', (req, res) => res.redirect('/admin/login'));
+
+// Fallback to instantly break any infinite `onerror` image loops in the browser
+app.get('/img/placeholder.jpg', (req, res) => {
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.send('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#e2e8f0"/><text x="50%" y="50%" font-family="sans-serif" font-size="20" fill="#94a3b8" text-anchor="middle" dy=".3em">No Image</text></svg>');
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).render('404', {
+    title: '404 - Page Not Found',
+    user: req.session.username || null,
+  });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.stack);
+  const statusCode = err.status || 500;
+  res.status(statusCode).render('error', {
+    title: 'Error - EcomSphere',
+    message: err.message || 'Something went wrong',
+    user: req.session.username || null,
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 EcomSphere server running on http://localhost:${PORT}`);
+  console.log(`📊 Admin panel: http://localhost:${PORT}/admin/login`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+module.exports = app;

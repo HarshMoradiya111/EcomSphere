@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Shopping Cart - EcomSphere">
+  <title><%= title %></title>
+  <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <%- include('./partials/header') %>
+  <%- include('./partials/flash') %>
+
+  <section id="page-header">
+    <h2>Shopping Cart</h2>
+    <p>Review your items before checkout</p>
+  </section>
+
+  <section id="cart" class="section-p1">
+    <table width="100%">
+      <thead>
+        <tr>
+          <td>Remove</td>
+          <td>Image</td>
+          <td>Product</td>
+          <td>Price</td>
+          <td>Quantity</td>
+          <td>Subtotal</td>
+        </tr>
+      </thead>
+      <tbody id="cart-items">
+        <tr>
+          <td colspan="6" style="text-align:center; padding:40px; color:#888;">Loading cart...</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="cart-add" class="section-p1">
+    <div id="coupon">
+      <h3>Apply Coupon</h3>
+      <div>
+        <input type="text" placeholder="Enter Your Coupon" id="coupon-code">
+        <button class="normal" onclick="applyCoupon()"><a href="#">Apply</a></button>
+      </div>
+    </div>
+
+    <div id="subtotal">
+      <h3>Cart Totals</h3>
+      <table>
+        <tr>
+          <td>Cart Subtotal</td>
+          <td id="cart-subtotal">₹0.00</td>
+        </tr>
+        <tr>
+          <td>Shipping</td>
+          <td><strong>Free</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Cart Total</strong></td>
+          <td id="cart-total"><strong>₹0.00</strong></td>
+        </tr>
+      </table>
+      <a href="/checkout">
+        <button class="normal" id="checkout-btn" disabled>Proceed to Checkout</button>
+      </a>
+    </div>
+  </section>
+
+  <%- include('./partials/footer') %>
+
+  <script src="/js/script.js"></script>
+  <script src="/js/cart.js"></script>
+</body>
+</html>

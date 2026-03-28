@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error | EcomSphere</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .error-page { display: flex; justify-content: center; align-items: center; min-height: 70vh; flex-direction: column; text-align: center; padding: 40px; }
+    .error-code { font-size: 80px; font-weight: 900; color: #dc3545; }
+    .error-page h2 { color: #333; }
+    .error-page p { color: #666; }
+    .btn-home { background: #088178; color: #fff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <section class="error-page">
+    <div class="error-code">⚠️</div>
+    <h2>Something went wrong</h2>
+    <p><%= message || 'An unexpected error occurred.' %></p>
+    <a href="/" class="btn-home">← Back to Home</a>
+  </section>
+</body>
+</html>

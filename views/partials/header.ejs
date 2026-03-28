@@ -1,0 +1,26 @@
+<%# Header partial - shared navigation %>
+<section id="header">
+  <a href="/"><img src="/img/logo1.png" class="logo" alt="EcomSphere" height="60"></a>
+  <div>
+    <ul id="navbar">
+      <li><a href="/" class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>">Home</a></li>
+      <li><a href="/shop" class="<%= typeof activePage !== 'undefined' && activePage === 'shop' ? 'active' : '' %>">Shop</a></li>
+      <li><a href="/blog">Blog</a></li>
+      <li><a href="/about" class="<%= typeof activePage !== 'undefined' && activePage === 'about' ? 'active' : '' %>">About</a></li>
+      <li><a href="/contact" class="<%= typeof activePage !== 'undefined' && activePage === 'contact' ? 'active' : '' %>">Contact</a></li>
+      <% if (locals.sessionUser) { %>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/auth/logout">Logout (<%= locals.sessionUser %>)</a></li>
+      <% } else { %>
+        <li><a href="/auth/login">Login</a></li>
+      <% } %>
+      <li><a href="/admin/dashboard">Admin</a></li>
+      <li id="lg-bag"><a href="/cart"><img src="/img/cart.png" class="cart" alt="Cart" height="30"></a></li>
+      <a href="#" id="close"><img src="/img/close.svg" height="30" alt=""></a>
+    </ul>
+  </div>
+  <div id="mobile">
+    <a href="/cart"><img src="/img/cart.svg" height="20" alt="Cart"></a>
+    <i id="bar"><img src="/img/menu.svg" height="20" width="30" alt="Menu"></i>
+  </div>
+</section>

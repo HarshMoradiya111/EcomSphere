@@ -1,0 +1,144 @@
+<%- include('./partials/admin_header', { activePage: 'dashboard' }) %>
+
+<!-- Flash messages -->
+<% if (locals.success && success.length > 0) { %>
+  <div class="alert alert-success">
+    <% success.forEach(msg => { %><p><i class="fa-solid fa-circle-check"></i> <%= msg %></p><% }) %>
+  </div>
+<% } %>
+<% if (locals.errors && errors.length > 0) { %>
+  <div class="alert alert-error">
+    <% errors.forEach(msg => { %><p><i class="fa-solid fa-circle-exclamation"></i> <%= msg %></p><% }) %>
+  </div>
+<% } %>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+      <i class="fa-solid fa-box"></i>
+    </div>
+    <div class="stat-info">
+      <h3><%= productCount %></h3>
+      <p>Total Products</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
+      <i class="fa-solid fa-shopping-bag"></i>
+    </div>
+    <div class="stat-info">
+      <h3><%= orderCount %></h3>
+      <p>Total Orders</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
+      <i class="fa-solid fa-users"></i>
+    </div>
+    <div class="stat-info">
+      <h3><%= userCount %></h3>
+      <p>Total Users</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">
+      <i class="fa-solid fa-chart-line"></i>
+    </div>
+    <div class="stat-info">
+      <h3>Active</h3>
+      <p>Store Status</p>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+  <a href="/admin/products/add" class="admin-btn btn-primary">
+    <i class="fa-solid fa-plus"></i> Add Product
+  </a>
+  <a href="/admin/orders" class="admin-btn btn-secondary">
+    <i class="fa-solid fa-shopping-bag"></i> View Orders
+  </a>
+  <a href="/admin/users" class="admin-btn btn-secondary">
+    <i class="fa-solid fa-users"></i> Manage Users
+  </a>
+</div>
+
+<!-- Recent Orders -->
+<% if (recentOrders && recentOrders.length > 0) { %>
+<div class="admin-card" style="margin-top:30px;">
+  <div class="card-header">
+    <h3>Recent Orders</h3>
+    <a href="/admin/orders" class="see-all">View All →</a>
+  </div>
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% recentOrders.forEach(order => { %>
+        <tr>
+          <td>#<%= order._id.toString().slice(-8).toUpperCase() %></td>
+          <td><%= order.userId ? order.userId.username : 'Unknown' %></td>
+          <td>₹<%= order.totalAmount.toLocaleString('en-IN') %></td>
+          <td><span class="badge badge-<%= order.status.toLowerCase() %>"><%= order.status %></span></td>
+          <td><%= new Date(order.createdAt).toLocaleDateString('en-IN') %></td>
+          <td><a href="/admin/orders/<%= order._id %>" class="admin-btn btn-sm">View</a></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<!-- Products Table -->
+<div class="admin-card" style="margin-top:30px;">
+  <div class="card-header">
+    <h3>All Products</h3>
+    <a href="/admin/products" class="see-all">View All →</a>
+  </div>
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% products.forEach(product => { %>
+        <tr>
+          <td>
+            <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
+              class="product-thumb" onerror="this.src='/img/placeholder.jpg'">
+          </td>
+          <td><%= product.name %></td>
+          <td><span class="badge badge-category"><%= product.category %></span></td>
+          <td>₹<%= product.price.toLocaleString('en-IN') %></td>
+          <td class="action-btns">
+            <a href="/admin/products/edit/<%= product._id %>" class="admin-btn btn-warning btn-sm">
+              <i class="fa-solid fa-pen-to-square"></i> Edit
+            </a>
+            <form action="/admin/products/delete/<%= product._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this product?')">
+              <button type="submit" class="admin-btn btn-danger btn-sm">
+                <i class="fa-solid fa-trash"></i> Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('./partials/admin_footer') %>

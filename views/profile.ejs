@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="My Profile - EcomSphere">
+  <title><%= title %></title>
+  <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <%- include('./partials/header') %>
+  <%- include('./partials/flash') %>
+
+  <section id="page-header" class="about-header">
+    <h2>My Profile</h2>
+    <p>Manage your account and track orders</p>
+  </section>
+
+  <section id="user-profile" class="section-p1">
+    <div class="profile-container">
+      <div class="profile-info">
+        <div class="avatar">
+          <img src="/img/user-avatar.png" alt="User Avatar" onerror="this.src='/img/placeholder.jpg'">
+          <h4><%= user.username %></h4>
+        </div>
+        <div class="details">
+          <p><strong>Username:</strong> <span><%= user.username %></span></p>
+          <p><strong>Email:</strong> <span><%= user.email %></span></p>
+          <p><strong>Member since:</strong> <span><%= new Date(user.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) %></span></p>
+          <a href="/auth/logout" style="display:inline-block; margin-top:15px; padding:10px 25px; background:#dc3545; color:#fff; border-radius:6px; text-decoration:none; font-weight:600;">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- Order History -->
+      <div class="order-history">
+        <h2>Order History</h2>
+
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach(order => { %>
+            <div class="order-item">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div>
+                  <p><strong>Order ID:</strong> #<%= order._id.toString().slice(-8).toUpperCase() %></p>
+                  <p><strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString('en-IN') %></p>
+                  <p><strong>Items:</strong> <%= order.totalQuantity %></p>
+                  <p><strong>Total:</strong> ₹<%= order.totalAmount.toLocaleString('en-IN') %></p>
+                  <p>
+                    <strong>Status:</strong>
+                    <span class="order-status status-<%= order.status.toLowerCase() %>">
+                      <%= order.status %>
+                    </span>
+                  </p>
+                  <a href="/track-order?orderId=<%= order._id %>" style="display:inline-block; margin-top:10px; padding:8px 16px; background:#e8f6ea; color:#088178; border:1px solid #088178; border-radius:6px; text-decoration:none; font-weight:600; font-size:14px; transition:0.3s;" onmouseover="this.style.background='#088178'; this.style.color='#fff';" onmouseout="this.style.background='#e8f6ea'; this.style.color='#088178';">
+                    <i class="fa-solid fa-map-location-dot"></i> Track Order
+                  </a>
+                </div>
+                <div>
+                  <strong>Items Ordered:</strong>
+                  <ul style="list-style:none; padding:0; margin-top:8px;">
+                    <% order.items.forEach(item => { %>
+                      <li style="margin:4px 0;">
+                        <img src="/uploads/<%= item.image %>" width="40" height="40" style="border-radius:4px; object-fit:cover; margin-right:8px; vertical-align:middle;" onerror="this.src='/img/placeholder.jpg'">
+                        <%= item.name %> × <%= item.quantity %> — ₹<%= (item.price * item.quantity).toLocaleString('en-IN') %>
+                      </li>
+                    <% }) %>
+                  </ul>
+                  <% if (order.checkoutInfo) { %>
+                    <p style="margin-top:8px;"><strong>Delivered to:</strong> <%= order.checkoutInfo.name %>, <%= order.checkoutInfo.address %></p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div style="text-align:center; padding:40px; background:#f9f9f9; border-radius:10px;">
+            <i class="fa-solid fa-box-open" style="font-size:60px; color:#ccc;"></i>
+            <p style="color:#888; margin-top:15px; font-size:18px;">No orders yet. <a href="/shop" style="color:#088178;">Start shopping!</a></p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <%- include('./partials/footer') %>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

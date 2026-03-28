@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create your EcomSphere account - Start shopping today">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+</head>
+<body>
+  <div class="wrapper active">
+    <span class="rotate-bg"></span>
+    <span class="rotate-bg2"></span>
+
+    <div class="form-box login">
+      <h2 class="title animation" style="--i:0; --j:0">Login</h2>
+      <form action="/auth/login" method="POST">
+        <div class="input-box animation" style="--i:1; --j:1">
+          <input type="email" name="email" id="login-email" required autocomplete="email">
+          <label for="login-email">Email</label>
+          <i class='bx bxs-envelope'></i>
+        </div>
+        <div class="input-box animation" style="--i:2; --j:2">
+          <input type="password" name="password" id="login-password" required autocomplete="current-password">
+          <label for="login-password">Password</label>
+          <i class='bx bxs-lock-alt'></i>
+        </div>
+        <button type="submit" class="btn animation" style="--i:3; --j:3">Login</button>
+        <div class="linkTxt animation" style="--i:4; --j:4">
+          <p>Don't have an account? <a href="#" class="register-link">Sign Up</a></p>
+        </div>
+      </form>
+    </div>
+
+    <div class="info-text login">
+      <h2 class="animation" style="--i:0; --j:0">Welcome Back!</h2>
+      <p class="animation" style="--i:1; --j:1">Sign in to access your EcomSphere account.</p>
+    </div>
+
+    <div class="form-box register">
+      <h2 class="title animation" style="--i:17; --j:0">Sign Up</h2>
+
+      <%- include('./partials/flash') %>
+
+      <form action="/auth/register" method="POST">
+        <div class="input-box animation" style="--i:18; --j:1">
+          <input type="text" name="username" id="reg-username" required autocomplete="username">
+          <label for="reg-username">Username</label>
+          <i class='bx bxs-user'></i>
+        </div>
+        <div class="input-box animation" style="--i:19; --j:2">
+          <input type="email" name="email" id="reg-email" required autocomplete="email">
+          <label for="reg-email">Email</label>
+          <i class='bx bxs-envelope'></i>
+        </div>
+        <div class="input-box animation" style="--i:20; --j:3">
+          <input type="password" name="password" id="reg-password" required autocomplete="new-password">
+          <label for="reg-password">Password</label>
+          <i class='bx bxs-lock-alt'></i>
+        </div>
+        <div class="input-box animation" style="--i:20; --j:4">
+          <input type="password" name="confirmPassword" id="reg-confirm" required autocomplete="new-password">
+          <label for="reg-confirm">Confirm Password</label>
+          <i class='bx bxs-lock-alt'></i>
+        </div>
+        <button type="submit" class="btn animation" style="--i:21; --j:5">Sign Up</button>
+        <div class="linkTxt animation" style="--i:22; --j:6">
+          <p>Already have an account? <a href="#" class="login-link">Login</a></p>
+        </div>
+      </form>
+    </div>
+
+    <div class="info-text register">
+      <h2 class="animation" style="--i:17; --j:0">Join EcomSphere!</h2>
+      <p class="animation" style="--i:18; --j:1">Create your account and start shopping our premium collections.</p>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+</body>
+</html>

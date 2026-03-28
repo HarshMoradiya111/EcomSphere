@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="<%= product.name %> - EcomSphere">
+  <title><%= title %></title>
+  <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <%- include('./partials/header') %>
+  <%- include('./partials/flash') %>
+
+  <section id="prodetails" class="section-p1">
+    <div class="single-pro-image">
+      <img src="/uploads/<%= product.image %>"
+           alt="<%= product.name %>"
+           width="100%"
+           id="main-product-image"
+           onerror="this.src='/img/placeholder.jpg'">
+      <div class="small-img-group">
+        <div class="small-img-col">
+          <img src="/uploads/<%= product.image %>"
+               alt=""
+               class="small-img active-thumb"
+               onerror="this.src='/img/placeholder.jpg'"
+               onclick="document.getElementById('main-product-image').src=this.src">
+        </div>
+      </div>
+    </div>
+
+    <div class="single-pro-details">
+      <h6><%= product.category %></h6>
+      <h2><%= product.name %></h2>
+      <h4>₹<%= product.price.toLocaleString('en-IN') %></h4>
+      <p><%= product.description %></p>
+
+      <div style="margin:20px 0;">
+        <label style="font-weight:600; margin-right:10px;">Quantity:</label>
+        <input type="number" id="product-quantity" value="1" min="1" max="10" style="width:60px; padding:8px; border:1px solid #ddd; border-radius:4px;">
+      </div>
+
+      <button
+        class="add-to-cart normal"
+        id="add-to-cart-btn"
+        data-product-id="<%= product._id %>"
+        data-name="<%= product.name %>"
+        data-price="<%= product.price %>"
+        data-image="<%= product.image %>"
+        style="background:#088178; color:#fff; padding:14px 35px; border:none; border-radius:6px; font-size:15px; font-weight:600; cursor:pointer; transition:0.3s;">
+        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+      </button>
+
+      <div style="margin-top:25px; padding-top:20px; border-top:1px solid #eee;">
+        <p><i class="fa-solid fa-truck" style="color:#088178; margin-right:8px;"></i><strong>Free shipping</strong> on orders above ₹1000</p>
+        <p><i class="fa-solid fa-rotate-left" style="color:#088178; margin-right:8px;"></i><strong>Free returns</strong> within 30 days</p>
+        <p><i class="fa-solid fa-shield-halved" style="color:#088178; margin-right:8px;"></i><strong>Secure payment</strong> guaranteed</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Products -->
+  <% if (relatedProducts && relatedProducts.length > 0) { %>
+  <section id="product1" class="section-p1">
+    <h2>Related Products</h2>
+    <p>More from <%= product.category %></p>
+    <div class="pro-container">
+      <% relatedProducts.forEach(rp => { %>
+        <div class="pro">
+          <a href="/product/<%= rp._id %>">
+            <img src="/uploads/<%= rp.image %>" alt="<%= rp.name %>" onerror="this.src='/img/placeholder.jpg'">
+          </a>
+          <div class="des">
+            <span><%= rp.category %></span>
+            <h5><%= rp.name %></h5>
+            <h4>₹<%= rp.price.toLocaleString('en-IN') %></h4>
+          </div>
+          <a href="#"
+             class="add-to-cart cart1"
+             data-product-id="<%= rp._id %>"
+             data-name="<%= rp.name %>"
+             data-price="<%= rp.price %>"
+             data-image="<%= rp.image %>">
+            <i class="fa-solid fa-cart-shopping"></i>
+          </a>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <%- include('./partials/footer') %>
+
+  <script src="/js/script.js"></script>
+  <script>
+    // Handle quantity-aware add to cart for single product page
+    document.getElementById('add-to-cart-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      const qty = parseInt(document.getElementById('product-quantity').value) || 1;
+      const productId = this.dataset.productId;
+
+      fetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity: qty })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          showToast('Item added to cart! 🛒');
+        } else {
+          showToast(data.error || 'Failed to add item', 'error');
+        }
+      })
+      .catch(() => showToast('Error adding to cart', 'error'));
+    });
+  </script>
+</body>
+</html>

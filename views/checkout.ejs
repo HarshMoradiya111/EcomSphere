@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Checkout - EcomSphere">
+  <title><%= title %></title>
+  <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    #checkout-container { max-width: 900px; margin: 50px auto; padding: 25px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 12px; }
+    #checkout-container h2 { font-size: 28px; color: #333; margin-bottom: 20px; text-align:center; }
+    #checkout-summary { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    #checkout-summary th, #checkout-summary td { border: 1px solid #ddd; padding: 14px; text-align: center; }
+    #checkout-summary th { background-color: #088178; color: white; font-size: 16px; }
+    #checkout-summary tr:nth-child(even) { background-color: #f2f2f2; }
+    .checkout-total { font-size: 24px; font-weight: bold; color: #088178; margin: 20px 0; text-align:center; }
+    .checkout-form { margin-top: 20px; }
+    .checkout-form input {
+      width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: border 0.3s;
+    }
+    .checkout-form input:focus { border-color: #088178; outline: none; }
+    .checkout-form button { background-color: #088178; color: white; font-size: 18px; font-weight: bold; padding: 16px; border: none; border-radius: 8px; cursor: pointer; transition: background 0.3s; width: 100%; display: block; margin-top: 10px; }
+    .checkout-form button:hover { background-color: #066b64; }
+    .empty-cart-msg { text-align: center; padding: 40px; color: #e63946; font-size: 20px; }
+  </style>
+</head>
+<body>
+
+  <%- include('./partials/header') %>
+  <%- include('./partials/flash') %>
+
+  <div id="checkout-container">
+    <h2><i class="fa-solid fa-bag-shopping"></i> Checkout</h2>
+
+    <% if (cart && cart.length > 0) { %>
+      <table id="checkout-summary">
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+        </tr>
+        <% cart.forEach(item => { %>
+          <tr>
+            <td>
+              <img src="/uploads/<%= item.image %>" width="50" height="50" style="border-radius:6px; object-fit:cover; margin-right:8px; vertical-align:middle;" onerror="this.src='/img/placeholder.jpg'">
+              <%= item.name %>
+            </td>
+            <td>₹<%= item.price.toLocaleString('en-IN') %></td>
+            <td><%= item.quantity %></td>
+            <td>₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></td>
+          </tr>
+        <% }) %>
+      </table>
+
+      <h3 class="checkout-total">Order Total: ₹<%= total.toLocaleString('en-IN') %></h3>
+
+      <form class="checkout-form" action="/checkout/place-order" method="POST">
+        <h3 style="margin-bottom:10px; color:#333;">Delivery Information</h3>
+        <input type="text" name="name" id="delivery-name" placeholder="Full Name" required autocomplete="name">
+        <input type="text" name="address" id="delivery-address" placeholder="Shipping Address" required autocomplete="street-address">
+        <input type="tel" name="phone" id="delivery-phone" placeholder="Phone Number" required autocomplete="tel">
+        <button type="submit">
+          <i class="fa-solid fa-check-circle"></i> Place Order — ₹<%= total.toLocaleString('en-IN') %>
+        </button>
+      </form>
+    <% } else { %>
+      <div class="empty-cart-msg">
+        <i class="fa-solid fa-cart-shopping" style="font-size:60px; color:#ccc; display:block; margin-bottom:20px;"></i>
+        <p>Your cart is empty!</p>
+        <a href="/shop" style="display:inline-block;margin-top:15px;padding:12px 28px;background:#088178;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;">Start Shopping</a>
+      </div>
+    <% } %>
+  </div>
+
+  <%- include('./partials/footer') %>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>
