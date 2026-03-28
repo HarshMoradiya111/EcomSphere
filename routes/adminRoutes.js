@@ -19,6 +19,14 @@ const {
   deleteOrder,
   getUsers,
   deleteUser,
+  getSettings,
+  updateSettings,
+  getBlogs,
+  addBlogForm,
+  addBlog,
+  editBlogForm,
+  updateBlog,
+  deleteBlog,
 } = require('../controllers/adminController');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../middleware/auth');
 
@@ -74,5 +82,17 @@ router.post('/orders/:id/delete', isAdminAuthenticated, deleteOrder);
 // Users
 router.get('/users', isAdminAuthenticated, getUsers);
 router.post('/users/:id/delete', isAdminAuthenticated, deleteUser);
+
+// Settings
+router.get('/settings', isAdminAuthenticated, getSettings);
+router.post('/settings', isAdminAuthenticated, upload.single('logo'), updateSettings);
+
+// Blogs
+router.get('/blogs', isAdminAuthenticated, getBlogs);
+router.get('/blogs/add', isAdminAuthenticated, addBlogForm);
+router.post('/blogs/add', isAdminAuthenticated, upload.single('image'), addBlog);
+router.get('/blogs/edit/:id', isAdminAuthenticated, editBlogForm);
+router.put('/blogs/edit/:id', isAdminAuthenticated, upload.single('image'), updateBlog);
+router.delete('/blogs/delete/:id', isAdminAuthenticated, deleteBlog);
 
 module.exports = router;

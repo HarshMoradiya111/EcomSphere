@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { getHomepage, getShop, getSingleProduct, getProfile, postProfilePhoto } = require('../controllers/productController');
+const { getHomepage, getShop, getSingleProduct, getProfile, postProfilePhoto, getBlogPage } = require('../controllers/productController');
 const { isAuthenticated } = require('../middleware/auth');
 
 // Multer configuration for profile photo uploads
@@ -60,11 +60,6 @@ router.get('/contact', (req, res) => {
   });
 });
 
-router.get('/blog', (req, res) => {
-  res.render('blog', {
-    title: 'Blog - EcomSphere',
-    user: req.session.username || null,
-  });
-});
+router.get('/blog', getBlogPage);
 
 module.exports = router;

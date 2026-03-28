@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Blog = require('../models/Blog');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const path = require('path');
@@ -154,10 +155,27 @@ const postProfilePhoto = async (req, res) => {
   }
 };
 
+// GET /blog
+const getBlogPage = async (req, res) => {
+  try {
+    const blogs = await Blog.find().sort({ date: -1 });
+    res.render('blog', {
+      title: 'Blog - EcomSphere',
+      blogs,
+      user: req.session.username || null,
+      errors: req.flash('error'),
+      success: req.flash('success')
+    });
+  } catch(e) {
+    res.render('blog', { title: 'Blog', blogs:[], user: null, errors: [], success: [] });
+  }
+};
+
 module.exports = {
   getHomepage,
   getShop,
   getSingleProduct,
   getProfile,
   postProfilePhoto,
+  getBlogPage,
 };

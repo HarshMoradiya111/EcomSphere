@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const methodOverride = require('method-override');
 const path = require('path');
+const Settings = require('./models/Settings');
 
 const connectDB = require('./config/db');
 
@@ -71,11 +72,20 @@ app.use(
 app.use(flash());
 
 // Global template variables middleware
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.sessionUser = req.session.username || null;
   res.locals.sessionUserId = req.session.userId || null;
   res.locals.isAdmin = !!req.session.adminId;
   res.locals.adminUsername = req.session.adminUsername || null;
+  
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) settings = await Settings.create({});
+    res.locals.settings = settings;
+  } catch(e) {
+    res.locals.settings = { address: "SSCCS", phone: "+91 8160730726", hours: "10:00 - 18:00", email: "", logo: "/img/logo1.png" };
+  }
+  
   next();
 });
 

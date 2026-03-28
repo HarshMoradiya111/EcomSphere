@@ -2,6 +2,8 @@ const Admin = require('../models/Admin');
 const Product = require('../models/Product');
 const User = require('../models/User');
 const Order = require('../models/Order');
+const Blog = require('../models/Blog');
+const Settings = require('../models/Settings');
 const path = require('path');
 const fs = require('fs');
 
@@ -393,6 +395,52 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getSettings = async (req, res) => {
+  const settings = await Settings.findOne() || await Settings.create({});
+  res.render('admin/settings', { title: 'Settings', settings, activePage: 'settings' });
+};
+
+const updateSettings = async (req, res) => {
+  const { address, phone, hours, email } = req.body;
+  const settings = await Settings.findOne() || await Settings.create({});
+  settings.address = address;
+  settings.phone = phone;
+  settings.hours = hours;
+  settings.email = email;
+  if (req.file) settings.logo = '/uploads/' + req.file.filename;
+  await settings.save();
+  res.redirect('/admin/settings');
+};
+
+const getBlogs = async (req, res) => {
+  const blogs = await Blog.find();
+  res.render('admin/blogs', { title: 'Blogs', blogs, activePage: 'blogs' });
+};
+
+const addBlogForm = (req, res) => res.render('admin/add_blog', { title: 'Add Blog', activePage: 'blogs' });
+
+const addBlog = async (req, res) => {
+  await Blog.create({ title: req.body.title, content: req.body.content, image: '/uploads/' + req.file.filename });
+  res.redirect('/admin/blogs');
+};
+
+const editBlogForm = async (req, res) => {
+  const blog = await Blog.findById(req.params.id);
+  res.render('admin/edit_blog', { title: 'Edit Blog', blog, activePage: 'blogs' });
+};
+
+const updateBlog = async (req, res) => {
+  const updateQuery = { title: req.body.title, content: req.body.content };
+  if (req.file) updateQuery.image = '/uploads/' + req.file.filename;
+  await Blog.findByIdAndUpdate(req.params.id, updateQuery);
+  res.redirect('/admin/blogs');
+};
+
+const deleteBlog = async (req, res) => {
+  await Blog.findByIdAndDelete(req.params.id);
+  res.redirect('/admin/blogs');
+};
+
 module.exports = {
   getAdminLogin,
   postAdminLogin,
@@ -410,4 +458,12 @@ module.exports = {
   deleteOrder,
   getUsers,
   deleteUser,
+  getSettings,
+  updateSettings,
+  getBlogs,
+  addBlogForm,
+  addBlog,
+  editBlogForm,
+  updateBlog,
+  deleteBlog,
 };
