@@ -85,23 +85,120 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // ==========================================
-  // Mobile Navigation
+  // Mobile Navigation — Sidebar Controller
   // ==========================================
-  const bar = document.getElementById('bar');
-  const nav = document.getElementById('navbar');
-  const close = document.getElementById('close');
+  const navbar  = document.getElementById('navbar');
+  const bar     = document.getElementById('bar');
+  const close   = document.getElementById('close');
+  const overlay = document.getElementById('drawer-overlay');
 
+  let savedScrollY = 0;
+  let debounceTimer = null;
+
+  /** Centralized Sidebar State Controller */
+  const Sidebar = {
+    isOpen: false,
+
+    toggle(force) {
+      // Debounce rapid taps
+      if (debounceTimer) return;
+      debounceTimer = setTimeout(() => { debounceTimer = null; }, 150);
+
+      this.isOpen = (force !== undefined) ? force : !this.isOpen;
+
+      if (navbar)  navbar.classList.toggle('active', this.isOpen);
+      if (overlay) overlay.classList.toggle('visible', this.isOpen);
+      if (bar)     bar.setAttribute('aria-expanded', String(this.isOpen));
+
+      if (this.isOpen) {
+        // Lock body scroll
+        savedScrollY = window.scrollY;
+        document.body.style.overflow = 'hidden';
+        // Move focus to first link inside sidebar
+        const firstLink = navbar && navbar.querySelector('a');
+        if (firstLink) firstLink.focus();
+      } else {
+        // Restore body scroll
+        document.body.style.overflow = '';
+        window.scrollTo(0, savedScrollY);
+        // Return focus to hamburger
+        if (bar) bar.focus();
+      }
+    },
+
+    open()  { this.toggle(true);  },
+    close() { this.toggle(false); }
+  };
+
+  // Hamburger opens sidebar
   if (bar) {
-    bar.addEventListener('click', () => {
-      nav.classList.add('active');
-      bar.style.display = 'none';
+    bar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      Sidebar.open();
     });
   }
 
+  // Close button inside profile header
   if (close) {
-    close.addEventListener('click', () => {
-      nav.classList.remove('active');
-      if (bar) bar.style.display = 'block';
+    close.addEventListener('click', (e) => {
+      e.preventDefault();
+      Sidebar.close();
+    });
+  }
+
+  // Overlay click closes sidebar (outside click)
+  if (overlay) {
+    overlay.addEventListener('click', () => Sidebar.close());
+  }
+
+  // Sidebar clicks do NOT bubble to overlay
+  if (navbar) {
+    navbar.addEventListener('click', (e) => e.stopPropagation());
+  }
+
+  // ESC key closes sidebar
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && Sidebar.isOpen) Sidebar.close();
+  });
+
+  // Force-close on resize to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 1100 && Sidebar.isOpen) Sidebar.close();
+  });
+
+  // ── Swipe Gesture Support ──
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    const deltaX = e.changedTouches[0].clientX - touchStartX;
+    const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY);
+
+    // Only treat as horizontal swipe if it's more horizontal than vertical
+    if (deltaY > 40) return;
+
+    // Swipe right from left edge → open sidebar
+    if (deltaX > 60 && touchStartX < 40 && !Sidebar.isOpen) {
+      Sidebar.open();
+    }
+    // Swipe left → close sidebar
+    if (deltaX < -60 && Sidebar.isOpen) {
+      Sidebar.close();
+    }
+  }, { passive: true });
+
+  // ── Analytics: Delegated tracking on sidebar links ──
+  if (navbar) {
+    navbar.addEventListener('click', (e) => {
+      const link = e.target.closest('[data-track]');
+      if (link && typeof window.gtag === 'function') {
+        window.gtag('event', link.dataset.track, { label: link.dataset.label });
+      }
     });
   }
 
@@ -114,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
       setTimeout(() => msg.remove(), 500);
     }, 4000);
   });
-});
+}); // end DOMContentLoaded
 
 // ==========================================
 // Cart Badge Update
