@@ -3,24 +3,26 @@
       height="60"></a>
   <div>
     <ul id="navbar">
-      <li><a href="/" class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>">Home</a>
-      </li>
-      <li><a href="/shop"
-          class="<%= typeof activePage !== 'undefined' && activePage === 'shop' ? 'active' : '' %>">Shop</a></li>
+      <div id="mobile-drawer-header">
+        <span>MENU</span>
+        <a href="#" id="close"><i class="fa-solid fa-xmark"></i></a>
+      </div>
+      <li><a href="/" class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>">Home</a></li>
+      <li><a href="/shop" class="<%= typeof activePage !== 'undefined' && activePage === 'shop' ? 'active' : '' %>">Shop</a></li>
       <li><a href="/blog">Blog</a></li>
-      <li><a href="/about"
-          class="<%= typeof activePage !== 'undefined' && activePage === 'about' ? 'active' : '' %>">About</a></li>
-      <li><a href="/contact"
-          class="<%= typeof activePage !== 'undefined' && activePage === 'contact' ? 'active' : '' %>">Contact</a></li>
+      <li><a href="/about" class="<%= typeof activePage !== 'undefined' && activePage === 'about' ? 'active' : '' %>">About</a></li>
+      <li><a href="/contact" class="<%= typeof activePage !== 'undefined' && activePage === 'contact' ? 'active' : '' %>">Contact</a></li>
+      
+      <div class="drawer-divider"></div>
+
+      <li><a href="/profile">My Profile</a></li>
+      <li><a href="/admin/dashboard">Admin Panel</a></li>
       <% if (locals.sessionUser) { %>
-        <li><a href="/profile">Profile</a></li>
-        <li><a href="/auth/logout">Logout (<%= locals.sessionUser %>)</a></li>
-        <% } else { %>
-          <li><a href="/auth/login">Login</a></li>
-          <% } %>
-            <li><a href="/admin/dashboard">Admin</a></li>
-            <li id="lg-bag"><a href="/cart"><img src="/img/cart.png" class="cart" alt="Cart" height="30"></a></li>
-            <a href="#" id="close"><img src="/img/close1.svg" height="30" alt=""></a>
+        <li class="auth-li"><a href="/auth/logout">Logout</a></li>
+      <% } else { %>
+        <li class="auth-li"><a href="/auth/login">Login / Register</a></li>
+      <% } %>
+      <li id="lg-bag"><a href="/cart"><img src="/img/cart.png" class="cart" alt="Cart" height="30"></a></li>
     </ul>
   </div>
   <div id="mobile">

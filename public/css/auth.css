@@ -15,12 +15,20 @@
   font-family: 'Poppins', sans-serif;
 }
 
+html,
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: grid;
+  place-items: center;
   min-height: 100vh;
   background: #f0f2f5;
+  padding: 20px;
 }
 
 .wrapper {
@@ -51,9 +59,10 @@ body {
 }
 
 .form-box h2 {
-  margin-bottom: 10px;
+  margin-bottom: 25px;
   position: relative;
-  font-size: 28px;
+  font-size: 32px;
+  font-weight: 800;
   color: var(--black);
   text-align: center;
 }
@@ -300,16 +309,69 @@ form .linkTxt {
 
 /* Responsive auth */
 @media (max-width: 768px) {
+  body {
+    padding: 10px;
+    background: #f8f9fa;
+  }
   .wrapper {
-    width: 95vw;
+    width: 100%;
+    max-width: 380px;
     height: auto;
-    flex-direction: column;
-    overflow: visible;
+    min-height: 520px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #ffffff;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
   }
   .wrapper .rotate-bg, .wrapper .rotate-bg2 { display: none; }
-  .wrapper .form-box, .wrapper .info-text { position: relative; width: 100%; }
-  .wrapper .info-text.login, .wrapper .info-text.register { display: none; }
-  .wrapper .form-box.login, .wrapper .form-box.register { position: relative; padding: 30px 25px; left: auto; right: auto; }
-  .wrapper.active .form-box.login .animation { transform: none; opacity: 1; filter: none; }
-  .wrapper.active .form-box.register .animation { transform: none; opacity: 1; filter: none; }
+  .wrapper .form-box { 
+    position: absolute; 
+    width: 100%; 
+    padding: 40px 30px; 
+    height: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    text-align: center;
+    transition: 0.5s ease;
+  }
+  .wrapper .info-text { display: none; }
+  .wrapper .form-box.login { 
+    left: 0;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 10;
+  }
+  .wrapper .form-box.register { 
+    right: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    transform: translateX(100%);
+  }
+  .wrapper.active .form-box.login {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-100%);
+  }
+  .wrapper.active .form-box.register {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+    z-index: 10;
+  }
+  .wrapper .form-box form {
+    width: 100%;
+  }
+  .input-box {
+    width: 100% !important;
+  }
+  .wrapper.active .form-box.login .animation,
+  .wrapper .form-box.register .animation,
+  .wrapper.active .form-box.register .animation { transform: none; opacity: 1; filter: none; transition: none; }
+  .forgot-link { text-align: center; margin-top: 5px; }
 }
