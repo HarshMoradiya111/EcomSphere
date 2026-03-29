@@ -51,6 +51,11 @@
   <!-- Main Content -->
   <main class="admin-main">
     <div class="admin-topbar">
-      <h1 class="page-title"><%= title %></h1>
+      <div style="display:flex; align-items:center; gap:15px;">
+        <button id="sidebar-toggle" style="background:none; border:none; color:var(--accent); font-size:20px; cursor:pointer; display:none;">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="page-title"><%= title %></h1>
+      </div>
       <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> <%= locals.adminUsername || 'Admin' %></span>
     </div>

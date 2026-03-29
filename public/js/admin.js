@@ -51,4 +51,24 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   });
+  // ==========================================
+  // Sidebar Toggle for Mobile
+  // ==========================================
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebar = document.querySelector('.admin-sidebar');
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('open');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 991 && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && e.target !== sidebarToggle) {
+          sidebar.classList.remove('open');
+        }
+      }
+    });
+  }
 });

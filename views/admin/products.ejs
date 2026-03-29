@@ -53,42 +53,44 @@
   </div>
 
   <% if (products.length > 0) { %>
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Added</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% products.forEach(product => { %>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
           <tr>
-            <td>
-              <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
-                class="product-thumb" onerror="this.src='/img/placeholder.jpg'">
-            </td>
-            <td><%= product.name %></td>
-            <td><span class="badge badge-category"><%= product.category %></span></td>
-            <td>₹<%= product.price.toLocaleString('en-IN') %></td>
-            <td><%= new Date(product.createdAt).toLocaleDateString('en-IN') %></td>
-            <td class="action-btns">
-              <a href="/admin/products/edit/<%= product._id %>" class="admin-btn btn-warning btn-sm">
-                <i class="fa-solid fa-pen-to-square"></i> Edit
-              </a>
-              <form action="/admin/products/delete/<%= product._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this product?')">
-                <button type="submit" class="admin-btn btn-danger btn-sm">
-                  <i class="fa-solid fa-trash"></i> Delete
-                </button>
-              </form>
-            </td>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Added</th>
+            <th>Actions</th>
           </tr>
-        <% }) %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% products.forEach(product => { %>
+            <tr>
+              <td>
+                <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
+                  class="product-thumb" onerror="this.src='/img/placeholder.jpg'">
+              </td>
+              <td><%= product.name %></td>
+              <td><span class="badge badge-category"><%= product.category %></span></td>
+              <td>₹<%= product.price.toLocaleString('en-IN') %></td>
+              <td><%= new Date(product.createdAt).toLocaleDateString('en-IN') %></td>
+              <td class="action-btns">
+                <a href="/admin/products/edit/<%= product._id %>" class="admin-btn btn-warning btn-sm">
+                  <i class="fa-solid fa-pen-to-square"></i> Edit
+                </a>
+                <form action="/admin/products/delete/<%= product._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this product?')">
+                  <button type="submit" class="admin-btn btn-danger btn-sm">
+                    <i class="fa-solid fa-trash"></i> Delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   <% } else { %>
     <div style="text-align:center; padding:50px; color:#94a3b8;">
       <i class="fa-solid fa-box-open" style="font-size:50px; margin-bottom:15px;"></i>

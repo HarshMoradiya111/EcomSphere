@@ -94,12 +94,14 @@ document.addEventListener('DOMContentLoaded', function () {
   if (bar) {
     bar.addEventListener('click', () => {
       nav.classList.add('active');
+      bar.style.display = 'none';
     });
   }
 
   if (close) {
     close.addEventListener('click', () => {
       nav.classList.remove('active');
+      if (bar) bar.style.display = 'block';
     });
   }
 

@@ -72,30 +72,32 @@
     <h3>Recent Orders</h3>
     <a href="/admin/orders" class="see-all">View All →</a>
   </div>
-  <table class="admin-table">
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Customer</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th>Date</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% recentOrders.forEach(order => { %>
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
         <tr>
-          <td>#<%= order._id.toString().slice(-8).toUpperCase() %></td>
-          <td><%= order.userId ? order.userId.username : 'Unknown' %></td>
-          <td>₹<%= order.totalAmount.toLocaleString('en-IN') %></td>
-          <td><span class="badge badge-<%= order.status.toLowerCase() %>"><%= order.status %></span></td>
-          <td><%= new Date(order.createdAt).toLocaleDateString('en-IN') %></td>
-          <td><a href="/admin/orders/<%= order._id %>" class="admin-btn btn-sm">View</a></td>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Action</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% recentOrders.forEach(order => { %>
+          <tr>
+            <td>#<%= order._id.toString().slice(-8).toUpperCase() %></td>
+            <td><%= order.userId ? order.userId.username : 'Unknown' %></td>
+            <td>₹<%= order.totalAmount.toLocaleString('en-IN') %></td>
+            <td><span class="badge badge-<%= order.status.toLowerCase() %>"><%= order.status %></span></td>
+            <td><%= new Date(order.createdAt).toLocaleDateString('en-IN') %></td>
+            <td><a href="/admin/orders/<%= order._id %>" class="admin-btn btn-sm">View</a></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
 </div>
 <% } %>
 
@@ -105,40 +107,42 @@
     <h3>All Products</h3>
     <a href="/admin/products" class="see-all">View All →</a>
   </div>
-  <table class="admin-table">
-    <thead>
-      <tr>
-        <th>Image</th>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Price</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% products.forEach(product => { %>
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
         <tr>
-          <td>
-            <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
-              class="product-thumb" onerror="this.src='/img/placeholder.jpg'">
-          </td>
-          <td><%= product.name %></td>
-          <td><span class="badge badge-category"><%= product.category %></span></td>
-          <td>₹<%= product.price.toLocaleString('en-IN') %></td>
-          <td class="action-btns">
-            <a href="/admin/products/edit/<%= product._id %>" class="admin-btn btn-warning btn-sm">
-              <i class="fa-solid fa-pen-to-square"></i> Edit
-            </a>
-            <form action="/admin/products/delete/<%= product._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this product?')">
-              <button type="submit" class="admin-btn btn-danger btn-sm">
-                <i class="fa-solid fa-trash"></i> Delete
-              </button>
-            </form>
-          </td>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Actions</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% products.forEach(product => { %>
+          <tr>
+            <td>
+              <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
+                class="product-thumb" onerror="this.src='/img/placeholder.jpg'">
+            </td>
+            <td><%= product.name %></td>
+            <td><span class="badge badge-category"><%= product.category %></span></td>
+            <td>₹<%= product.price.toLocaleString('en-IN') %></td>
+            <td class="action-btns">
+              <a href="/admin/products/edit/<%= product._id %>" class="admin-btn btn-warning btn-sm">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </a>
+              <form action="/admin/products/delete/<%= product._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this product?')">
+                <button type="submit" class="admin-btn btn-danger btn-sm">
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <%- include('./partials/admin_footer') %>
