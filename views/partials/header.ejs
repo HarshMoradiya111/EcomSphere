@@ -37,7 +37,13 @@
 
   <!-- Profile Header -->
   <div id="drawer-profile">
-    <div id="drawer-profile-icon"><i class="fa-solid fa-circle-user"></i></div>
+    <div id="drawer-profile-icon">
+      <% if (locals.sessionPhoto) { %>
+        <img src="<%= locals.sessionPhoto %>" alt="User" class="drawer-avatar">
+      <% } else { %>
+        <i class="fa-solid fa-circle-user"></i>
+      <% } %>
+    </div>
     <div id="drawer-profile-text">
       <% if (locals.sessionUser) { %>
         <span class="drawer-hello">Hello,</span>

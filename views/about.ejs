@@ -3,41 +3,275 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="About EcomSphere - Our Story and Mission">
+  <meta name="description" content="About EcomSphere - Our Heritage, Values and Mission">
   <title><%= title %></title>
   <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    :root {
+      --classic-teal: #088178;
+      --classic-dark: #1a1a1a;
+      --classic-text: #465b52;
+      --classic-bg: #f5f7f9;
+    }
+
+    body {
+      background-color: #fff;
+      font-family: 'Spartan', sans-serif;
+    }
+
+    /* Hero Section - Classic High-End */
+    #page-header.about-header {
+      background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/img/about/banner.png");
+      background-size: cover;
+      background-position: center;
+      height: 50vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #page-header h2 {
+      font-size: 3.5rem;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    #page-header p {
+      font-size: 1.2rem;
+      color: #ddd;
+      font-style: italic;
+    }
+
+    /* Main Content Styling */
+    .about-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 20px;
+    }
+
+    .about-row {
+      display: flex;
+      align-items: center;
+      gap: 60px;
+      margin-bottom: 100px;
+    }
+
+    .about-row:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+
+    .about-img {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .about-img img {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 15px 35px rgba(8, 129, 120, 0.2);
+      border: 8px solid #fff;
+      transition: transform 0.3s ease;
+    }
+
+    .about-text {
+      flex: 1;
+    }
+
+    .about-text span {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--classic-teal);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    .about-text h2 {
+      font-size: 2.8rem;
+      color: var(--classic-teal);
+      margin-bottom: 25px;
+      line-height: 1.2;
+    }
+
+    .about-text p {
+      color: var(--classic-text);
+      line-height: 1.8;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* Features / Stats Bar */
+    .classic-stats {
+      background: var(--classic-teal);
+      padding: 60px 20px;
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      color: #fff;
+      border-radius: 8px;
+    }
+
+    .stat-box h3 {
+      font-size: 2.5rem;
+      margin-bottom: 5px;
+    }
+
+    .stat-box p {
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.8;
+      letter-spacing: 1px;
+    }
+
+    /* Heritage Section */
+    .heritage-section {
+      padding: 100px 20px;
+      background-color: var(--classic-bg);
+      text-align: center;
+    }
+
+    .heritage-section h2 {
+      margin-bottom: 50px;
+    }
+
+    .heritage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .heritage-card {
+      background: #fff;
+      padding: 40px;
+      border-radius: 4px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      transition: 0.3s;
+    }
+
+    .heritage-card:hover {
+      transform: translateY(-10px);
+    }
+
+    .heritage-card i {
+      font-size: 40px;
+      color: var(--classic-teal);
+      margin-bottom: 20px;
+    }
+
+    .heritage-card h4 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: var(--classic-dark);
+    }
+
+    @media (max-width: 991px) {
+      .about-row, .about-row:nth-child(even) {
+        flex-direction: column;
+      }
+      .about-img, .about-text {
+        width: 100%;
+      }
+      #page-header h2 {
+        font-size: 2.5rem;
+      }
+      .classic-stats {
+        flex-wrap: wrap;
+        gap: 30px;
+      }
+    }
+  </style>
 </head>
 <body>
   <%- include('./partials/header') %>
 
+  <!-- Classic Hero -->
   <section id="page-header" class="about-header">
-    <h2>About EcomSphere</h2>
-    <p>Our story and mission</p>
+    <h2>Our Heritage</h2>
+    <p>Defined by quality, driven by passion since 2015.</p>
   </section>
 
-  <section id="about-head" class="section-p1">
-    <img src="/img/about/about.jpg" alt="About EcomSphere" onerror="this.src='/img/placeholder.jpg'">
-    <div>
-      <h2>Who Are We?</h2>
-      <p>EcomSphere is a premium e-commerce platform offering a curated selection of clothing, footwear, glasses, and cosmetics. We believe shopping should be simple, enjoyable, and trustworthy.</p>
-      <p>Our mission is to bring the best products to your doorstep with fast shipping, easy returns, and excellent customer support.</p>
-      <h4>Our Values</h4>
-      <p><i class="fa-solid fa-check" style="color:#088178; margin-right:8px;"></i> Quality first — only premium products</p>
-      <p><i class="fa-solid fa-check" style="color:#088178; margin-right:8px;"></i> Customer satisfaction guaranteed</p>
-      <p><i class="fa-solid fa-check" style="color:#088178; margin-right:8px;"></i> Secure and transparent transactions</p>
-      <p><i class="fa-solid fa-check" style="color:#088178; margin-right:8px;"></i> Fast and free shipping nationwide</p>
+  <div class="about-container">
+    <!-- Story Row 1 -->
+    <div class="about-row">
+      <div class="about-img">
+        <img src="/img/about/about.jpg" alt="About US" onerror="this.src='/img/placeholder.jpg'">
+      </div>
+      <div class="about-text">
+        <span>The Journey</span>
+        <h2>Redefining Elegant E-Commerce Architecture</h2>
+        <p>EcomSphere began with a singular vision: to create a digital boutique that feels as premium as the products it houses. We recognized a gap in the market for a platform that balances technical excellence with aesthetic sophistication.</p>
+        <p>Today, we serve a global community of style-conscious individuals who demand transparency, speed, and uncompromising quality in every interaction.</p>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="classic-stats">
+      <div class="stat-box">
+        <h3>10k+</h3>
+        <p>Happy Customers</p>
+      </div>
+      <div class="stat-box">
+        <h3>50+</h3>
+        <p>Premium Brands</p>
+      </div>
+      <div class="stat-box">
+        <h3>24h</h3>
+        <p>Global Support</p>
+      </div>
+      <div class="stat-box">
+        <h3>100%</h3>
+        <p>Secure Systems</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heritage / Values Section -->
+  <section class="heritage-section">
+    <div class="about-container">
+      <h2>The Pillars of EcomSphere</h2>
+      <div class="heritage-grid">
+        <div class="heritage-card">
+          <i class="fa-solid fa-gem"></i>
+          <h4>Uncompromising Quality</h4>
+          <p>Every product in our catalog undergoes a rigorous selection process. If it doesn't meet our standards for craftsmanship, it doesn't make it to our store.</p>
+        </div>
+        <div class="heritage-card">
+          <i class="fa-solid fa-shield-halved"></i>
+          <h4>Built on Trust</h4>
+          <p>Security is the foundation of digital commerce. We utilize military-grade encryption to ensure your data and transactions remain private and protected.</p>
+        </div>
+        <div class="heritage-card">
+          <i class="fa-solid fa-earth-americas"></i>
+          <h4>Global Vision</h4>
+          <p>Style knows no borders. We've optimized our logistics network to provide fast, reliable shipping to every corner of the globe.</p>
+        </div>
+      </div>
     </div>
   </section>
 
+  <!-- Classic Newsletter Integration -->
   <section id="newsletter" class="section-p1 section-m1">
     <div class="newstext">
-      <h4>Sign Up For Newsletter</h4>
-      <p>Get E-mail updates about our latest shop and <span>special offers.</span></p>
+      <h4>Refined Updates</h4>
+      <p>Subscribe to our newsletter for exclusive insights and <span>curated collections.</span></p>
     </div>
     <div class="form">
-      <input type="text" placeholder="Your E-mail address">
-      <button class="normal">Sign Up</button>
+      <input type="text" placeholder="Your professional email address">
+      <button class="normal">Join Now</button>
     </div>
   </section>
 
