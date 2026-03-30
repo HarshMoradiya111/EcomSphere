@@ -203,6 +203,44 @@ button.white {
 #navbar { display: none; }
 #drawer-overlay { display: none; }
 #mobile { display: none; align-items: center; }
+#search-bar-desktop {
+  display: flex;
+  align-items: center;
+  background-color: #f0f2f5;
+  border-radius: 25px;
+  padding: 5px 15px;
+  width: 30%;
+  max-width: 450px;
+  margin: 0 20px;
+  transition: 0.3s;
+  border: 1px solid transparent;
+}
+#search-bar-desktop:focus-within {
+  background-color: #fff;
+  border-color: #088178;
+  box-shadow: 0 4px 12px rgba(8, 129, 120, 0.1);
+}
+#search-bar-desktop input {
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  width: 100%;
+  font-size: 14px;
+  color: #333;
+}
+#search-bar-desktop button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 16px;
+  transition: 0.2s;
+  padding: 5px;
+}
+#search-bar-desktop button:hover {
+  color: #088178;
+}
+
 #close { display: none; }
 
 /* === Hero Section === */

@@ -1,6 +1,12 @@
 <section id="header">
   <a href="/"><img src="<%= locals.settings ? locals.settings.logo : '/img/logo1.png' %>" class="logo" alt="EcomSphere" height="60"></a>
 
+  <!-- Search Bar -->
+  <form action="/shop" method="GET" id="search-bar-desktop">
+    <input type="text" name="search" placeholder="Search products..." value="<%= locals.search || '' %>">
+    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+  </form>
+
   <!-- Desktop Navigation (inside header = correct stacking context) -->
   <div id="nav-desktop">
     <ul>
@@ -58,6 +64,11 @@
 
   <!-- Nav Links -->
   <ul>
+    <li style="padding: 10px 25px;">
+      <form action="/shop" method="GET" id="search-bar-mobile">
+        <input type="text" name="search" placeholder="Search..." value="<%= locals.search || '' %>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+      </form>
+    </li>
     <li class="drawer-section-label">Browse</li>
     <li><a href="/" class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>" data-track="sidebar_click" data-label="home"><i class="fa-solid fa-house"></i> Home</a></li>
     <li><a href="/shop" class="<%= typeof activePage !== 'undefined' && activePage === 'shop' ? 'active' : '' %>" data-track="sidebar_click" data-label="shop"><i class="fa-solid fa-bag-shopping"></i> Shop</a></li>

@@ -38,7 +38,11 @@
   </section>
 
   <section id="product1" class="section-p1">
-    <h2><%= selectedCategory || 'All Products' %></h2>
+    <% if (search) { %>
+      <h2>Search Results for "<%= search %>"</h2>
+    <% } else { %>
+      <h2><%= selectedCategory || 'All Products' %></h2>
+    <% } %>
     <p><%= products.length %> product<%= products.length !== 1 ? 's' : '' %> found</p>
 
     <div class="pro-container">

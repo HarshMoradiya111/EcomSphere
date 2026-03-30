@@ -21,6 +21,7 @@ const getCart = async (req, res) => {
         price: item.price,
         image: item.image,
         size: item.size,
+        color: item.color,
         quantity: item.quantity,
         subtotal: item.price * item.quantity,
       })),
@@ -45,28 +46,28 @@ const getCartPage = (req, res) => {
 // POST /api/cart/add - Add item to cart
 const addToCart = async (req, res) => {
   try {
-    const { productId, quantity = 1, size = null } = req.body;
-
+    const { productId, quantity = 1, size = null, color = null } = req.body;
+ 
     if (!productId) {
       return res.status(400).json({ success: false, error: 'Product ID is required' });
     }
-
+ 
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
-
+ 
     let cart = await Cart.findOne({ userId: req.session.userId });
-
+ 
     if (!cart) {
       cart = new Cart({ userId: req.session.userId, items: [] });
     }
-
-    // Check if item already in cart with the same size
+ 
+    // Check if item already in cart with the same size and color
     const existingItemIndex = cart.items.findIndex(
-      (item) => item.productId.toString() === productId && item.size === size
+      (item) => item.productId.toString() === productId && item.size === size && item.color === color
     );
-
+ 
     if (existingItemIndex > -1) {
       cart.items[existingItemIndex].quantity += parseInt(quantity);
     } else {
@@ -76,6 +77,7 @@ const addToCart = async (req, res) => {
         price: product.price,
         image: product.image,
         size: size,
+        color: color,
         quantity: parseInt(quantity),
       });
     }

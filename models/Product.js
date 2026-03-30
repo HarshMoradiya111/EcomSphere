@@ -36,6 +36,14 @@ const productSchema = new mongoose.Schema({
       message: `Category must be one of: ${CATEGORIES.join(', ')}`,
     },
   },
+  sizes: {
+    type: [String],
+    default: [],
+  },
+  colors: {
+    type: [String],
+    default: [],
+  },
   createdAt: {
     type: Date,
     default: Date.now,

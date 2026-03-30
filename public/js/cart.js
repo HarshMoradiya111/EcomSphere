@@ -62,6 +62,8 @@ document.addEventListener('DOMContentLoaded', function () {
         </td>
         <td>
           <strong>${item.name}</strong>
+          ${item.size ? `<p style="margin:5px 0 0; font-size:12px; color:#666;">Size: <strong>${item.size}</strong></p>` : ''}
+          ${item.color ? `<p style="margin:2px 0 0; font-size:12px; color:#666;">Color: <strong>${item.color}</strong></p>` : ''}
         </td>
         <td>₹${parseFloat(item.price).toLocaleString('en-IN')}</td>
         <td>

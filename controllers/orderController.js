@@ -57,6 +57,8 @@ const placeOrder = async (req, res) => {
         name: item.name,
         price: item.price,
         image: item.image,
+        size: item.size,
+        color: item.color,
         quantity: item.quantity,
       })),
       checkoutInfo: {

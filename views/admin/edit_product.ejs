@@ -55,6 +55,18 @@
       <label for="edit-description">Description</label>
       <textarea id="edit-description" name="description" rows="4" required><%= product.description %></textarea>
     </div>
+ 
+    <div class="form-group">
+      <label for="edit-sizes">Sizes (comma separated)</label>
+      <input type="text" id="edit-sizes" name="sizes" value="<%= product.sizes ? product.sizes.join(', ') : '' %>" placeholder="e.g. S, M, L, XL">
+      <small style="color:#94a3b8; font-size:12px;">Leave empty if not applicable.</small>
+    </div>
+ 
+    <div class="form-group">
+      <label for="edit-colors">Colors (comma separated)</label>
+      <input type="text" id="edit-colors" name="colors" value="<%= product.colors ? product.colors.join(', ') : '' %>" placeholder="e.g. Red, Blue, Black">
+      <small style="color:#94a3b8; font-size:12px;">Leave empty if not applicable.</small>
+    </div>
 
     <div class="form-group">
       <label for="edit-image">New Main Image (Banner) (optional)</label>

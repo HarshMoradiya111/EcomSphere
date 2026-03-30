@@ -50,27 +50,24 @@
       <h4>₹<%= product.price.toLocaleString('en-IN') %></h4>
       <p><%= product.description %></p>
 
-      <% if (product.category === 'Men Clothing' || product.category === 'Women Clothing') { %>
+      <% if (product.sizes && product.sizes.length > 0) { %>
         <div style="margin:20px 0;">
           <label style="font-weight:600; margin-right:10px;">Size:</label>
           <select id="product-size" style="padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size: 15px; outline: none;">
-            <option value="S">S</option>
-            <option value="M" selected>M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-            <option value="XXL">XXL</option>
+            <% product.sizes.forEach(size => { %>
+              <option value="<%= size %>"><%= size %></option>
+            <% }) %>
           </select>
         </div>
-      <% } else if (product.category === 'Footwear') { %>
+      <% } %>
+ 
+      <% if (product.colors && product.colors.length > 0) { %>
         <div style="margin:20px 0;">
-          <label style="font-weight:600; margin-right:10px;">Size:</label>
-          <select id="product-size" style="padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size: 15px; outline: none;">
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8" selected>8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
+          <label style="font-weight:600; margin-right:10px;">Color:</label>
+          <select id="product-color" style="padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size: 15px; outline: none;">
+            <% product.colors.forEach(color => { %>
+              <option value="<%= color %>"><%= color %></option>
+            <% }) %>
           </select>
         </div>
       <% } %>
@@ -177,12 +174,14 @@
       const qty = parseInt(document.getElementById('product-quantity').value) || 1;
       const sizeDropdown = document.getElementById('product-size');
       const size = sizeDropdown ? sizeDropdown.value : null;
+      const colorDropdown = document.getElementById('product-color');
+      const color = colorDropdown ? colorDropdown.value : null;
       const productId = this.dataset.productId;
 
       fetch('/api/cart/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: qty, size: size })
+        body: JSON.stringify({ productId, quantity: qty, size: size, color: color })
       })
       .then(r => r.json())
       .then(data => {

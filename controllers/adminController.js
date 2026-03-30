@@ -139,21 +139,24 @@ const getAddProduct = (req, res) => {
 // POST /admin/products/add
 const postAddProduct = async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
-
+    const { name, description, price, category, sizes: sizesStr, colors: colorsStr } = req.body;
+ 
     if (!name || !description || !price || !category) {
       req.flash('error', 'All fields are required');
       return res.redirect('/admin/products/add');
     }
-
+ 
     if (!req.files || !req.files.image || req.files.image.length === 0) {
       req.flash('error', 'Main product image is required');
       return res.redirect('/admin/products/add');
     }
-
+ 
+    const sizes = sizesStr ? sizesStr.split(',').map(s => s.trim()).filter(s => s !== '') : [];
+    const colors = colorsStr ? colorsStr.split(',').map(c => c.trim()).filter(c => c !== '') : [];
+ 
     const mainImage = req.files.image[0].filename;
     const additionalImages = req.files.additionalImages ? req.files.additionalImages.map(f => f.filename) : [];
-
+ 
     const product = new Product({
       name: name.trim(),
       description: description.trim(),
@@ -161,6 +164,8 @@ const postAddProduct = async (req, res) => {
       category,
       image: mainImage,
       additionalImages: additionalImages,
+      sizes,
+      colors,
     });
 
     await product.save();
@@ -207,7 +212,7 @@ const getEditProduct = async (req, res) => {
 // POST /admin/products/edit/:id
 const postEditProduct = async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, sizes: sizesStr, colors: colorsStr } = req.body;
     const product = await Product.findById(req.params.id);
 
     if (!product) {
@@ -234,7 +239,10 @@ const postEditProduct = async (req, res) => {
     product.description = description ? description.trim() : product.description;
     product.price = price ? parseFloat(price) : product.price;
     product.category = category || product.category;
-
+ 
+    product.sizes = sizesStr ? sizesStr.split(',').map(s => s.trim()).filter(s => s !== '') : [];
+    product.colors = colorsStr ? colorsStr.split(',').map(c => c.trim()).filter(c => c !== '') : [];
+ 
     await product.save();
 
     req.flash('success', 'Product updated successfully!');

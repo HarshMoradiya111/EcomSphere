@@ -40,11 +40,18 @@ const getHomepage = async (req, res) => {
 // GET /shop - Shop page with all products and category filter
 const getShop = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, search } = req.query;
     let query = {};
 
     if (category && CATEGORIES.includes(category)) {
       query.category = category;
+    }
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
 
     const products = await Product.find(query).sort({ createdAt: -1 });
@@ -54,6 +61,7 @@ const getShop = async (req, res) => {
       products,
       categories: CATEGORIES,
       selectedCategory: category || '',
+      search: search || '',
       user: req.session.username || null,
       success: req.flash('success'),
       errors: req.flash('error'),
@@ -65,6 +73,7 @@ const getShop = async (req, res) => {
       products: [],
       categories: CATEGORIES,
       selectedCategory: '',
+      search: '',
       user: req.session.username || null,
       success: [],
       errors: ['Failed to load products'],
