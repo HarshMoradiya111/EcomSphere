@@ -2,9 +2,10 @@
   <a href="/"><img src="<%= locals.settings ? locals.settings.logo : '/img/logo1.png' %>" class="logo" alt="EcomSphere" height="60"></a>
 
   <!-- Search Bar -->
-  <form action="/shop" method="GET" id="search-bar-desktop">
-    <input type="text" name="search" placeholder="Search products..." value="<%= locals.search || '' %>">
+  <form action="/shop" method="GET" id="search-bar-desktop" style="position: relative;">
+    <input type="text" name="search" id="live-search-input-desktop" placeholder="Search products..." value="<%= locals.search || '' %>" autocomplete="off">
     <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <div id="search-results-desktop" class="search-results-dropdown"></div>
   </form>
 
   <!-- Desktop Navigation (inside header = correct stacking context) -->
@@ -66,8 +67,9 @@
   <!-- Nav Links -->
   <ul>
     <li style="padding: 10px 25px;">
-      <form action="/shop" method="GET" id="search-bar-mobile">
-        <input type="text" name="search" placeholder="Search..." value="<%= locals.search || '' %>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+      <form action="/shop" method="GET" id="search-bar-mobile" style="position: relative;">
+        <input type="text" name="search" id="live-search-input-mobile" placeholder="Search..." value="<%= locals.search || '' %>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" autocomplete="off">
+        <div id="search-results-mobile" class="search-results-dropdown"></div>
       </form>
     </li>
     <li class="drawer-section-label">Browse</li>

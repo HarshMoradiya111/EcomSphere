@@ -254,6 +254,69 @@ document.addEventListener('DOMContentLoaded', function () {
       setTimeout(() => msg.remove(), 500);
     }, 4000);
   });
+ 
+  // ==========================================
+  // Live Search Logic
+  // ==========================================
+  const searchInputsConfigs = [
+    { input: document.getElementById('live-search-input-desktop'), results: document.getElementById('search-results-desktop') },
+    { input: document.getElementById('live-search-input-mobile'), results: document.getElementById('search-results-mobile') }
+  ];
+ 
+  searchInputsConfigs.forEach(({ input, results }) => {
+    if (!input || !results) return;
+ 
+    let debounceSearchTimeout;
+    input.addEventListener('input', function() {
+      clearTimeout(debounceSearchTimeout);
+      const qVal = this.value.trim();
+ 
+      if (qVal.length < 2) {
+        results.innerHTML = '';
+        results.classList.remove('show');
+        return;
+      }
+ 
+      debounceSearchTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/products/search?q=${encodeURIComponent(qVal)}`);
+          const sData = await res.json();
+ 
+          if (sData.success && sData.products.length > 0) {
+            results.innerHTML = sData.products.map(p => `
+              <a href="/product/${p._id}" class="search-result-item">
+                <img src="/uploads/${p.image}" alt="${p.name}" onerror="this.src='/img/placeholder.jpg'">
+                <div class="res-info">
+                  <h5>${p.name}</h5>
+                  <p>₹${p.price.toLocaleString('en-IN')}</p>
+                </div>
+              </a>
+            `).join('');
+            results.classList.add('show');
+          } else {
+            results.innerHTML = '<div class="search-no-results">No products found for "' + qVal + '"</div>';
+            results.classList.add('show');
+          }
+        } catch (err) {
+          console.error('Search fetch error:', err);
+        }
+      }, 300);
+    });
+ 
+    // Close results when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !results.contains(e.target)) {
+        results.classList.remove('show');
+      }
+    });
+ 
+    // Re-show results on focus if there's text
+    input.addEventListener('focus', function() {
+      if (this.value.trim().length >= 2 && results.innerHTML !== '') {
+        results.classList.add('show');
+      }
+    });
+  });
 }); // end DOMContentLoaded
 
 // ==========================================

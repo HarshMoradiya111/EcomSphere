@@ -345,6 +345,29 @@ const postAddReview = async (req, res) => {
   }
 };
  
+// GET /api/products/search - Live search API
+const getSearchApi = async (req, res) => {
+  try {
+    const qVal = req.query.q || '';
+    if (qVal.length < 2) {
+      return res.json({ success: true, products: [] });
+    }
+ 
+    // Use exact same query logic as getShop
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: qVal, $options: 'i' } },
+        { description: { $regex: qVal, $options: 'i' } }
+      ]
+    }).limit(10);
+ 
+    res.json({ success: true, products });
+  } catch (error) {
+    console.error('Search API error:', error);
+    res.status(500).json({ success: false, error: 'Failed to search' });
+  }
+};
+ 
 module.exports = {
   getHomepage,
   getShop,
@@ -356,4 +379,5 @@ module.exports = {
   postUpdateProfile,
   postAddAddress,
   postDeleteAddress,
+  getSearchApi,
 };
