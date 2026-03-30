@@ -83,6 +83,49 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
   });
+ 
+  // ==========================================
+  // Wishlist Toggle functionality
+  // ==========================================
+  document.querySelectorAll('.toggle-wishlist').forEach((button) => {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+ 
+      const productId = this.getAttribute('data-product-id');
+      const icon = this.querySelector('i');
+ 
+      fetch('/api/wishlist/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            if (data.action === 'added') {
+              this.classList.add('active');
+              this.style.color = '#ff4d4d';
+              showToast('Added to wishlist! ❤️');
+            } else {
+              this.classList.remove('active');
+              this.style.color = '#ccc';
+              showToast('Removed from wishlist');
+            }
+          } else {
+            if (data.error === 'Unauthorized') {
+              window.location.href = '/auth/login';
+            } else {
+              showToast(data.error || 'Failed to update wishlist', 'error');
+            }
+          }
+        })
+        .catch((error) => {
+          console.error('Wishlist toggle error:', error);
+          showToast('Failed to update wishlist', 'error');
+        });
+    });
+  });
 
   // ==========================================
   // Mobile Navigation — Sidebar Controller

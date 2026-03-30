@@ -70,6 +70,14 @@
               <p><%= product.description.substring(0, 60) %>...</p>
               <h4>₹<%= product.price.toLocaleString('en-IN') %></h4>
             </div>
+            <% if (locals.sessionUserId) { %>
+              <button class="toggle-wishlist <%= product.isInWishlist ? 'active' : '' %>" 
+                      data-product-id="<%= product._id %>" 
+                      title="Wishlist" 
+                      style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: <%= product.isInWishlist ? '#ff4d4d' : '#ccc' %>; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+                <i class="fa-solid fa-heart"></i>
+              </button>
+            <% } %>
             <a href="#"
                class="add-to-cart cart1"
                data-product-id="<%= product._id %>"

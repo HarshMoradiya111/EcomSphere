@@ -18,6 +18,7 @@ const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
 
 const app = express();
 
@@ -94,6 +95,7 @@ app.use('/auth', authRoutes);
 app.use('/', productRoutes);
 app.use('/', cartRoutes);
 app.use('/', orderRoutes);
+app.use('/', wishlistRoutes);
 app.use('/admin', adminRoutes);
 
 // Redirect root to login if not authenticated

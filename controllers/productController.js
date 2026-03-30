@@ -12,8 +12,23 @@ const getHomepage = async (req, res) => {
   try {
     const productsByCategory = {};
 
+    // Mark items in wishlist if logged in
+    let wishlistIds = [];
+    if (req.session.userId) {
+      const user = await User.findById(req.session.userId);
+      if (user) wishlistIds = user.wishlist.map(id => id.toString());
+    }
+
     for (const category of CATEGORIES) {
-      productsByCategory[category] = await Product.find({ category }).sort({ createdAt: -1 });
+      let products = await Product.find({ category }).sort({ createdAt: -1 });
+      if (wishlistIds.length > 0) {
+        products = products.map(p => {
+          const productObj = p.toObject();
+          productObj.isInWishlist = wishlistIds.includes(p._id.toString());
+          return productObj;
+        });
+      }
+      productsByCategory[category] = products;
     }
 
     res.render('index', {
@@ -54,7 +69,20 @@ const getShop = async (req, res) => {
       ];
     }
 
-    const products = await Product.find(query).sort({ createdAt: -1 });
+    let products = await Product.find(query).sort({ createdAt: -1 });
+ 
+    // Mark items in wishlist if logged in
+    if (req.session.userId) {
+      const user = await User.findById(req.session.userId);
+      if (user) {
+        const wishlistIds = user.wishlist.map(id => id.toString());
+        products = products.map(p => {
+          const productObj = p.toObject();
+          productObj.isInWishlist = wishlistIds.includes(p._id.toString());
+          return productObj;
+        });
+      }
+    }
 
     res.render('shop', {
       title: 'Shop - EcomSphere',

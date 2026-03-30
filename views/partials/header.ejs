@@ -17,6 +17,7 @@
       <li><a href="/contact" class="<%= typeof activePage !== 'undefined' && activePage === 'contact' ? 'active' : '' %>">Contact</a></li>
       <% if (locals.sessionUser) { %>
         <li><a href="/profile">Profile</a></li>
+        <li><a href="/wishlist" class="<%= typeof activePage !== 'undefined' && activePage === 'wishlist' ? 'active' : '' %>"><i class="fa-regular fa-heart"></i></a></li>
         <li><a href="/auth/logout">Logout (<%= locals.sessionUser %>)</a></li>
       <% } else { %>
         <li><a href="/auth/login">Login</a></li>
