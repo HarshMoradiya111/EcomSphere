@@ -208,6 +208,59 @@ const getBlogPage = async (req, res) => {
   }
 };
 
+// POST /api/product/review - Add a product review
+const postAddReview = async (req, res) => {
+  try {
+    const { productId, rating, comment } = req.body;
+    const userId = req.session.userId;
+ 
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Please login to leave a review' });
+    }
+ 
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+ 
+    // Check if user already reviewed
+    const alreadyReviewed = product.reviews.find(
+      (r) => r.userId.toString() === userId.toString()
+    );
+ 
+    if (alreadyReviewed) {
+      return res.status(400).json({ success: false, error: 'You have already reviewed this product' });
+    }
+ 
+    const user = await User.findById(userId);
+ 
+    const newReview = {
+      userId,
+      username: user.username,
+      userPhoto: user.profilePhoto,
+      rating: Number(rating),
+      comment: comment.trim(),
+    };
+ 
+    product.reviews.push(newReview);
+    await product.save();
+ 
+    res.json({ 
+      success: true, 
+      message: 'Review added successfully!', 
+      averageRating: product.averageRating, 
+      numReviews: product.numReviews,
+      review: {
+        ...newReview,
+        createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      }
+    });
+  } catch (error) {
+    console.error('Add review error:', error);
+    res.status(500).json({ success: false, error: 'Failed to submit review' });
+  }
+};
+ 
 module.exports = {
   getHomepage,
   getShop,
@@ -215,4 +268,5 @@ module.exports = {
   getProfile,
   postProfilePhoto,
   getBlogPage,
+  postAddReview,
 };

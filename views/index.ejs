@@ -66,6 +66,13 @@
             </a>
             <div class="des">
               <span><%= product.category %></span>
+              <div class="star" style="margin: 5px 0;">
+                <% const avg = Math.round(product.averageRating || 0); %>
+                <% for(let i=1; i<=5; i++) { %>
+                  <i class="fa-<%= i <= avg ? 'solid' : 'regular' %> fa-star" style="color: #ffbd27; font-size: 12px;"></i>
+                <% } %>
+                <small style="color: #888; margin-left: 5px;">(<%= product.numReviews || 0 %>)</small>
+              </div>
               <h5><%= product.name %></h5>
               <p><%= product.description.substring(0, 60) %>...</p>
               <h4>₹<%= product.price.toLocaleString('en-IN') %></h4>

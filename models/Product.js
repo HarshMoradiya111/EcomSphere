@@ -1,7 +1,31 @@
 const mongoose = require('mongoose');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
-
+ 
+const reviewSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  username: String,
+  userPhoto: String,
+  rating: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5,
+  },
+  comment: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+ 
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -44,12 +68,28 @@ const productSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  reviews: [reviewSchema],
   createdAt: {
     type: Date,
     default: Date.now,
   },
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
 });
-
+ 
+// Virtual for average rating
+productSchema.virtual('averageRating').get(function () {
+  if (this.reviews.length === 0) return 0;
+  const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
+  return (sum / this.reviews.length).toFixed(1);
+});
+ 
+// Virtual for number of reviews
+productSchema.virtual('numReviews').get(function () {
+  return this.reviews.length;
+});
+ 
 // Static method to get all categories
 productSchema.statics.getCategories = function () {
   return CATEGORIES;

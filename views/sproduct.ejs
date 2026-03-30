@@ -95,7 +95,88 @@
       </div>
     </div>
   </section>
-
+ 
+  <!-- Product Reviews Section -->
+  <section id="reviews" class="section-p1">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:40px;">
+      
+      <!-- Show Reviews -->
+      <div style="flex:2; min-width:320px;">
+        <h3 style="margin-bottom:20px;">Customer Reviews (<%= product.numReviews %>)</h3>
+        
+        <div style="display:flex; align-items:center; gap:20px; margin-bottom:35px; background: #fbfbfb; padding: 25px; border-radius: 12px; border: 1px solid #f0f0f0;">
+          <h1 style="font-size:54px; color:#088178; margin:0; line-height: 1;"><%= product.averageRating %></h1>
+          <div>
+            <div class="stars" style="color:#ffbd27; font-size:20px; margin-bottom: 5px;">
+              <% for(let i=1; i<=5; i++) { %>
+                <i class="fa-<%= i <= Math.round(product.averageRating) ? 'solid' : 'regular' %> fa-star"></i>
+              <% } %>
+            </div>
+            <p style="color:#777; margin:0; font-weight: 500;">Average Rating</p>
+          </div>
+        </div>
+ 
+        <div id="reviews-list">
+          <% if (product.reviews && product.reviews.length > 0) { %>
+            <% product.reviews.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(review => { %>
+              <div class="review-item" style="padding:25px 0; border-top:1px solid #eee;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                  <img src="<%= review.userPhoto || '/img/rprofile/1.jpg' %>" alt="User" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 1px solid #eee;">
+                  <div>
+                    <h5 style="margin:0; font-size: 15px;"><%= review.username %></h5>
+                    <div class="stars" style="color:#ffbd27; font-size:11px; margin-top: 2px;">
+                      <% for(let i=1; i<=5; i++) { %>
+                        <i class="fa-solid fa-star" style="color:<%= i <= review.rating ? '#ffbd27' : '#ddd' %>"></i>
+                      <% } %>
+                    </div>
+                  </div>
+                  <small style="color:#999; margin-left:auto;"><%= new Date(review.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></small>
+                </div>
+                <p style="color:#444; line-height:1.7; margin:0; font-size: 14.5px;"><%= review.comment %></p>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div style="text-align:center; padding: 40px; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
+              <i class="fa-regular fa-comment-dots" style="font-size: 40px; color: #ddd; margin-bottom: 10px; display: block;"></i>
+              <p style="color:#888; margin: 0;">No reviews yet. Be the first to share your thoughts!</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+ 
+      <!-- Add Review Form -->
+      <div style="flex:1; min-width:320px; background:#fff; padding:35px; border-radius:12px; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+        <h3 style="margin-bottom:25px; font-size: 20px;">Write a Review</h3>
+        <form id="add-review-form">
+          <input type="hidden" id="review-product-id" value="<%= product._id %>">
+          
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:12px; font-weight:600; font-size: 14px; color: #555;">Rating</label>
+            <div id="star-rating" style="display:flex; gap:10px; font-size:28px; color:#ddd; cursor:pointer;">
+              <i class="fa-solid fa-star star-opt" data-value="1"></i>
+              <i class="fa-solid fa-star star-opt" data-value="2"></i>
+              <i class="fa-solid fa-star star-opt" data-value="3"></i>
+              <i class="fa-solid fa-star star-opt" data-value="4"></i>
+              <i class="fa-solid fa-star star-opt" data-value="5"></i>
+            </div>
+            <input type="hidden" id="review-rating" value="0">
+          </div>
+ 
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:12px; font-weight:600; font-size: 14px; color: #555;">Your Comment</label>
+            <textarea id="review-comment" rows="5" style="width:100%; padding:15px; border:1px solid #eee; background: #fcfcfc; border-radius:8px; outline:none; font-family: inherit; font-size: 14px; transition: 0.3s; resize: none;" 
+                      placeholder="Share your experience with this product..." required></textarea>
+          </div>
+ 
+          <button type="submit" class="normal" id="submit-review-btn" style="background:#088178; color:#fff; border:none; padding:15px 30px; border-radius:8px; font-weight:700; cursor:pointer; width:100%; font-size: 15px; transition: 0.3s; box-shadow: 0 4px 12px rgba(8, 129, 120, 0.2);">
+            Submit Review
+          </button>
+        </form>
+      </div>
+ 
+    </div>
+  </section>
+ 
   <!-- Related Products -->
   <% if (relatedProducts && relatedProducts.length > 0) { %>
   <section id="product1" class="section-p1">
@@ -130,6 +211,115 @@
 
   <script src="/js/script.js"></script>
   <script>
+    // Star Rating Interaction
+    const starOpts = document.querySelectorAll('.star-opt');
+    const ratingInput = document.getElementById('review-rating');
+ 
+    starOpts.forEach(star => {
+      star.addEventListener('click', function() {
+        const val = this.dataset.value;
+        ratingInput.value = val;
+        
+        // Update visual
+        starOpts.forEach(s => {
+          if (s.dataset.value <= val) {
+            s.style.color = '#ffbd27';
+          } else {
+            s.style.color = '#ddd';
+          }
+        });
+      });
+ 
+      // Hover effect
+      star.addEventListener('mouseover', function() {
+        const val = this.dataset.value;
+        starOpts.forEach(s => {
+          if (s.dataset.value <= val) s.style.color = '#ffbd27';
+        });
+      });
+ 
+      star.addEventListener('mouseout', function() {
+        const val = ratingInput.value;
+        starOpts.forEach(s => {
+          if (s.dataset.value <= val) s.style.color = '#ffbd27';
+          else s.style.color = '#ddd';
+        });
+      });
+    });
+ 
+    // Submit Review
+    const reviewForm = document.getElementById('add-review-form');
+    if (reviewForm) {
+      reviewForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const productId = document.getElementById('review-product-id').value;
+        const rating = ratingInput.value;
+        const comment = document.getElementById('review-comment').value;
+ 
+        if (rating == 0) {
+          showToast('Please select a star rating', 'error');
+          return;
+        }
+ 
+        const btn = document.getElementById('submit-review-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+ 
+        try {
+          const response = await fetch('/api/product/review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, rating, comment })
+          });
+ 
+          const data = await response.json();
+          
+          if (data.success) {
+            showToast('Review submitted successfully! Thank you.');
+            // Dynamically add the review to the list
+            const reviewList = document.getElementById('reviews-list');
+            const noReviewsMsg = reviewList.querySelector('div[style*="dashed"]');
+            if (noReviewsMsg) noReviewsMsg.remove();
+ 
+            const newReviewHtml = `
+              <div class="review-item" style="padding:25px 0; border-top:1px solid #eee; animation: fadeIn 0.5s ease;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                  <img src="${data.review.userPhoto || '/img/rprofile/1.jpg'}" alt="User" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 1px solid #eee;">
+                  <div>
+                    <h5 style="margin:0; font-size: 15px;">${data.review.username}</h5>
+                    <div class="stars" style="color:#ffbd27; font-size:11px; margin-top: 2px;">
+                      ${Array(5).fill(0).map((_, i) => `<i class="fa-solid fa-star" style="color:${i + 1 <= data.review.rating ? '#ffbd27' : '#ddd'}"></i>`).join('')}
+                    </div>
+                  </div>
+                  <small style="color:#999; margin-left:auto;">${data.review.createdAt}</small>
+                </div>
+                <p style="color:#444; line-height:1.7; margin:0; font-size: 14.5px;">${data.review.comment}</p>
+              </div>
+            `;
+            reviewList.insertAdjacentHTML('afterbegin', newReviewHtml);
+            
+            // Clear form
+            reviewForm.reset();
+            ratingInput.value = 0;
+            starOpts.forEach(s => s.style.color = '#ddd');
+            
+            // Update counts (optional but nice)
+            const countHeader = document.querySelector('#reviews h3');
+            if (countHeader) countHeader.textContent = `Customer Reviews (${data.numReviews})`;
+          } else {
+            showToast(data.error || 'Failed to submit review', 'error');
+          }
+        } catch (err) {
+          console.error('Submit review error:', err);
+          showToast('An error occurred. Please try again.', 'error');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = 'Submit Review';
+        }
+      });
+    }
+ 
     function changeImage(element) {
       const mainImg = document.getElementById('main-product-image');
       
