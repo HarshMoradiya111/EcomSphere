@@ -191,7 +191,91 @@ const postProfilePhoto = async (req, res) => {
     res.redirect('/profile');
   }
 };
-
+ 
+// POST /profile/update - Update personal info
+const postUpdateProfile = async (req, res) => {
+  try {
+    const { username, email, phone } = req.body;
+    const user = await User.findById(req.session.userId);
+ 
+    if (username) user.username = username.trim();
+    if (email) user.email = email.trim();
+    if (phone) user.phone = phone.trim();
+ 
+    await user.save();
+    
+    // Update session if username changed
+    req.session.username = user.username;
+ 
+    req.flash('success', 'Profile updated successfully!');
+    res.redirect('/profile');
+  } catch (error) {
+    console.error('Update profile error:', error);
+    req.flash('error', error.code === 11000 ? 'Username or Email already exists' : 'Failed to update profile');
+    res.redirect('/profile');
+  }
+};
+ 
+// POST /profile/address/add - Add new address
+const postAddAddress = async (req, res) => {
+  try {
+    const { street, city, state, zip, country, isDefault } = req.body;
+    const user = await User.findById(req.session.userId);
+ 
+    const newAddress = {
+      street: street.trim(),
+      city: city.trim(),
+      state: state.trim(),
+      zip: zip.trim(),
+      country: country ? country.trim() : 'India',
+      isDefault: isDefault === 'on' || isDefault === true,
+    };
+ 
+    // If making this default, unset other defaults
+    if (newAddress.isDefault) {
+      user.addresses.forEach(addr => addr.isDefault = false);
+    } else if (user.addresses.length === 0) {
+      newAddress.isDefault = true; // First address is default
+    }
+ 
+    user.addresses.push(newAddress);
+    await user.save();
+ 
+    req.flash('success', 'Address added successfully!');
+    res.redirect('/profile');
+  } catch (error) {
+    console.error('Add address error:', error);
+    req.flash('error', 'Failed to add address');
+    res.redirect('/profile');
+  }
+};
+ 
+// POST /profile/address/delete/:index - Delete an address
+const postDeleteAddress = async (req, res) => {
+  try {
+    const index = parseInt(req.params.index);
+    const user = await User.findById(req.session.userId);
+ 
+    if (index >= 0 && index < user.addresses.length) {
+      const removed = user.addresses.splice(index, 1)[0];
+      
+      // If we removed the default, set a new one if possible
+      if (removed.isDefault && user.addresses.length > 0) {
+        user.addresses[0].isDefault = true;
+      }
+      
+      await user.save();
+      req.flash('success', 'Address deleted successfully!');
+    }
+ 
+    res.redirect('/profile');
+  } catch (error) {
+    console.error('Delete address error:', error);
+    req.flash('error', 'Failed to delete address');
+    res.redirect('/profile');
+  }
+};
+ 
 // GET /blog
 const getBlogPage = async (req, res) => {
   try {
@@ -269,4 +353,7 @@ module.exports = {
   postProfilePhoto,
   getBlogPage,
   postAddReview,
+  postUpdateProfile,
+  postAddAddress,
+  postDeleteAddress,
 };

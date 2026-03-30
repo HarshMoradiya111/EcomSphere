@@ -57,7 +57,24 @@
       <h3 class="checkout-total">Order Total: ₹<%= total.toLocaleString('en-IN') %></h3>
 
       <form class="checkout-form" action="/checkout/place-order" method="POST">
-        <h3 style="margin-bottom:10px; color:#333;">Delivery Information</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+          <h3 style="margin:0; color:#333;">Delivery Information</h3>
+          
+          <% if (user && user.addresses && user.addresses.length > 0) { %>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <i class="fa-solid fa-location-dot" style="color:#088178;"></i>
+              <select id="saved-address-selector" style="padding:8px 12px; border:1px solid #088178; border-radius:6px; cursor:pointer; background:#fff; font-size:14px; font-weight:600; color:#088178; outline:none;">
+                <option value="">-- Use a Saved Address --</option>
+                <% user.addresses.forEach((addr, idx) => { %>
+                  <option value="<%= idx %>" <%= addr.isDefault ? 'selected' : '' %>>
+                    <%= addr.isDefault ? '[Default] ' : '' %><%= addr.street %>, <%= addr.city %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+          <% } %>
+        </div>
+
         <input type="text" name="name" id="delivery-name" placeholder="Full Name" required autocomplete="name">
         <input type="text" name="address" id="delivery-address" placeholder="Shipping Address" required autocomplete="street-address">
         <input type="tel" name="phone" id="delivery-phone" placeholder="Phone Number" required autocomplete="tel">
@@ -65,6 +82,39 @@
           <i class="fa-solid fa-check-circle"></i> Place Order — ₹<%= total.toLocaleString('en-IN') %>
         </button>
       </form>
+
+      <script>
+        // Saved Address Auto-fill Logic
+        const addresses = <%- user ? JSON.stringify(user.addresses || []) : '[]' %>;
+        const nameInput = document.getElementById('delivery-name');
+        const addressInput = document.getElementById('delivery-address');
+        const phoneInput = document.getElementById('delivery-phone');
+        const selector = document.getElementById('saved-address-selector');
+
+        function fillAddress(idx) {
+          if (idx !== "" && addresses[idx]) {
+            const addr = addresses[idx];
+            nameInput.value = "<%= user ? user.username : '' %>"; // Use username as fallback for saved name
+            addressInput.value = `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}, ${addr.country}`;
+            phoneInput.value = "<%= user ? user.phone : '' %>";
+          }
+        }
+
+        if (selector) {
+          selector.addEventListener('change', function() {
+            fillAddress(this.value);
+          });
+
+          // Pre-fill on load if default exists
+          if (selector.value !== "") {
+            fillAddress(selector.value);
+          }
+        } else {
+          // Default fallback even if no selector
+          nameInput.value = "<%= user ? user.username : '' %>";
+          phoneInput.value = "<%= user ? user.phone : '' %>";
+        }
+      </script>
     <% } else { %>
       <div class="empty-cart-msg">
         <i class="fa-solid fa-cart-shopping" style="font-size:60px; color:#ccc; display:block; margin-bottom:20px;"></i>

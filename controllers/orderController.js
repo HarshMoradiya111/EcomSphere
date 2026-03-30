@@ -1,24 +1,27 @@
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
-
+const User = require('../models/User');
+ 
 // GET /checkout - Checkout page
 const getCheckout = async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: req.session.userId });
-
+    const user = await User.findById(req.session.userId);
+ 
     if (!cart || cart.items.length === 0) {
       req.flash('error', 'Your cart is empty');
       return res.redirect('/cart');
     }
-
+ 
     const total = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
+ 
     res.render('checkout', {
       title: 'Checkout - EcomSphere',
       cart: cart.items,
       total: parseFloat(total.toFixed(2)),
-      user: req.session.username || null,
+      user: user,
+      username: req.session.username || null,
       errors: req.flash('error'),
       success: req.flash('success'),
     });

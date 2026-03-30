@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { getHomepage, getShop, getSingleProduct, getProfile, postProfilePhoto, getBlogPage, postAddReview } = require('../controllers/productController');
+const { getHomepage, getShop, getSingleProduct, getProfile, postProfilePhoto, getBlogPage, postAddReview, postUpdateProfile, postAddAddress, postDeleteAddress } = require('../controllers/productController');
 const { isAuthenticated } = require('../middleware/auth');
 
 // Multer configuration for profile photo uploads
@@ -47,7 +47,10 @@ router.post('/api/product/review', isAuthenticated, postAddReview);
 // Profile page (requires auth)
 router.get('/profile', isAuthenticated, getProfile);
 router.post('/profile/photo', isAuthenticated, upload.single('profilePhoto'), postProfilePhoto);
-
+router.post('/profile/update', isAuthenticated, postUpdateProfile);
+router.post('/profile/address/add', isAuthenticated, postAddAddress);
+router.get('/profile/address/delete/:index', isAuthenticated, postDeleteAddress);
+ 
 // Static pages (public)
 router.get('/about', (req, res) => {
   res.render('about', {
