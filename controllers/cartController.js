@@ -43,6 +43,7 @@ const getCartPage = (req, res) => {
     user: req.session.username || null,
     success: req.flash('success'),
     errors: req.flash('error'),
+    breadcrumbs: [{ name: 'Shopping Cart', url: '/cart' }]
   });
 };
 

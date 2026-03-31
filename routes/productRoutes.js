@@ -59,6 +59,7 @@ router.get('/about', (req, res) => {
   res.render('about', {
     title: 'About Us - EcomSphere',
     user: req.session.username || null,
+    breadcrumbs: [{ name: 'About Us', url: '/about' }]
   });
 });
 
@@ -66,6 +67,7 @@ router.get('/contact', (req, res) => {
   res.render('contact', {
     title: 'Contact Us - EcomSphere',
     user: req.session.username || null,
+    breadcrumbs: [{ name: 'Contact Us', url: '/contact' }]
   });
 });
 

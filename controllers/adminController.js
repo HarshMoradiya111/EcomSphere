@@ -71,6 +71,46 @@ const getDashboard = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(5);
 
+    // Sales Analytics: Daily Revenue (Last 7 Days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const dailyRevenue = await Order.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo }, status: { $ne: 'Cancelled' } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: "$totalAmount" }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Sales Analytics: Category Distribution (Last 30 Days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    // Efficiently get category sales by joining with Products
+    const categorySales = await Order.aggregate([
+      { $match: { createdAt: { $gte: thirtyDaysAgo }, status: { $ne: 'Cancelled' } } },
+      { $unwind: "$items" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.productId",
+          foreignField: "_id",
+          as: "productInfo"
+        }
+      },
+      { $unwind: "$productInfo" },
+      {
+        $group: {
+          _id: "$productInfo.category",
+          totalSold: { $sum: "$items.quantity" }
+        }
+      }
+    ]);
+
     res.render('admin/dashboard', {
       title: 'Admin Dashboard - EcomSphere',
       adminUsername: req.session.adminUsername,
@@ -79,6 +119,8 @@ const getDashboard = async (req, res) => {
       userCount,
       orderCount,
       recentOrders,
+      dailyRevenue,
+      categorySales,
       errors: req.flash('error'),
       success: req.flash('success'),
     });

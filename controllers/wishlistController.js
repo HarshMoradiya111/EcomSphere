@@ -12,6 +12,7 @@ const getWishlistPage = async (req, res) => {
       user: req.session.username || null,
       success: req.flash('success'),
       errors: req.flash('error'),
+      breadcrumbs: [{ name: 'My Wishlist', url: '/wishlist' }]
     });
   } catch (error) {
     console.error('Wishlist page error:', error);

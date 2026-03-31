@@ -29,6 +29,7 @@
 
   <%- include('./partials/header') %>
   <%- include('./partials/flash') %>
+  <%- include('./partials/breadcrumbs') %>
 
   <div id="checkout-container">
     <h2><i class="fa-solid fa-bag-shopping"></i> Checkout</h2>
@@ -85,7 +86,7 @@
 
       <script>
         // Saved Address Auto-fill Logic
-        const addresses = <%- user ? JSON.stringify(user.addresses || []) : '[]' %>;
+        const addresses = <%- JSON.stringify(user ? user.addresses || [] : []) %>;
         const nameInput = document.getElementById('delivery-name');
         const addressInput = document.getElementById('delivery-address');
         const phoneInput = document.getElementById('delivery-phone');

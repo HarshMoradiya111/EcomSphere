@@ -32,6 +32,10 @@ const getCheckout = async (req, res) => {
       username: req.session.username || null,
       errors: req.flash('error'),
       success: req.flash('success'),
+      breadcrumbs: [
+        { name: 'Shopping Cart', url: '/cart' },
+        { name: 'Checkout', url: '/checkout' }
+      ]
     });
   } catch (error) {
     console.error('Checkout page error:', error);
@@ -141,6 +145,9 @@ const getOrderSuccess = async (req, res) => {
       user: req.session.username || null,
       success: req.flash('success'),
       errors: req.flash('error'),
+      breadcrumbs: [
+        { name: 'Order Success', url: `/order-success/${order._id}` }
+      ]
     });
   } catch (error) {
     console.error('Order success page error:', error);
@@ -190,7 +197,8 @@ const getTrackOrder = async (req, res) => {
       user: req.session.username || null,
       order,
       orderId: rawInput,
-      errorMsg
+      errorMsg,
+      breadcrumbs: [{ name: 'Track Order', url: '/track-order' }]
     });
   } catch (error) {
     console.error('Track order error:', error);

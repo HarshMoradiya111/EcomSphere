@@ -84,6 +84,11 @@ const getShop = async (req, res) => {
       }
     }
 
+    let breadcrumbs = [{ name: 'Shop', url: '/shop' }];
+    if (category) {
+      breadcrumbs.push({ name: category, url: `/shop?category=${category}` });
+    }
+
     res.render('shop', {
       title: 'Shop - EcomSphere',
       products,
@@ -93,6 +98,7 @@ const getShop = async (req, res) => {
       user: req.session.username || null,
       success: req.flash('success'),
       errors: req.flash('error'),
+      breadcrumbs
     });
   } catch (error) {
     console.error('Shop error:', error);
@@ -105,6 +111,7 @@ const getShop = async (req, res) => {
       user: req.session.username || null,
       success: [],
       errors: ['Failed to load products'],
+      breadcrumbs: [{ name: 'Shop', url: '/shop' }]
     });
   }
 };
@@ -125,6 +132,12 @@ const getSingleProduct = async (req, res) => {
       _id: { $ne: product._id },
     }).limit(4);
 
+    const breadcrumbs = [
+      { name: 'Shop', url: '/shop' },
+      { name: product.category, url: `/shop?category=${product.category}` },
+      { name: product.name, url: `/product/${product._id}` }
+    ];
+
     res.render('sproduct', {
       title: `${product.name} - EcomSphere`,
       product,
@@ -132,6 +145,7 @@ const getSingleProduct = async (req, res) => {
       user: req.session.username || null,
       success: req.flash('success'),
       errors: req.flash('error'),
+      breadcrumbs
     });
   } catch (error) {
     console.error('Single product error:', error);
@@ -152,6 +166,7 @@ const getProfile = async (req, res) => {
       orders,
       success: req.flash('success'),
       errors: req.flash('error'),
+      breadcrumbs: [{ name: 'My Profile', url: '/profile' }]
     });
   } catch (error) {
     console.error('Profile error:', error);
@@ -285,7 +300,8 @@ const getBlogPage = async (req, res) => {
       blogs,
       user: req.session.username || null,
       errors: req.flash('error'),
-      success: req.flash('success')
+      success: req.flash('success'),
+      breadcrumbs: [{ name: 'Blog', url: '/blog' }]
     });
   } catch(e) {
     res.render('blog', { title: 'Blog', blogs:[], user: null, errors: [], success: [] });

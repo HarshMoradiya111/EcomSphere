@@ -885,3 +885,50 @@ footer .copyright { width: 100%; text-align: center; }
   #banner3 .banner-box { height: 20vh; }
   #sm-banner .banner-box { height: 30vh; }
 }
+
+/* === Breadcrumbs === */
+.breadcrumb-container {
+  background: transparent;
+  padding: 20px 80px;
+}
+.breadcrumb {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+.breadcrumb-item a {
+  text-decoration: none;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+.breadcrumb-item a:hover {
+  color: #088178;
+}
+.breadcrumb-item i.fa-house {
+  margin-right: 6px;
+  font-size: 13px;
+}
+.breadcrumb-separator {
+  margin: 0 12px;
+  color: #ccc;
+  font-size: 10px;
+}
+.breadcrumb-item.active span {
+  color: #088178;
+  font-weight: 600;
+  font-size: 14px;
+}
+@media (max-width: 1100px) {
+  .breadcrumb-container {
+    padding: 20px 25px;
+  }
+}

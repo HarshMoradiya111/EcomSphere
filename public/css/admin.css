@@ -302,3 +302,17 @@ body { background: var(--bg-primary); color: var(--text-primary); min-height: 10
   .stats-grid { grid-template-columns: 1fr; }
   .page-title { display: none; }
 }
+
+/* === Charts Grid === */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 20px;
+  padding: 0 30px 25px;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}

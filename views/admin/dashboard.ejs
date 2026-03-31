@@ -52,6 +52,98 @@
   </div>
 </div>
 
+<!-- Charts Section -->
+<div class="charts-grid">
+  <div class="admin-card" style="margin:0;">
+    <div class="card-header">
+      <h3>Revenue Overview (Last 7 Days)</h3>
+    </div>
+    <div style="padding:20px; height:300px;">
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+  <div class="admin-card" style="margin:0;">
+    <div class="card-header">
+      <h3>Sales by Category (Last 30 Days)</h3>
+    </div>
+    <div style="padding:20px; height:300px; display:flex; justify-content:center;">
+      <canvas id="categoryChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Prepare data from EJS
+  const dailyRevenue = <%- JSON.stringify(dailyRevenue) %>;
+  const categorySales = <%- JSON.stringify(categorySales) %>;
+
+  // 1. Revenue Chart (Line)
+  const revCtx = document.getElementById('revenueChart').getContext('2d');
+  new Chart(revCtx, {
+    type: 'line',
+    data: {
+      labels: dailyRevenue.map(d => new Date(d._id).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' })),
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: dailyRevenue.map(d => d.revenue),
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 3,
+        pointBackgroundColor: '#3b82f6',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#94a3b8' }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#94a3b8' }
+        }
+      }
+    }
+  });
+
+  // 2. Category Chart (Doughnut)
+  const catCtx = document.getElementById('categoryChart').getContext('2d');
+  new Chart(catCtx, {
+    type: 'doughnut',
+    data: {
+      labels: categorySales.map(c => c._id),
+      datasets: [{
+        data: categorySales.map(c => c.totalSold),
+        backgroundColor: [
+          '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
+        ],
+        borderWidth: 0,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#94a3b8', padding: 20, usePointStyle: true }
+        }
+      },
+      cutout: '70%'
+    }
+  });
+</script>
+
 <!-- Quick Actions -->
 <div class="quick-actions">
   <a href="/admin/products/add" class="admin-btn btn-primary">
