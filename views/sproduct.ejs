@@ -48,6 +48,16 @@
       <h6><%= product.category %></h6>
       <h2><%= product.name %></h2>
       <h4>₹<%= product.price.toLocaleString('en-IN') %></h4>
+      <div class="stock-status" style="margin-bottom: 20px;">
+        <span class="order-status status-<%= (product.status || 'In Stock').toLowerCase().replace(/ /g, '-') %>">
+          <i class="fa-solid <%= product.countInStock > 0 ? 'fa-check-circle' : 'fa-circle-xmark' %>"></i>
+          <%= product.status || 'In Stock' %> 
+          <% if (product.countInStock > 0 && product.countInStock <= 5) { %>
+            (<%= product.countInStock %> left)
+          <% } %>
+        </span>
+      </div>
+
       <p><%= product.description %></p>
 
       <% if (product.sizes && product.sizes.length > 0) { %>
@@ -84,8 +94,9 @@
         data-name="<%= product.name %>"
         data-price="<%= product.price %>"
         data-image="<%= product.image %>"
-        style="background:#088178; color:#fff; padding:14px 35px; border:none; border-radius:6px; font-size:15px; font-weight:600; cursor:pointer; transition:0.3s;">
-        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+        <%= product.countInStock === 0 ? 'disabled' : '' %>
+        style="background: <%= product.countInStock === 0 ? '#ccc' : '#088178' %>; color:#fff; padding:14px 35px; border:none; border-radius:6px; font-size:15px; font-weight:600; cursor: <%= product.countInStock === 0 ? 'not-allowed' : 'pointer' %>; transition:0.3s;">
+        <i class="fa-solid fa-cart-shopping"></i> <%= product.countInStock === 0 ? 'Out of Stock' : 'Add to Cart' %>
       </button>
 
       <div style="margin-top:25px; padding-top:20px; border-top:1px solid #eee;">

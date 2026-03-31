@@ -27,6 +27,12 @@ const {
   editBlogForm,
   updateBlog,
   deleteBlog,
+  getCoupons,
+  getAddCoupon,
+  postAddCoupon,
+  getEditCoupon,
+  postEditCoupon,
+  deleteCoupon,
 } = require('../controllers/adminController');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../middleware/auth');
 
@@ -94,5 +100,13 @@ router.post('/blogs/add', isAdminAuthenticated, upload.single('image'), addBlog)
 router.get('/blogs/edit/:id', isAdminAuthenticated, editBlogForm);
 router.put('/blogs/edit/:id', isAdminAuthenticated, upload.single('image'), updateBlog);
 router.delete('/blogs/delete/:id', isAdminAuthenticated, deleteBlog);
+ 
+ // Coupons
+ router.get('/coupons', isAdminAuthenticated, getCoupons);
+ router.get('/coupons/add', isAdminAuthenticated, getAddCoupon);
+ router.post('/coupons/add', isAdminAuthenticated, postAddCoupon);
+ router.get('/coupons/edit/:id', isAdminAuthenticated, getEditCoupon);
+ router.post('/coupons/edit/:id', isAdminAuthenticated, postEditCoupon);
+ router.post('/coupons/delete/:id', isAdminAuthenticated, deleteCoupon);
 
 module.exports = router;

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const User = require('../models/User');
+const Product = require('../models/Product');
  
 // GET /checkout - Checkout page
 const getCheckout = async (req, res) => {
@@ -14,12 +15,17 @@ const getCheckout = async (req, res) => {
       return res.redirect('/cart');
     }
  
-    const total = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discount = cart.discountAmount || 0;
+    const finalTotal = subtotal - discount;
  
     res.render('checkout', {
       title: 'Checkout - EcomSphere',
       cart: cart.items,
-      total: parseFloat(total.toFixed(2)),
+      subtotal: parseFloat(subtotal.toFixed(2)),
+      discount: parseFloat(discount.toFixed(2)),
+      total: parseFloat(finalTotal.toFixed(2)),
+      appliedCoupon: cart.appliedCoupon,
       user: user,
       username: req.session.username || null,
       errors: req.flash('error'),
@@ -48,9 +54,21 @@ const placeOrder = async (req, res) => {
       req.flash('error', 'Your cart is empty');
       return res.redirect('/cart');
     }
+ 
+    // FINAL STOCK VALIDATION before creating order
+    for (const item of cart.items) {
+      const product = await Product.findById(item.productId);
+      if (!product || product.countInStock < item.quantity) {
+        req.flash('error', `Insufficient stock for ${item.name}. Please update your cart.`);
+        return res.redirect('/cart');
+      }
+    }
+
 
     const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-    const totalPrice = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discountAmount = cart.discountAmount || 0;
+    const totalPrice = subtotal - discountAmount;
 
     // Create order with embedded items
     const order = new Order({
@@ -70,15 +88,28 @@ const placeOrder = async (req, res) => {
         phone: phone.trim(),
       },
       totalQuantity,
+      subtotal: parseFloat(subtotal.toFixed(2)),
+      discount: parseFloat(discountAmount.toFixed(2)),
+      appliedCoupon: cart.appliedCoupon,
       totalPrice: parseFloat(totalPrice.toFixed(2)),
       totalAmount: parseFloat(totalPrice.toFixed(2)),
       status: 'Pending',
     });
 
     await order.save();
+ 
+    // Decrement stock for each item
+    for (const item of cart.items) {
+      await Product.findByIdAndUpdate(item.productId, {
+        $inc: { countInStock: -item.quantity }
+      });
+    }
+
 
     // Clear cart after successful order
     cart.items = [];
+    cart.appliedCoupon = null;
+    cart.discountAmount = 0;
     await cart.save();
 
     res.redirect(`/order-success/${order._id}`);

@@ -68,6 +68,17 @@ const productSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  countInStock: {
+    type: Number,
+    required: [true, 'Stock count is required'],
+    min: [0, 'Stock cannot be negative'],
+    default: 10,
+  },
+  status: {
+    type: String,
+    enum: ['In Stock', 'Out of Stock', 'Low Stock'],
+    default: 'In Stock',
+  },
   reviews: [reviewSchema],
   createdAt: {
     type: Date,
@@ -78,6 +89,20 @@ const productSchema = new mongoose.Schema({
   toObject: { virtuals: true },
 });
  
+// Pre-save middleware to update status based on stock count
+productSchema.pre('save', function (next) {
+  if (this.isModified('countInStock')) {
+    if (this.countInStock === 0) {
+      this.status = 'Out of Stock';
+    } else if (this.countInStock <= 5) {
+      this.status = 'Low Stock';
+    } else {
+      this.status = 'In Stock';
+    }
+  }
+  next();
+});
+
 // Virtual for average rating
 productSchema.virtual('averageRating').get(function () {
   if (this.reviews.length === 0) return 0;

@@ -24,8 +24,20 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: [function() {
+      return !this.googleId && !this.facebookId;
+    }, 'Password is required for local account'],
     minlength: [6, 'Password must be at least 6 characters'],
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true, // Allow multiple null values for this unique index
+  },
+  facebookId: {
+    type: String,
+    unique: true,
+    sparse: true,
   },
   resetToken: {
     type: String,

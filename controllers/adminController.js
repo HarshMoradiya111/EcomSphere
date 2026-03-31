@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Order = require('../models/Order');
 const Blog = require('../models/Blog');
 const Settings = require('../models/Settings');
+const Coupon = require('../models/Coupon');
 const path = require('path');
 const fs = require('fs');
 
@@ -139,7 +140,7 @@ const getAddProduct = (req, res) => {
 // POST /admin/products/add
 const postAddProduct = async (req, res) => {
   try {
-    const { name, description, price, category, sizes: sizesStr, colors: colorsStr } = req.body;
+    const { name, description, price, category, sizes: sizesStr, colors: colorsStr, countInStock } = req.body;
  
     if (!name || !description || !price || !category) {
       req.flash('error', 'All fields are required');
@@ -166,6 +167,7 @@ const postAddProduct = async (req, res) => {
       additionalImages: additionalImages,
       sizes,
       colors,
+      countInStock: parseInt(countInStock) || 0,
     });
 
     await product.save();
@@ -212,7 +214,7 @@ const getEditProduct = async (req, res) => {
 // POST /admin/products/edit/:id
 const postEditProduct = async (req, res) => {
   try {
-    const { name, description, price, category, sizes: sizesStr, colors: colorsStr } = req.body;
+    const { name, description, price, category, sizes: sizesStr, colors: colorsStr, countInStock } = req.body;
     const product = await Product.findById(req.params.id);
 
     if (!product) {
@@ -242,6 +244,7 @@ const postEditProduct = async (req, res) => {
  
     product.sizes = sizesStr ? sizesStr.split(',').map(s => s.trim()).filter(s => s !== '') : [];
     product.colors = colorsStr ? colorsStr.split(',').map(c => c.trim()).filter(c => c !== '') : [];
+    product.countInStock = countInStock ? parseInt(countInStock) : product.countInStock;
  
     await product.save();
 
@@ -474,4 +477,113 @@ module.exports = {
   editBlogForm,
   updateBlog,
   deleteBlog,
+  getCoupons,
+  getAddCoupon,
+  postAddCoupon,
+  getEditCoupon,
+  postEditCoupon,
+  deleteCoupon,
 };
+ 
+ // GET /admin/coupons
+ async function getCoupons(req, res) {
+   try {
+     const coupons = await Coupon.find().sort({ createdAt: -1 });
+     res.render('admin/coupons', {
+       title: 'Coupon Management - Admin',
+       adminUsername: req.session.adminUsername,
+       coupons,
+       errors: req.flash('error'),
+       success: req.flash('success'),
+       activePage: 'coupons'
+     });
+   } catch (error) {
+     console.error('Admin coupons error:', error);
+     req.flash('error', 'Failed to load coupons');
+     res.redirect('/admin/dashboard');
+   }
+ }
+ 
+ // GET /admin/coupons/add
+ function getAddCoupon(req, res) {
+   res.render('admin/add_coupon', {
+     title: 'Add Coupon - Admin',
+     adminUsername: req.session.adminUsername,
+     errors: req.flash('error'),
+     activePage: 'coupons'
+   });
+ }
+ 
+ // POST /admin/coupons/add
+ async function postAddCoupon(req, res) {
+   try {
+     const { code, discountType, discountValue, minPurchase, expiryDate, usageLimit, isActive } = req.body;
+ 
+     const coupon = new Coupon({
+       code: code.toUpperCase(),
+       discountType,
+       discountValue,
+       minPurchase: minPurchase || 0,
+       expiryDate,
+       usageLimit: usageLimit || null,
+       isActive: isActive === 'on' ? true : false
+     });
+ 
+     await coupon.save();
+     req.flash('success', 'Coupon created successfully!');
+     res.redirect('/admin/coupons');
+   } catch (error) {
+     console.error('Add coupon error:', error);
+     req.flash('error', error.code === 11000 ? 'Coupon code already exists' : 'Failed to create coupon');
+     res.redirect('/admin/coupons/add');
+   }
+ }
+ 
+ // GET /admin/coupons/edit/:id
+ async function getEditCoupon(req, res) {
+   try {
+     const coupon = await Coupon.findById(req.params.id);
+     if (!coupon) return res.redirect('/admin/coupons');
+     res.render('admin/edit_coupon', {
+       title: 'Edit Coupon - Admin',
+       coupon,
+       adminUsername: req.session.adminUsername,
+       errors: req.flash('error'),
+       activePage: 'coupons'
+     });
+   } catch (error) {
+     res.redirect('/admin/coupons');
+   }
+ }
+ 
+ // POST /admin/coupons/edit/:id
+ async function postEditCoupon(req, res) {
+   try {
+     const { code, discountType, discountValue, minPurchase, expiryDate, usageLimit, isActive } = req.body;
+     await Coupon.findByIdAndUpdate(req.params.id, {
+       code: code.toUpperCase(),
+       discountType,
+       discountValue,
+       minPurchase: minPurchase || 0,
+       expiryDate,
+       usageLimit: usageLimit || null,
+       isActive: isActive === 'on' ? true : false
+     });
+     req.flash('success', 'Coupon updated successfully!');
+     res.redirect('/admin/coupons');
+   } catch (error) {
+     req.flash('error', 'Failed to update coupon');
+     res.redirect(`/admin/coupons/edit/${req.params.id}`);
+   }
+ }
+ 
+ async function deleteCoupon(req, res) {
+   try {
+     await Coupon.findByIdAndDelete(req.params.id);
+     req.flash('success', 'Coupon deleted successfully!');
+     res.redirect('/admin/coupons');
+   } catch (error) {
+     req.flash('error', 'Failed to delete coupon');
+     res.redirect('/admin/coupons');
+   }
+ }

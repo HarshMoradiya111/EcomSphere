@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (data.success && data.cart && data.cart.length > 0) {
           displayCartItems(data.cart);
-          updateCartTotals(data.total);
+          updateCartTotals(data.total, data.discountAmount, data.appliedCoupon);
           // Enable checkout button
           const checkoutBtn = document.getElementById('checkout-btn');
           if (checkoutBtn) checkoutBtn.disabled = false;
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </tr>
       `;
     }
-    updateCartTotals(0);
+    updateCartTotals(0, 0, null);
     const checkoutBtn = document.getElementById('checkout-btn');
     if (checkoutBtn) checkoutBtn.disabled = true;
   }
@@ -116,21 +116,68 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCartQuantity(itemId, 'increase');
       });
     });
-
+ 
     document.querySelectorAll('.decrease-qty').forEach((button) => {
       button.addEventListener('click', function () {
         const itemId = this.getAttribute('data-id');
         updateCartQuantity(itemId, 'decrease');
       });
     });
-
+ 
     document.querySelectorAll('.remove-item').forEach((button) => {
       button.addEventListener('click', function () {
         const itemId = this.getAttribute('data-id');
         removeCartItem(itemId);
       });
     });
+ 
+    // Coupon Button Listeners
+    const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    if (applyCouponBtn) {
+      applyCouponBtn.onclick = function() {
+        const codeValue = document.getElementById('coupon-code').value.trim();
+        if (!codeValue) return showToastCart('Please enter a coupon code', 'error');
+        applyCoupon(codeValue);
+      };
+    }
+ 
+    const removeCouponBtn = document.getElementById('remove-coupon-btn');
+    if (removeCouponBtn) {
+      removeCouponBtn.onclick = function() {
+        removeCoupon();
+      };
+    }
   }
+ 
+  function applyCoupon(couponCode) {
+    fetch('/api/cart/coupon/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ couponCode })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToastCart('Coupon applied successfully!');
+        fetchCartItems(); // refresh to get new totals
+      } else {
+        showToastCart(data.error || 'Failed to apply coupon', 'error');
+      }
+    })
+    .catch(() => showToastCart('Error applying coupon', 'error'));
+  }
+ 
+  function removeCoupon() {
+    fetch('/api/cart/coupon/remove', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToastCart('Coupon removed');
+        fetchCartItems();
+      }
+    });
+  }
+
 
   // ==========================================
   // Update Cart Quantity
@@ -186,15 +233,42 @@ document.addEventListener('DOMContentLoaded', function () {
   // ==========================================
   // Update Cart Totals Display
   // ==========================================
-  function updateCartTotals(total) {
+  function updateCartTotals(total, discountAmount = 0, appliedCoupon = null) {
     const subtotalEl = document.getElementById('cart-subtotal');
     const totalEl = document.getElementById('cart-total');
-
-    const displayTotal = `₹${parseFloat(total).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-    if (subtotalEl) subtotalEl.textContent = displayTotal;
-    if (totalEl) totalEl.innerHTML = `<strong>${displayTotal}</strong>`;
+    const discountRow = document.getElementById('discount-row');
+    const discountEl = document.getElementById('cart-discount');
+    const couponInfo = document.getElementById('applied-coupon-info');
+    const activeCouponCode = document.getElementById('active-coupon-code');
+    const couponInputArea = document.querySelector('#coupon > div');
+ 
+    // Calculate subtotal from current items (before discount)
+    let subtotal = 0;
+    document.querySelectorAll('.cart-item-subtotal').forEach(el => {
+      // Clean prefix if present
+      const text = el.textContent.replace('₹', '').replace(/,/g, '').trim();
+      subtotal += parseFloat(text) || 0;
+    });
+ 
+    const format = (val) => `₹${parseFloat(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+ 
+    if (subtotalEl) subtotalEl.textContent = format(subtotal);
+ 
+    if (discountAmount > 0) {
+      if (discountRow) discountRow.style.display = 'table-row';
+      if (discountEl) discountEl.textContent = `-${format(discountAmount)}`;
+      if (couponInfo) couponInfo.style.display = 'block';
+      if (activeCouponCode) activeCouponCode.textContent = appliedCoupon;
+      if (couponInputArea) couponInputArea.style.display = 'none';
+    } else {
+      if (discountRow) discountRow.style.display = 'none';
+      if (couponInfo) couponInfo.style.display = 'none';
+      if (couponInputArea) couponInputArea.style.display = 'flex';
+    }
+ 
+    if (totalEl) totalEl.innerHTML = `<strong>${format(total)}</strong>`;
   }
+
 
   // Cart-specific toast (re-uses global if available)
   function showToastCart(msg, type = 'success') {
