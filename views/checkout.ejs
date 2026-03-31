@@ -84,9 +84,19 @@
         </button>
       </form>
 
+      <!-- Data source for script -->
+      <script id="user-data" type="application/json">
+        <%- JSON.stringify({
+          addresses: user ? user.addresses || [] : [],
+          username: user ? user.username : '',
+          phone: user ? user.phone : ''
+        }) %>
+      </script>
+
       <script>
         // Saved Address Auto-fill Logic
-        const addresses = <%- JSON.stringify(user ? user.addresses || [] : []) %>;
+        const userData = JSON.parse(document.getElementById('user-data').textContent);
+        const addresses = userData.addresses;
         const nameInput = document.getElementById('delivery-name');
         const addressInput = document.getElementById('delivery-address');
         const phoneInput = document.getElementById('delivery-phone');
@@ -95,9 +105,9 @@
         function fillAddress(idx) {
           if (idx !== "" && addresses[idx]) {
             const addr = addresses[idx];
-            nameInput.value = "<%= user ? user.username : '' %>"; // Use username as fallback for saved name
+            nameInput.value = userData.username; // Use username as fallback for saved name
             addressInput.value = `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}, ${addr.country}`;
-            phoneInput.value = "<%= user ? user.phone : '' %>";
+            phoneInput.value = userData.phone;
           }
         }
 
