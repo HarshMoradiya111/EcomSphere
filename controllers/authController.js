@@ -112,9 +112,12 @@ const postRegister = async (req, res) => {
 
 // GET /auth/logout
 const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) console.error('Session destroy error:', err);
-    res.redirect('/auth/login');
+  req.logout((err) => {
+    if (err) console.error('Passport logout error:', err);
+    req.session.destroy((err) => {
+      if (err) console.error('Session destroy error:', err);
+      res.redirect('/auth/login');
+    });
   });
 };
 

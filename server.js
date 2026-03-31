@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const methodOverride = require('method-override');
 const path = require('path');
 const Settings = require('./models/Settings');
+const passport = require('./config/passport');
 
 const connectDB = require('./config/db');
 
@@ -71,13 +72,25 @@ app.use(
 
 // Flash messages
 app.use(flash());
+ 
+ // Passport middleware
+ app.use(passport.initialize());
+ app.use(passport.session());
+
 
 // Global template variables middleware
 app.use(async (req, res, next) => {
+  // Passport populates req.user. If present, sync with existing session logic
+  if (req.user) {
+    req.session.userId = req.user._id.toString();
+    req.session.username = req.user.username;
+  }
+
   res.locals.sessionUser = req.session.username || null;
   res.locals.sessionUserId = req.session.userId || null;
   res.locals.isAdmin = !!req.session.adminId;
   res.locals.adminUsername = req.session.adminUsername || null;
+
   
   try {
     let settings = await Settings.findOne();
