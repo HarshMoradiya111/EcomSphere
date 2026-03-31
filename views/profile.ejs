@@ -228,9 +228,12 @@
                   <p style="margin:5px 0; font-size:13px; color:#666; line-height:1.5;"><%= order.checkoutInfo.address %></p>
                   <p style="margin:0; font-size:13px; color:#666;">Phone: <%= order.checkoutInfo.phone %></p>
                   
-                  <div style="margin-top:20px;">
-                    <a href="/track-order?orderId=<%= order._id %>" class="normal" style="background:#088178; color:#fff; display:block; text-align:center; padding:10px; font-size:12px; text-decoration:none;">
+                  <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+                    <a href="/track-order?orderId=<%= order._id %>" class="normal" style="background:#088178; color:#fff; display:block; text-align:center; padding:10px; font-size:12px; text-decoration:none; border-radius:4px;">
                       <i class="fa-solid fa-map-marker-alt"></i> Live Tracking
+                    </a>
+                    <a href="/orders/invoice/<%= order._id %>" class="normal" style="background:#444; color:#fff; display:block; text-align:center; padding:10px; font-size:12px; text-decoration:none; border-radius:4px;">
+                      <i class="fa-solid fa-file-pdf"></i> Download Invoice
                     </a>
                   </div>
                 </div>

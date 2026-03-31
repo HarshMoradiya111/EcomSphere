@@ -12,7 +12,12 @@
   <div class="admin-card" style="flex:1; min-width:300px;">
     <div class="card-header">
       <h3>Order Details</h3>
-      <a href="/admin/orders" class="admin-btn btn-secondary btn-sm">← Back</a>
+      <div style="display:flex; gap:10px;">
+        <a href="/orders/invoice/<%= order._id %>" class="admin-btn btn-primary btn-sm">
+          <i class="fa-solid fa-file-pdf"></i> Invoice
+        </a>
+        <a href="/admin/orders" class="admin-btn btn-secondary btn-sm">← Back</a>
+      </div>
     </div>
 
     <div style="padding:10px 0;">

@@ -5,6 +5,8 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const Settings = require('../models/Settings');
 const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
  
 // GET /checkout - Checkout page
 const getCheckout = async (req, res) => {
@@ -212,103 +214,160 @@ const getTrackOrder = async (req, res) => {
   }
 };
 
- // GET /orders/invoice/:id
- const downloadInvoice = async (req, res) => {
-   try {
-     const order = await Order.findById(req.params.id);
-     if (!order || (order.userId.toString() !== req.session.userId && !req.session.adminId)) {
-       return res.status(403).send('Unauthorized');
-     }
- 
-     const settings = await Settings.findOne() || { address: "SSCCS Mumbai", phone: "+91 8160730726", email: "support@ecomsphere.com" };
- 
-     const doc = new PDFDocument({ margin: 50, size: 'A4' });
-     
-     // Set Response Headers
-     res.setHeader('Content-Type', 'application/pdf');
-     res.setHeader('Content-Disposition', `attachment; filename=Invoice-${order._id.toString().slice(-6).toUpperCase()}.pdf`);
- 
-     doc.pipe(res);
- 
-     // --- HEADER ---
-     doc.fillColor('#088178').fontSize(24).text('ECOMSPHERE', 50, 45);
-     doc.fillColor('#444444').fontSize(10).text(settings.address || 'EcomSphere Headquarters', 200, 50, { align: 'right' });
-     doc.text(`${settings.phone} | ${settings.email}`, 200, 65, { align: 'right' });
-     doc.moveDown();
- 
-     // --- HORIZONTAL LINE ---
-     doc.strokeColor('#eeeeee').lineWidth(1).moveTo(50, 90).lineTo(550, 90).stroke();
- 
-     // --- BILLING INFO ---
-     doc.fontSize(14).text('INVOICE', 50, 110);
-     doc.fontSize(10).fillColor('#888888').text(`Invoice No: INV-${order._id.toString().slice(-6).toUpperCase()}`, 50, 130);
-     doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 50, 145);
- 
-     doc.fillColor('#000000').fontSize(12).text('Bill To:', 300, 110);
-     doc.fontSize(10).text(order.checkoutInfo.name, 300, 130);
-     doc.text(order.checkoutInfo.address, 300, 145, { width: 250 });
-     doc.text(`Phone: ${order.checkoutInfo.phone}`, 300, 175);
- 
-     doc.moveDown(4);
- 
-     // --- TABLE HEADER ---
-     const tableTop = 230;
-     doc.font('Helvetica-Bold');
-     doc.text('Item', 50, tableTop);
-     doc.text('Price', 280, tableTop, { width: 90, align: 'right' });
-     doc.text('Qty', 370, tableTop, { width: 90, align: 'right' });
-     doc.text('Total', 470, tableTop, { width: 80, align: 'right' });
-     
-     doc.strokeColor('#088178').lineWidth(2).moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-     
-     // --- ITEMS ---
-     let rowY = tableTop + 30;
-     doc.font('Helvetica');
-     
-     order.items.forEach(item => {
-       const itemPrice = item.price || 0;
-       const itemQty = item.quantity || 1;
-       const itemTotal = itemPrice * itemQty;
-       doc.text(item.name, 50, rowY, { width: 220 });
-       doc.text(`INR ${itemPrice.toFixed(2)}`, 280, rowY, { width: 90, align: 'right' });
-       doc.text(itemQty.toString(), 370, rowY, { width: 90, align: 'right' });
-       doc.text(`INR ${itemTotal.toFixed(2)}`, 470, rowY, { width: 80, align: 'right' });
-       
-       rowY += 25;
-       
-       // Draw subtle line between rows
-       doc.strokeColor('#f9f9f9').lineWidth(0.5).moveTo(50, rowY - 5).lineTo(550, rowY - 5).stroke();
-     });
- 
-     // --- SUMMARY ---
-     doc.moveDown(2);
-     const summaryY = Math.max(rowY + 20, 350); 
-     
-     doc.font('Helvetica-Bold');
-     doc.text('Subtotal', 350, summaryY);
-     doc.font('Helvetica');
-     doc.text(`INR ${order.subtotal.toFixed(2)}`, 450, summaryY, { align: 'right', width: 100 });
- 
-     if (order.discount > 0) {
-       doc.fillColor('#088178');
-       doc.text(`Discount (${order.appliedCoupon || 'Promo'})`, 350, summaryY + 20);
-       doc.text(`- INR ${order.discount.toFixed(2)}`, 450, summaryY + 20, { align: 'right', width: 100 });
-       doc.fillColor('#000000');
-     }
- 
-     doc.fontSize(14).font('Helvetica-Bold');
-     doc.text('Grand Total', 350, summaryY + 45);
-     doc.text(`INR ${order.totalAmount.toFixed(2)}`, 450, summaryY + 45, { align: 'right', width: 100 });
- 
-     // --- FOOTER ---
-     doc.fontSize(10).fillColor('#aaaaaa').text('Thank you for shopping with EcomSphere!', 50, 750, { align: 'center', width: 500 });
- 
-     doc.end();
-   } catch (error) {
-     console.error('Invoice error:', error);
-     res.status(500).send('Error generating invoice');
-   }
- };
+  // GET /orders/invoice/:id
+  const downloadInvoice = async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.id);
+      if (!order || (order.userId.toString() !== req.session.userId && !req.session.adminId)) {
+        return res.status(403).send('Unauthorized');
+      }
+  
+      const settings = (await Settings.findOne()) || {
+        address: "SSCCS Mumbai",
+        phone: "+91 8160730726",
+        email: "support@ecomsphere.com",
+        logo: '/img/logo1.png'
+      };
+  
+      const doc = new PDFDocument({ margin: 40, size: 'A4' });
+      
+      // Set Response Headers
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=Invoice-${order._id.toString().slice(-6).toUpperCase()}.pdf`);
+  
+      doc.pipe(res);
+  
+      // --- HEADER & COLOR PALETTE ---
+      const primaryColor = '#088178';
+      const secondaryColor = '#1e293b';
+      const textColor = '#334155';
+      const lightBg = '#f8fafc';
+      const borderColor = '#e2e8f0';
+  
+      // -- LOGO OR CO-NAME --
+      // Attempt to load logo from disk if it starts with /
+      let logoAdded = false;
+      if (settings.logo && typeof settings.logo === 'string') {
+        try {
+          // Clean the logo path if it's a browser URL path
+          const logoPath = path.join(__dirname, '../public', settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo);
+          if (fs.existsSync(logoPath)) {
+            doc.image(logoPath, 40, 35, { width: 45 });
+            logoAdded = true;
+          }
+        } catch (e) { console.error('Logo loading failed:', e); }
+      }
+  
+      if (!logoAdded) {
+        doc.fillColor(primaryColor).fontSize(20).font('Helvetica-Bold').text('ECOMSPHERE', 40, 45);
+        doc.fillColor(textColor).fontSize(9).font('Helvetica').text(settings.address || 'Global Headquarters', 40, 65, { width: 250 });
+        doc.text(`${settings.phone} | ${settings.email}`, 40, 77);
+      } else {
+        doc.fillColor(primaryColor).fontSize(18).font('Helvetica-Bold').text('ECOMSPHERE', 95, 40);
+        doc.fillColor(textColor).fontSize(9).font('Helvetica').text(settings.address || 'Global Headquarters', 95, 60, { width: 250 });
+        doc.text(`${settings.phone} | ${settings.email}`, 95, 75);
+      }
+  
+      // -- INVOICE BADGE --
+      doc.rect(400, 35, 160, 70).fill(lightBg).stroke(borderColor);
+      doc.fillColor(secondaryColor).fontSize(14).font('Helvetica-Bold').text('INVOICE', 415, 45);
+      doc.fillColor(textColor).fontSize(9).font('Helvetica')
+         .text(`Number: #INV-${order._id.toString().slice(-6).toUpperCase()}`, 415, 65)
+         .text(`Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}`, 415, 78)
+         .text(`Status: ${order.status.toUpperCase()}`, 415, 91);
+  
+      doc.moveDown(4);
+  
+      // --- BILLING INFO ---
+      const infoY = 140;
+      doc.fillColor(secondaryColor).fontSize(10).font('Helvetica-Bold').text('BILL TO:', 40, infoY);
+      doc.fillColor(textColor).font('Helvetica')
+         .text(order.checkoutInfo.name, 40, infoY + 15)
+         .text(order.checkoutInfo.address, 40, infoY + 30, { width: 250 })
+         .text(`Phone: ${order.checkoutInfo.phone}`, 40, infoY + 60);
+  
+      doc.fillColor(secondaryColor).font('Helvetica-Bold').text('SHIP TO:', 320, infoY);
+      doc.fillColor(textColor).font('Helvetica')
+         .text(order.checkoutInfo.name, 320, infoY + 15)
+         .text(order.checkoutInfo.address, 320, infoY + 30, { width: 230 })
+         .text(`Phone: ${order.checkoutInfo.phone}`, 320, infoY + 60);
+  
+      // --- TABLE HEADER ---
+      const tableTop = 260;
+      doc.rect(40, tableTop, 520, 25).fill(secondaryColor);
+      doc.fillColor('#FFFFFF').fontSize(10).font('Helvetica-Bold');
+      doc.text('ITEM DESCRIPTION', 50, tableTop + 8);
+      doc.text('PRICE', 300, tableTop + 8, { width: 80, align: 'right' });
+      doc.text('QTY', 390, tableTop + 8, { width: 60, align: 'right' });
+      doc.text('TOTAL', 460, tableTop + 8, { width: 90, align: 'right' });
+  
+      // --- ITEMS ---
+      let rowY = tableTop + 25;
+      doc.fillColor(textColor).font('Helvetica');
+      
+      order.items.forEach((item, index) => {
+        const itemPrice = item.price || 0;
+        const itemQty = item.quantity || 1;
+        const itemTotal = itemPrice * itemQty;
+  
+        // Zebra striping
+        if (index % 2 === 0) {
+          doc.rect(40, rowY, 520, 30).fill('#f1f5f9');
+        }
+        
+        doc.fillColor(textColor);
+        doc.text(item.name, 50, rowY + 10, { width: 240 });
+        doc.text(`INR ${itemPrice.toLocaleString('en-IN')}`, 300, rowY + 10, { width: 80, align: 'right' });
+        doc.text(itemQty.toString(), 390, rowY + 10, { width: 60, align: 'right' });
+        doc.text(`INR ${itemTotal.toLocaleString('en-IN')}`, 460, rowY + 10, { width: 90, align: 'right' });
+        
+        rowY += 30;
+  
+        // Prevent overflow if items exceed page
+        if (rowY > 700) {
+          doc.addPage();
+          rowY = 40; 
+        }
+      });
+  
+      // --- SUMMARY ---
+      const summaryY = Math.min(rowY + 20, 700);
+      
+      // Bottom border for table
+      doc.strokeColor(borderColor).lineWidth(1).moveTo(40, rowY).lineTo(560, rowY).stroke();
+  
+      doc.moveDown(2);
+      
+      doc.font('Helvetica-Bold').fontSize(10).text('SUBTOTAL', 380, summaryY + 10);
+      doc.font('Helvetica').text(`INR ${order.subtotal.toLocaleString('en-IN')}`, 460, summaryY + 10, { align: 'right', width: 90 });
+  
+      if (order.discount > 0) {
+        doc.fillColor(primaryColor);
+        doc.font('Helvetica-Bold').text('DISCOUNT', 380, summaryY + 30);
+        doc.font('Helvetica').text(`- INR ${order.discount.toLocaleString('en-IN')}`, 460, summaryY + 30, { align: 'right', width: 90 });
+        doc.fillColor(textColor);
+      }
+  
+      // Grand Total Box
+      doc.rect(360, summaryY + 55, 200, 35).fill(primaryColor);
+      doc.fillColor('#FFFFFF').fontSize(12).font('Helvetica-Bold');
+      doc.text('GRAND TOTAL', 375, summaryY + 67);
+      doc.text(`INR ${order.totalAmount.toLocaleString('en-IN')}`, 460, summaryY + 67, { align: 'right', width: 90 });
+  
+      // --- FOOTER ---
+      doc.fillColor('#94a3b8').fontSize(9).font('Helvetica')
+         .text('Payment Mode: Cash on Delivery / Prepaid Online', 40, 750)
+         .text('Generated electronically by EcomSphere Billing System.', 40, 762);
+  
+      doc.fontSize(10).fillColor(primaryColor).font('Helvetica-Bold')
+         .text('Thank you for choosing EcomSphere!', 40, 785, { align: 'center', width: 520 });
+  
+      doc.end();
+    } catch (error) {
+      console.error('Invoice error:', error);
+      res.status(500).send('Error generating invoice');
+    }
+  };
  
  module.exports = {
    getCheckout,
