@@ -10,9 +10,14 @@
 <div class="admin-card">
   <div class="card-header">
     <h3>All Products (<%= products.length %>)</h3>
-    <a href="/admin/products/add" class="admin-btn btn-primary">
-      <i class="fa-solid fa-plus"></i> Add New Product
-    </a>
+    <div class="header-actions" style="display:flex; gap:10px;">
+      <a href="/admin/products/bulk" class="admin-btn btn-secondary">
+        <i class="fa-solid fa-file-csv"></i> Bulk Import
+      </a>
+      <a href="/admin/products/add" class="admin-btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Add New Product
+      </a>
+    </div>
   </div>
 
   <div class="admin-filter-bar" style="background: #1e293b; padding: 15px 20px; border-bottom: 1px solid #334155; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">

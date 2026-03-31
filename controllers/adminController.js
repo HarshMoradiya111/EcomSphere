@@ -7,6 +7,7 @@ const Settings = require('../models/Settings');
 const Coupon = require('../models/Coupon');
 const path = require('path');
 const fs = require('fs');
+const csv = require('csv-parser');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
@@ -483,7 +484,80 @@ module.exports = {
   getEditCoupon,
   postEditCoupon,
   deleteCoupon,
+  getBulkUpload,
+  postBulkUpload,
 };
+ 
+ // GET /admin/products/bulk
+ function getBulkUpload(req, res) {
+   res.render('admin/bulk_upload', {
+     title: 'Bulk Product Import - Admin',
+     adminUsername: req.session.adminUsername,
+     errors: req.flash('error'),
+     success: req.flash('success'),
+     activePage: 'products'
+   });
+ }
+ 
+ // POST /admin/products/bulk
+ async function postBulkUpload(req, res) {
+   if (!req.file) {
+     req.flash('error', 'Please select a CSV file to upload.');
+     return res.redirect('/admin/products/bulk');
+   }
+ 
+   const products = [];
+   const errors = [];
+   let rowCount = 0;
+ 
+   fs.createReadStream(req.file.path)
+     .pipe(csv())
+     .on('data', (row) => {
+       rowCount++;
+       // Basic validation
+       if (!row.name || !row.price) {
+         errors.push(`Row ${rowCount}: Name and Price are required.`);
+         return;
+       }
+ 
+       products.push({
+         name: row.name.trim(),
+         description: row.description || '',
+         price: parseFloat(row.price),
+         category: row.category || 'Uncategorized',
+         brand: row.brand || 'EcomSphere',
+         countInStock: parseInt(row.countInStock) || 0,
+         image: row.image || '/img/products/f1.jpg',
+         status: 'In Stock' // Model middleware will auto-adjust this on save
+       });
+     })
+     .on('end', async () => {
+       try {
+         // Cleanup the uploaded temp file
+         fs.unlinkSync(req.file.path);
+ 
+         if (errors.length > 0) {
+           req.flash('error', `Import partially failed: ${errors[0]}`);
+           return res.redirect('/admin/products/bulk');
+         }
+ 
+         if (products.length === 0) {
+           req.flash('error', 'The CSV file is empty or formatted incorrectly.');
+           return res.redirect('/admin/products/bulk');
+         }
+ 
+         // Save all products (batch insert)
+         await Product.insertMany(products);
+         
+         req.flash('success', `Successfully imported ${products.length} products!`);
+         res.redirect('/admin/products');
+       } catch (err) {
+         console.error('Bulk import save error:', err);
+         req.flash('error', 'Failed to save products. Check if your data has duplicate names or invalid values.');
+         res.redirect('/admin/products/bulk');
+       }
+     });
+ }
  
  // GET /admin/coupons
  async function getCoupons(req, res) {

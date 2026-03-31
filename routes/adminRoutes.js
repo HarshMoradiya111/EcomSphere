@@ -33,6 +33,8 @@ const {
   getEditCoupon,
   postEditCoupon,
   deleteCoupon,
+  getBulkUpload,
+  postBulkUpload,
 } = require('../controllers/adminController');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../middleware/auth');
 
@@ -48,13 +50,15 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const allowedTypes = /jpeg|jpg|png|gif|webp|csv/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  const isCSV = path.extname(file.originalname).toLowerCase() === '.csv';
+  const mimetype = allowedTypes.test(file.mimetype) || (isCSV && (file.mimetype === 'text/csv' || file.mimetype === 'application/vnd.ms-excel'));
+  
   if (extname && mimetype) {
     return cb(null, true);
   }
-  cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+  cb(new Error('Only image files (jpeg, jpg, png, gif, webp) or CSV files are allowed'));
 };
 
 const upload = multer({
@@ -78,6 +82,9 @@ router.post('/products/add', isAdminAuthenticated, upload.fields([{ name: 'image
 router.get('/products/edit/:id', isAdminAuthenticated, getEditProduct);
 router.post('/products/edit/:id', isAdminAuthenticated, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'additionalImages', maxCount: 10 }]), postEditProduct);
 router.post('/products/delete/:id', isAdminAuthenticated, deleteProduct);
+router.get('/products/bulk', isAdminAuthenticated, getBulkUpload);
+router.post('/products/bulk', isAdminAuthenticated, upload.single('csvFile'), postBulkUpload);
+
 
 // Orders
 router.get('/orders', isAdminAuthenticated, getOrders);
