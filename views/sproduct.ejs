@@ -126,7 +126,7 @@
                     <h5 style="margin:0; font-size: 15px;"><%= review.username %></h5>
                     <div class="stars" style="color:#ffbd27; font-size:11px; margin-top: 2px;">
                       <% for(let i=1; i<=5; i++) { %>
-                        <i class="fa-solid fa-star" style="color:<%= i <= review.rating ? '#ffbd27' : '#ddd' %>"></i>
+                        <i class="fa-solid fa-star review-star <%= i <= review.rating ? 'active' : '' %>"></i>
                       <% } %>
                     </div>
                   </div>
@@ -289,7 +289,7 @@
                   <div>
                     <h5 style="margin:0; font-size: 15px;">${data.review.username}</h5>
                     <div class="stars" style="color:#ffbd27; font-size:11px; margin-top: 2px;">
-                      ${Array(5).fill(0).map((_, i) => `<i class="fa-solid fa-star" style="color:${i + 1 <= data.review.rating ? '#ffbd27' : '#ddd'}"></i>`).join('')}
+                      ${Array(5).fill(0).map((_, i) => `<i class="fa-solid fa-star review-star ${i + 1 <= data.review.rating ? 'active' : ''}"></i>`).join('')}
                     </div>
                   </div>
                   <small style="color:#999; margin-left:auto;">${data.review.createdAt}</small>

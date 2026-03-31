@@ -382,6 +382,38 @@ button.white {
   transition: 0.3s;
 }
 .pro .cart1:hover { background-color: #088178; color: #fff; border-color: #088178; }
+ 
+ /* === Wishlist Button === */
+ .toggle-wishlist {
+   position: absolute;
+   top: 15px;
+   right: 15px;
+   background: rgba(255, 255, 255, 0.9);
+   border: none;
+   border-radius: 50%;
+   width: 35px;
+   height: 35px;
+   cursor: pointer;
+   color: #ccc;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+   z-index: 10;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   transition: 0.3s;
+ }
+ .toggle-wishlist.active {
+   color: #ff4d4d !important;
+ }
+ 
+ /* === Star Ratings === */
+ .review-star {
+   color: #ddd;
+ }
+ .review-star.active {
+   color: #ffbd27 !important;
+ }
+
 
 /* === Banners === */
 #banner {
