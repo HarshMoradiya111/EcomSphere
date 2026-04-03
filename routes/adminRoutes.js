@@ -44,7 +44,10 @@ const {
   postUpdateStock,
   getFAQs,
   postAddFAQ,
+  getEditFAQ,
+  postUpdateFAQ,
   deleteFAQ,
+  getCustomerSegmentation,
 } = require('../controllers/adminController');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../middleware/auth');
 
@@ -140,6 +143,11 @@ router.post('/inventory/update-stock/:id', isAdminAuthenticated, postUpdateStock
 // FAQ Management
 router.get('/faqs', isAdminAuthenticated, getFAQs);
 router.post('/faqs/add', isAdminAuthenticated, postAddFAQ);
+router.get('/faqs/edit/:id', isAdminAuthenticated, getEditFAQ);
+router.post('/faqs/edit/:id', isAdminAuthenticated, postUpdateFAQ);
 router.post('/faqs/delete/:id', isAdminAuthenticated, deleteFAQ);
+
+// Customer Analytics
+router.get('/customers/segments', isAdminAuthenticated, getCustomerSegmentation);
 
 module.exports = router;

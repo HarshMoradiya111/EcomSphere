@@ -687,6 +687,45 @@ const postAddFAQ = async (req, res) => {
   }
 };
 
+// GET /admin/faqs/edit/:id
+const getEditFAQ = async (req, res) => {
+  try {
+    const faq = await FAQ.findById(req.params.id);
+    if (!faq) {
+      req.flash('error', 'FAQ not found');
+      return res.redirect('/admin/faqs');
+    }
+    res.render('admin/faq_edit', {
+      title: 'Edit FAQ - EcomSphere',
+      adminUsername: req.session.adminUsername,
+      faq,
+      errors: req.flash('error'),
+      success: req.flash('success'),
+    });
+  } catch (error) {
+    req.flash('error', 'Could not open edit form');
+    res.redirect('/admin/faqs');
+  }
+};
+
+// POST /admin/faqs/edit/:id
+const postUpdateFAQ = async (req, res) => {
+  try {
+    const { question, answer, category, order } = req.body;
+    await FAQ.findByIdAndUpdate(req.params.id, {
+      question,
+      answer,
+      category,
+      order: parseInt(order) || 0
+    });
+    req.flash('success', 'FAQ updated successfully');
+    res.redirect('/admin/faqs');
+  } catch (error) {
+    req.flash('error', 'Failed to update FAQ');
+    res.redirect('/admin/faqs');
+  }
+};
+
 // POST /admin/faqs/delete/:id
 const deleteFAQ = async (req, res) => {
   try {
@@ -696,6 +735,75 @@ const deleteFAQ = async (req, res) => {
   } catch (error) {
     req.flash('error', 'Failed to delete FAQ');
     res.redirect('/admin/faqs');
+  }
+};
+
+// CUSTOMER SEGMENTATION ANALYTICS
+
+// GET /admin/customers/segments
+const getCustomerSegmentation = async (req, res) => {
+  try {
+    // 1. Get all users and their order stats - Correct field is userId
+    const userStats = await Order.aggregate([
+      { $match: { status: { $ne: 'Cancelled' } } },
+      {
+        $group: {
+          _id: '$userId',
+          totalSpent: { $sum: '$totalAmount' },
+          orderCount: { $sum: 1 },
+          lastOrderDate: { $max: '$createdAt' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      { $unwind: '$userDetails' }
+    ]);
+
+    // 2. Define Segment Labels & Logic
+    const segments = {
+      'Big Spenders': [], // Spent > ₹20,000
+      'Regulars': [],     // >= 3 orders
+      'New Shoppers': [],  // 1-2 orders
+      'Window Shoppers': [] // 0 orders
+    };
+
+    // 3. Process aggregated stats
+    userStats.forEach(stat => {
+      if (stat.totalSpent > 20000) segments['Big Spenders'].push(stat);
+      else if (stat.orderCount >= 3) segments['Regulars'].push(stat);
+      else segments['New Shoppers'].push(stat);
+    });
+
+    // 4. Find users with 0 orders (Window Shoppers)
+    const buyers = userStats.map(s => s._id.toString());
+    const potentialWindowShoppers = await User.find({ _id: { $nin: buyers } }).limit(50);
+    
+    potentialWindowShoppers.forEach(u => {
+      segments['Window Shoppers'].push({
+        userDetails: u,
+        totalSpent: 0,
+        orderCount: 0,
+        lastOrderDate: 'N/A'
+      });
+    });
+
+    res.render('admin/customer_segments', {
+      title: 'Customer Segmentation - EcomSphere',
+      adminUsername: req.session.adminUsername,
+      segments,
+      errors: req.flash('error'),
+      success: req.flash('success'),
+    });
+  } catch (error) {
+    console.error('Segmentation error:', error);
+    req.flash('error', 'Failed to generate customer segments');
+    res.redirect('/admin/dashboard');
   }
 };
 
@@ -741,7 +849,10 @@ module.exports = {
   postUpdateStock,
   getFAQs,
   postAddFAQ,
+  getEditFAQ,
+  postUpdateFAQ,
   deleteFAQ,
+  getCustomerSegmentation,
 };
  
  // GET /admin/products/bulk

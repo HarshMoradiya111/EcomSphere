@@ -71,9 +71,12 @@
               <td><%= faq.answer.substring(0, 50) %>...</td>
               <td><%= faq.order %></td>
               <td>
-                <form action="/admin/faqs/delete/<%= faq._id %>" method="POST" onsubmit="return confirm('Delete this FAQ?')">
-                  <button type="submit" class="admin-btn btn-danger btn-sm">Delete</button>
-                </form>
+                <div style="display:flex; gap:5px;">
+                  <a href="/admin/faqs/edit/<%= faq._id %>" class="admin-btn btn-primary btn-sm">Edit</a>
+                  <form action="/admin/faqs/delete/<%= faq._id %>" method="POST" onsubmit="return confirm('Delete this FAQ?')">
+                    <button type="submit" class="admin-btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </div>
               </td>
             </tr>
           <% }) %>
