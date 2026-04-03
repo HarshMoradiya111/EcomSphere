@@ -15,7 +15,8 @@ const {
   postDeleteAddress, 
   getSearchApi,
   subscribeNewsletter,
-  getFAQPage
+  getFAQPage,
+  getComparePage
 } = require('../controllers/productController');
 const { isAuthenticated } = require('../middleware/auth');
 
@@ -90,6 +91,7 @@ router.get('/contact', (req, res) => {
 
 router.get('/blog', getBlogPage);
 router.get('/faq', getFAQPage);
+router.get('/compare', getComparePage);
 
 router.get('/terms', (req, res) => {
   res.render('terms', { title: 'Terms & Conditions - EcomSphere', user: req.session.username || null, breadcrumbs: [{ name: 'Terms', url: '/terms' }] });

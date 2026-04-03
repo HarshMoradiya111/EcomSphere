@@ -441,6 +441,28 @@ const getFAQPage = async (req, res) => {
   }
 };
 
+// GET /compare?ids=id1,id2...
+const getComparePage = async (req, res) => {
+  try {
+    const { ids } = req.query;
+    let products = [];
+    if (ids) {
+      const productIdsArray = ids.split(',').filter(id => id.length > 0);
+      products = await Product.find({ _id: { $in: productIdsArray } });
+    }
+
+    res.render('compare', {
+      title: 'Compare Products - EcomSphere',
+      products,
+      user: req.session.username || null,
+      breadcrumbs: [{ name: 'Compare', url: '/compare' }]
+    });
+  } catch (error) {
+    console.error('Compare error:', error);
+    res.redirect('/shop');
+  }
+};
+
 module.exports = {
   getHomepage,
   getShop,
@@ -455,4 +477,5 @@ module.exports = {
   getSearchApi,
   subscribeNewsletter,
   getFAQPage,
+  getComparePage,
 };

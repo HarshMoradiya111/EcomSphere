@@ -341,12 +341,52 @@ function updateCartBadge(count) {
   }
 }
 
-// Coupon placeholder
-function applyCoupon() {
-  const code = document.getElementById('coupon-code')?.value;
-  if (code) {
-    showToast('Coupon feature coming soon!', 'error');
+// ==========================================
+// Product Comparison functionality
+// ==========================================
+function addToCompare(productId) {
+  let compareList = JSON.parse(localStorage.getItem('compareItems') || '[]');
+  
+  if (compareList.includes(productId)) {
+    showToast('Already in comparison list', 'info');
+    return;
+  }
+  
+  if (compareList.length >= 4) {
+    showToast('Max 4 products allowed for comparison', 'error');
+    return;
+  }
+  
+  compareList.push(productId);
+  localStorage.setItem('compareItems', JSON.stringify(compareList));
+  
+  showToast('Added to comparison! ⚖️');
+  updateCompareFloatingButton(compareList.length);
+}
+
+function updateCompareFloatingButton(count) {
+  let btn = document.getElementById('floating-compare');
+  if (!btn) {
+    btn = document.createElement('a');
+    btn.id = 'floating-compare';
+    btn.className = 'floating-btn';
+    btn.style.cssText = 'position:fixed; bottom:110px; right:30px; background:#088178; color:#fff; padding:12px 20px; border-radius:30px; text-decoration:none; z-index:9999; box-shadow:0 10px 20px rgba(0,0,0,0.1); font-weight:600; display:none; transition: 0.3s;';
+    btn.innerHTML = '<i class="fa-solid fa-scale-unbalanced-flip"></i> Compare (<span id="compare-count">0</span>)';
+    document.body.appendChild(btn);
+  }
+  
+  const countSpan = document.getElementById('compare-count');
+  if (count > 0) {
+    countSpan.textContent = count;
+    btn.href = `/compare?ids=${JSON.parse(localStorage.getItem('compareItems')).join(',')}`;
+    btn.style.display = 'block';
   } else {
-    showToast('Please enter a coupon code', 'error');
+    btn.style.display = 'none';
   }
 }
+
+// Check comparison list on load
+document.addEventListener('DOMContentLoaded', () => {
+  const compareList = JSON.parse(localStorage.getItem('compareItems') || '[]');
+  updateCompareFloatingButton(compareList.length);
+});
