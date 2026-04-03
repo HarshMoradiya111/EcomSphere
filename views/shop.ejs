@@ -41,6 +41,42 @@
           background: #088178;
           color: #fff;
         }
+
+        .pro .action-btn {
+          position: absolute;
+          right: 15px;
+          background: rgba(255, 255, 255, 0.9);
+          border: none;
+          border-radius: 50%;
+          width: 35px;
+          height: 35px;
+          cursor: pointer;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          z-index: 10;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: 0.3s;
+        }
+
+        .pro .toggle-wishlist {
+          top: 15px;
+          color: #ccc;
+        }
+
+        .pro .toggle-wishlist.active {
+          color: #ff4d4d;
+        }
+
+        .pro .compare-btn {
+          top: 60px;
+          color: #088178;
+        }
+
+        .pro .action-btn:hover {
+          transform: scale(1.1);
+          background: #fff;
+        }
       </style>
       <section class="section-p1" style="padding-bottom:10px;">
         <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
@@ -54,6 +90,55 @@
             </a>
             <% }) %>
         </div>
+      </section>
+
+      <!-- Advanced Filters -->
+      <section class="section-p1" style="padding-top: 0;">
+        <form action="/shop" method="GET" id="filter-form" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; background:#f9f9f9; padding:25px; border-radius:15px; border: 1px solid #eee;">
+          
+          <!-- Preserve Category & Search -->
+          <input type="hidden" name="category" value="<%= selectedCategory %>">
+          
+          <!-- Search -->
+          <div style="flex: 1; min-width: 250px;">
+            <label style="display:block; font-size:11px; font-weight:800; margin-bottom:8px; color:#888; text-transform:uppercase; letter-spacing:1px;">Search Keyword</label>
+            <div style="position:relative;">
+              <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#aaa; font-size:14px;"></i>
+              <input type="text" name="search" value="<%= search %>" placeholder="Try 'Summer dress'..." style="width:100%; padding:12px 12px 12px 40px; border:1px solid #e0e0e0; border-radius:8px; font-size:14px; outline:none; transition:0.3s;">
+            </div>
+          </div>
+
+          <!-- Price Range Slider -->
+          <div style="flex: 1; min-width: 250px;">
+            <label id="price-label" style="display:block; font-size:11px; font-weight:800; margin-bottom:8px; color:#888; text-transform:uppercase; letter-spacing:1px;">
+              Price Limit: ₹<%= maxPrice.toLocaleString('en-IN') %>
+            </label>
+            <div style="padding: 10px 0;">
+              <input type="range" name="maxPrice" id="priceRange" min="<%= minPossible %>" max="<%= maxPossible %>" value="<%= maxPrice %>" step="100" style="width:100%; cursor:pointer; accent-color:#088178;" oninput="document.getElementById('price-label').innerText = 'Price Limit: ₹' + parseInt(this.value).toLocaleString('en-IN')">
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-top:5px;">
+                <span>₹<%= minPossible %></span>
+                <span>₹<%= maxPossible %></span>
+              </div>
+            </div>
+            <input type="hidden" name="minPrice" value="<%= minPossible %>">
+          </div>
+
+          <!-- Sort By -->
+          <div style="width: 220px;">
+            <label style="display:block; font-size:11px; font-weight:800; margin-bottom:8px; color:#888; text-transform:uppercase; letter-spacing:1px;">Sort Results</label>
+            <select name="sortBy" style="width:100%; padding:12px; border:1px solid #e0e0e0; border-radius:8px; font-size:14px; cursor:pointer;" onchange="this.form.submit()">
+              <option value="newest" <%= sortBy === 'newest' ? 'selected' : '' %>>✨ Newest Arrivals</option>
+              <option value="oldest" <%= sortBy === 'oldest' ? 'selected' : '' %>>🕒 Oldest First</option>
+              <option value="price-low" <%= sortBy === 'price-low' ? 'selected' : '' %>>💰 Price: Low to High</option>
+              <option value="price-high" <%= sortBy === 'price-high' ? 'selected' : '' %>>💎 Price: High to Low</option>
+            </select>
+          </div>
+
+          <!-- Apply Button -->
+          <div style="align-self: flex-end;">
+            <button type="submit" class="normal" style="padding:13px 35px; border-radius:8px; font-size:14px; height:46px;">Apply Filters</button>
+          </div>
+        </form>
       </section>
 
       <section id="product1" class="section-p1">
@@ -97,17 +182,16 @@
                         </h4>
                       </div>
                       <% if (locals.sessionUserId) { %>
-                        <button class="toggle-wishlist <%= product.isInWishlist ? 'active' : '' %>"
-                          data-product-id="<%= product._id %>" title="Wishlist"
-                          style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: <%= product.isInWishlist ? '#ff4d4d' : '#ccc' %>; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+                        <button class="action-btn toggle-wishlist <%= product.isInWishlist ? 'active' : '' %>"
+                          data-product-id="<%= product._id %>" title="Wishlist">
                           <i class="fa-solid fa-heart"></i>
                         </button>
                       <% } %>
 
-                      <button class="compare-btn" onclick="addToCompare('<%= product._id %>')" title="Compare"
-                        style="position: absolute; top: 60px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: #088178; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+                      <button class="action-btn compare-btn" onclick="addToCompare('<%= product._id %>')" title="Compare">
                         <i class="fa-solid fa-scale-unbalanced-flip"></i>
                       </button>
+                          <a href="#" class="add-to-cart cart1" data-product-id="<%= product._id %>"
                           <a href="#" class="add-to-cart cart1" data-product-id="<%= product._id %>"
                             data-name="<%= product.name %>" data-price="<%= product.price %>"
                             data-image="<%= product.image %>" title="Add to Cart">

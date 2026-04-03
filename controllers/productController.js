@@ -65,7 +65,7 @@ const getHomepage = async (req, res) => {
 // GET /shop - Shop page with all products and category filter
 const getShop = async (req, res) => {
   try {
-    const { category, search } = req.query;
+    const { category, search, minPrice, maxPrice, sortBy } = req.query;
     let query = {};
 
     if (category && CATEGORIES.includes(category)) {
@@ -79,7 +79,30 @@ const getShop = async (req, res) => {
       ];
     }
 
-    let products = await Product.find(query).sort({ createdAt: -1 });
+    // --- PRICE FILTERING ---
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+
+    // --- SORTING ---
+    let sortOption = { createdAt: -1 }; // Default: Newest
+    if (sortBy) {
+      switch (sortBy) {
+        case 'price-low': sortOption = { price: 1 }; break;
+        case 'price-high': sortOption = { price: -1 }; break;
+        case 'oldest': sortOption = { createdAt: 1 }; break;
+        case 'newest': sortOption = { createdAt: -1 }; break;
+      }
+    }
+
+    let products = await Product.find(query).sort(sortOption);
+
+    // Get Min/Max prices for the slider bounds
+    const allPrices = await Product.find({}, { price: 1 });
+    const minPossible = allPrices.length > 0 ? Math.min(...allPrices.map(p => p.price)) : 0;
+    const maxPossible = allPrices.length > 0 ? Math.max(...allPrices.map(p => p.price)) : 10000;
  
     // Mark items in wishlist if logged in
     if (req.session.userId) {
@@ -105,7 +128,13 @@ const getShop = async (req, res) => {
       categories: CATEGORIES,
       selectedCategory: category || '',
       search: search || '',
+      minPrice: minPrice || minPossible,
+      maxPrice: maxPrice || maxPossible,
+      minPossible,
+      maxPossible,
+      sortBy: sortBy || 'newest',
       user: req.session.username || null,
+      sessionUserId: req.session.userId || null,
       success: req.flash('success'),
       errors: req.flash('error'),
       breadcrumbs
