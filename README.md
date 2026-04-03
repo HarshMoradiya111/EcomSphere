@@ -1,6 +1,11 @@
-# 🛍️ EcomSphere - JavaScript Edition (v2.0.0)
+# 🛍️ EcomSphere - JavaScript Edition (v3.0.0)
 
-> **Complete e-commerce platform converted from PHP/MySQL to Node.js + Express + MongoDB**
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![EJS](https://img.shields.io/badge/EJS-B4CA65?style=for-the-badge&logo=ejs&logoColor=black)
+
+> **Complete modern e-commerce platform with Behavioral Analytics, Social integration, and Advanced Storefront management.**
 
 ## 🚀 Quick Start
 
@@ -66,11 +71,15 @@ EcomSphere-antigravity/
 │   └── auth.js               ← Session auth guards
 │
 ├── models/
-│   ├── User.js               ← User schema + bcrypt
+│   ├── User.js               ← User schema + loyalty points
 │   ├── Admin.js              ← Admin schema + bcrypt
-│   ├── Product.js            ← Product schema (5 categories)
+│   ├── Product.js            ← Product schema (5 categories + ratings)
 │   ├── Cart.js               ← Cart with embedded items
-│   └── Order.js              ← Order with embedded items + checkout info
+│   ├── Order.js              ← Order with embedded items + checkout info
+│   ├── FAQ.js                ← FAQ schema for support center
+│   ├── Coupon.js             ← Discount coupon management
+│   ├── Marketing.js          ← Banner & Flash sale configurations
+│   └── Subscriber.js         ← Newsletter subscriber list
 │
 ├── controllers/
 │   ├── authController.js     ← Login, register, forgot/reset password
@@ -102,10 +111,14 @@ EcomSphere-antigravity/
 │   │   ├── header.ejs, footer.ejs, flash.ejs
 │   └── admin/
 │       ├── login.ejs
-│       ├── dashboard.ejs
+│       ├── dashboard.ejs         ← Analytics charts
 │       ├── products.ejs, add_product.ejs, edit_product.ejs
+│       ├── inventory.ejs         ← Low stock alerts + inline editing
 │       ├── orders.ejs, order_details.ejs
 │       ├── users.ejs
+│       ├── customer_segments.ejs  ← Behavioral analytics
+│       ├── marketing.ejs         ← Banners & Flash sale
+│       ├── faqs.ejs, faq_edit.ejs ← Help center management
 │       └── partials/admin_header.ejs, admin_footer.ejs
 │
 ├── public/
@@ -177,8 +190,19 @@ EcomSphere-antigravity/
 | GET | `/admin/orders/:id` | Order details |
 | POST | `/admin/orders/:id/status` | Update status |
 | POST | `/admin/orders/:id/delete` | Delete order |
-| GET | `/admin/users` | Users list |
-| POST | `/admin/users/:id/delete` | Delete user |
+| GET | `/admin/inventory` | Inventory & Low Stock alerts |
+| GET | `/admin/customers/segments` | Behavioral Analytics |
+| GET/POST | `/admin/marketing` | Banners & Flash Sales |
+| GET/POST | `/admin/faqs` | Support Center CRUD |
+
+### Customer Support & Legal
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/faq` | Interactive Help Center |
+| GET | `/compare?ids=...` | Product Comparison |
+| GET | `/privacy` | Privacy Policy |
+| GET | `/terms` | Terms & Conditions |
+| GET | `/refund-shipping` | Shipping & Return Policy |
 
 ---
 
@@ -228,6 +252,21 @@ const Product = require('./models/Product');
 - [x] Order History on profile
 - [x] User Profile page
 - [x] All 5 categories: Men Clothing, Women Clothing, Footwear, Glasses, Cosmetics
+- [x] **Social Login**: Google OAuth 2.0 integration
+- [x] **Global Live Search**: Instant suggestions on desktop & mobile
+- [x] **Wishlist**: AJAX-based toggle with persistence
+- [x] **Product Comparison**: Side-by-side analysis with LocalStorage
+- [x] **Loyalty Points**: Earn/Redeem points on every order
+- [x] **Advanced Admin Dashboard**: Interactive Sales & Traffic charts
+- [x] **Inventory Control**: Low stock threshold alerts + inline stock editing
+- [x] **Customer Segmentation**: Analytics-driven behavioral grouping
+- [x] **Marketing Tools**: Homepage Banner & Flash Sale Timer management
+- [x] **Help Center**: Categorized FAQ management with CRUD
+- [x] **Live Support Widget**: Integrated WhatsApp & Email floating bubble
+- [x] **Legal Compliance**: Standard Terms, Privacy, and Shipping policies
+- [x] **Newsletter**: Subscriber management and exports
+- [x] **Multi-Image Support**: Multiple product galleries
+- [x] **Profile Photos**: Custom user avatar uploads
 - [x] Admin Login (DB-backed, bcrypt)
 - [x] Admin Dashboard (stats + recent orders + product list)
 - [x] Add Product (with image upload via multer)
@@ -247,18 +286,32 @@ const Product = require('./models/Product');
 
 ---
 
-## 🛡️ Security Features
+---
 
-- **Bcrypt**: Passwords hashed with 10 salt rounds
-- **Helmet.js**: HTTP security headers
-- **express-session**: Session-based auth stored in MongoDB
-- **Session timeout**: 30 minutes (configurable via `SESSION_MAX_AGE`)
-- **Input validation**: Server-side validation in controllers
-- **File upload**: Type filtering (images only) + 5MB size limit
-- **SQL injection**: N/A (MongoDB + Mongoose handles this)
-- **Route protection**: Middleware guards on all protected routes
-- **Admin separation**: Separate Admin model + session namespace
+## 📈 Key Feature Showcase
+
+### 💎 Shopper Experience
+*   **Social Connectivity**: Login once with Google via OAuth 2.0.
+*   **Intelligent Search**: Global live search results for products & categories.
+*   **Comparison Engine**: Side-by-side product feature & price comparison.
+*   **Loyalty Rewards**: Earn points on every purchase; redeem for discounts.
+*   **Help Center**: Contextual FAQ & Floating Live Support widget.
+
+### 🛡️ Merchant Control Panel
+*   **Business Intelligence**: Interactive charts for revenue & order metrics.
+*   **Smart Segmentation**: Automatic grouping of customers (Big Spenders, Regulars, etc.).
+*   **Inventory Automation**: Real-time stock status & low inventory alerts.
+*   **Campaign Management**: Home banners, Flash Sale timers, and Global Coupon controls.
+*   **Full CRUD**: Total management of Products, Categories, Blog, and FAQs.
 
 ---
 
-*EcomSphere JavaScript Edition v2.0.0 — March 2026*
+## 🛡️ Security & Compliance
+*   **Google OAuth**: Enterprise-standard social authentication.
+*   **Data Masking**: Privacy-first user information handling.
+*   **Legal Ready**: Built-in Privacy, Terms, and Shipping policy pages.
+*   **Protection**: Helmet.js security headers & Bcrypt password hashing.
+
+---
+
+*EcomSphere JavaScript Edition v3.0.0 — Created with ❤️ by Harsh Moradiya*
