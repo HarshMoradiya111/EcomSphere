@@ -42,6 +42,9 @@ const {
   deleteSubscriber,
   getInventory,
   postUpdateStock,
+  getFAQs,
+  postAddFAQ,
+  deleteFAQ,
 } = require('../controllers/adminController');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../middleware/auth');
 
@@ -133,5 +136,10 @@ router.post('/marketing/subscribers/delete/:id', isAdminAuthenticated, deleteSub
 // Inventory Management
 router.get('/inventory', isAdminAuthenticated, getInventory);
 router.post('/inventory/update-stock/:id', isAdminAuthenticated, postUpdateStock);
+
+// FAQ Management
+router.get('/faqs', isAdminAuthenticated, getFAQs);
+router.post('/faqs/add', isAdminAuthenticated, postAddFAQ);
+router.post('/faqs/delete/:id', isAdminAuthenticated, deleteFAQ);
 
 module.exports = router;

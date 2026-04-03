@@ -8,6 +8,7 @@ const Coupon = require('../models/Coupon');
 const HeroBanner = require('../models/HeroBanner');
 const FlashSale = require('../models/FlashSale');
 const Newsletter = require('../models/Newsletter');
+const FAQ = require('../models/FAQ');
 const path = require('path');
 const fs = require('fs');
 const csv = require('csv-parser');
@@ -654,6 +655,50 @@ const postUpdateStock = async (req, res) => {
   }
 };
 
+// FAQ MANAGEMENT
+
+// GET /admin/faqs
+const getFAQs = async (req, res) => {
+  try {
+    const faqs = await FAQ.find().sort({ category: 1, order: 1 });
+    res.render('admin/faqs', {
+      title: 'FAQ Management - EcomSphere',
+      adminUsername: req.session.adminUsername,
+      faqs,
+      errors: req.flash('error'),
+      success: req.flash('success'),
+    });
+  } catch (error) {
+    req.flash('error', 'Failed to load FAQs');
+    res.redirect('/admin/dashboard');
+  }
+};
+
+// POST /admin/faqs/add
+const postAddFAQ = async (req, res) => {
+  try {
+    const { question, answer, category, order } = req.body;
+    await FAQ.create({ question, answer, category, order: parseInt(order) || 0 });
+    req.flash('success', 'FAQ added successfully');
+    res.redirect('/admin/faqs');
+  } catch (error) {
+    req.flash('error', 'Failed to add FAQ');
+    res.redirect('/admin/faqs');
+  }
+};
+
+// POST /admin/faqs/delete/:id
+const deleteFAQ = async (req, res) => {
+  try {
+    await FAQ.findByIdAndDelete(req.params.id);
+    req.flash('success', 'FAQ deleted successfully');
+    res.redirect('/admin/faqs');
+  } catch (error) {
+    req.flash('error', 'Failed to delete FAQ');
+    res.redirect('/admin/faqs');
+  }
+};
+
 module.exports = {
   getAdminLogin,
   postAdminLogin,
@@ -694,6 +739,9 @@ module.exports = {
   deleteSubscriber,
   getInventory,
   postUpdateStock,
+  getFAQs,
+  postAddFAQ,
+  deleteFAQ,
 };
  
  // GET /admin/products/bulk

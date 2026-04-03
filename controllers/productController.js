@@ -7,6 +7,7 @@ const fs = require('fs');
 const HeroBanner = require('../models/HeroBanner');
 const FlashSale = require('../models/FlashSale');
 const Newsletter = require('../models/Newsletter');
+const FAQ = require('../models/FAQ');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
@@ -417,6 +418,29 @@ const subscribeNewsletter = async (req, res) => {
   }
 };
 
+// GET /faq
+const getFAQPage = async (req, res) => {
+  try {
+    const faqs = await FAQ.find().sort({ category: 1, order: 1 });
+    // Group FAQs by category
+    const groupedFAQs = faqs.reduce((acc, faq) => {
+      if (!acc[faq.category]) acc[faq.category] = [];
+      acc[faq.category].push(faq);
+      return acc;
+    }, {});
+
+    res.render('faq', {
+      title: 'Frequently Asked Questions - EcomSphere',
+      user: req.session.username || null,
+      groupedFAQs,
+      breadcrumbs: [{ name: 'FAQ', url: '/faq' }]
+    });
+  } catch (error) {
+    console.error('FAQ page error:', error);
+    res.redirect('/');
+  }
+};
+
 module.exports = {
   getHomepage,
   getShop,
@@ -430,4 +454,5 @@ module.exports = {
   postDeleteAddress,
   getSearchApi,
   subscribeNewsletter,
+  getFAQPage,
 };

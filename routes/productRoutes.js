@@ -14,7 +14,8 @@ const {
   postAddAddress, 
   postDeleteAddress, 
   getSearchApi,
-  subscribeNewsletter 
+  subscribeNewsletter,
+  getFAQPage
 } = require('../controllers/productController');
 const { isAuthenticated } = require('../middleware/auth');
 
@@ -88,5 +89,18 @@ router.get('/contact', (req, res) => {
 });
 
 router.get('/blog', getBlogPage);
+router.get('/faq', getFAQPage);
+
+router.get('/terms', (req, res) => {
+  res.render('terms', { title: 'Terms & Conditions - EcomSphere', user: req.session.username || null, breadcrumbs: [{ name: 'Terms', url: '/terms' }] });
+});
+
+router.get('/privacy', (req, res) => {
+  res.render('privacy', { title: 'Privacy Policy - EcomSphere', user: req.session.username || null, breadcrumbs: [{ name: 'Privacy', url: '/privacy' }] });
+});
+
+router.get('/refund-shipping', (req, res) => {
+  res.render('refund-shipping', { title: 'Refund & Shipping Policy - EcomSphere', user: req.session.username || null, breadcrumbs: [{ name: 'Refund & Shipping', url: '/refund-shipping' }] });
+});
 
 module.exports = router;

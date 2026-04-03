@@ -49,6 +49,9 @@
           <span class="sidebar-badge" style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:10px; font-size:11px; margin-left:auto;"><%= globalLowStockCount %></span>
         <% } %>
       </a>
+      <a href="/admin/faqs" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'faqs' ? 'active' : '' %>">
+        <i class="fa-solid fa-circle-question"></i> FAQ Management
+      </a>
       <hr style="border-color:rgba(255,255,255,0.1); margin:15px 0;">
       <a href="/" class="nav-item" target="_blank">
         <i class="fa-solid fa-globe"></i> View Site
