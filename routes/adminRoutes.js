@@ -48,6 +48,7 @@ const {
   postUpdateFAQ,
   deleteFAQ,
   getCustomerSegmentation,
+  getSearchAnalytics,
 } = require('../controllers/adminController');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../middleware/auth');
 
@@ -149,5 +150,6 @@ router.post('/faqs/delete/:id', isAdminAuthenticated, deleteFAQ);
 
 // Customer Analytics
 router.get('/customers/segments', isAdminAuthenticated, getCustomerSegmentation);
+router.get('/customers/search-analytics', isAdminAuthenticated, getSearchAnalytics);
 
 module.exports = router;

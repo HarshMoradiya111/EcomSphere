@@ -8,6 +8,7 @@ const HeroBanner = require('../models/HeroBanner');
 const FlashSale = require('../models/FlashSale');
 const Newsletter = require('../models/Newsletter');
 const FAQ = require('../models/FAQ');
+const SearchAnalytics = require('../models/SearchAnalytics');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
@@ -386,6 +387,14 @@ const getSearchApi = async (req, res) => {
       ]
     }).limit(10);
  
+    // ANALYTICS: Log search event asynchronously
+    SearchAnalytics.create({
+      query: qVal,
+      userId: req.session.userId || null,
+      resultsCount: products.length,
+      timestamp: new Date()
+    }).catch(err => console.error('Search logging failed:', err));
+
     res.json({ success: true, products });
   } catch (error) {
     console.error('Search API error:', error);

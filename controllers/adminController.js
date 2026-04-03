@@ -9,6 +9,7 @@ const HeroBanner = require('../models/HeroBanner');
 const FlashSale = require('../models/FlashSale');
 const Newsletter = require('../models/Newsletter');
 const FAQ = require('../models/FAQ');
+const SearchAnalytics = require('../models/SearchAnalytics');
 const path = require('path');
 const fs = require('fs');
 const csv = require('csv-parser');
@@ -657,6 +658,54 @@ const postUpdateStock = async (req, res) => {
 
 // FAQ MANAGEMENT
 
+// GET /admin/search-analytics
+const getSearchAnalytics = async (req, res) => {
+  try {
+    // 1. Top 10 Searched Terms (Aggregate)
+    const topSearches = await SearchAnalytics.aggregate([
+      {
+        $group: {
+          _id: '$query',
+          count: { $sum: 1 },
+          avgResults: { $avg: '$resultsCount' }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // 2. Terms with Zero Results (Potential Inventory Gaps)
+    const zeroResultsQueries = await SearchAnalytics.aggregate([
+      { $match: { resultsCount: 0 } },
+      {
+        $group: {
+          _id: '$query',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // 3. Overall Activity (Last 30 queries)
+    const recentQueries = await SearchAnalytics.find().sort({ timestamp: -1 }).limit(30);
+
+    res.render('admin/search_analytics', {
+      title: 'Search Analytics - EcomSphere',
+      adminUsername: req.session.adminUsername,
+      topSearches,
+      zeroResultsQueries,
+      recentQueries,
+      errors: req.flash('error'),
+      success: req.flash('success'),
+    });
+  } catch (error) {
+    console.error('Search analytics error:', error);
+    req.flash('error', 'Failed to load search analytics');
+    res.redirect('/admin/dashboard');
+  }
+};
+
 // GET /admin/faqs
 const getFAQs = async (req, res) => {
   try {
@@ -853,6 +902,7 @@ module.exports = {
   postUpdateFAQ,
   deleteFAQ,
   getCustomerSegmentation,
+  getSearchAnalytics
 };
  
  // GET /admin/products/bulk
