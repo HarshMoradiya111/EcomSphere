@@ -15,13 +15,23 @@
   <%- include('./partials/flash') %>
 
   <!-- Hero Section -->
-  <section id="hero">
-    <h4>Trade-in-offer</h4>
-    <h2>Super value deals</h2>
-    <h1>On all products</h1>
-    <p>Save more with coupon &amp; up to 70% off!</p>
-    <a href="/shop"><button>Shop now</button></a>
-  </section>
+  <% if (banners && banners.length > 0) { %>
+    <section id="hero" style="background-image: url('/uploads/<%= banners[0].image %>');">
+      <h4><%= banners[0].subtitle %></h4>
+      <h2><%= banners[0].title %></h2>
+      <h1>On all products</h1>
+      <p>Save more with loyalty points & free delivery!</p>
+      <a href="<%= banners[0].buttonLink %>"><button><%= banners[0].buttonText %></button></a>
+    </section>
+  <% } else { %>
+    <section id="hero">
+      <h4>Trade-in-offer</h4>
+      <h2>Super value deals</h2>
+      <h1>On all products</h1>
+      <p>Save more with coupon &amp; up to 70% off!</p>
+      <a href="/shop"><button>Shop now</button></a>
+    </section>
+  <% } %>
 
   <!-- Features Section -->
   <section id="feature" class="section-p1">
@@ -100,12 +110,49 @@
     <% } %>
   <% }) %>
 
-  <!-- Banner Section -->
-  <section id="banner" class="section-m1">
-    <h4>Repair service</h4>
-    <h2>Up to <span>70% off</span> - All T-Shirts &amp; Accessories</h2>
-    <a href="/shop"><button class="normal">Explore More</button></a>
-  </section>
+  <!-- Flash Sale Section -->
+  <% if (flashSale && flashSale.isActive) { %>
+    <section id="banner" class="section-m1" style="background-image: url('/img/banner/b2.jpg');">
+      <h4><%= flashSale.title %></h4>
+      <h2><%= flashSale.discountText %></h2>
+      <div id="countdown" style="display:flex; gap:20px; margin:20px 0; justify-content:center; color:#fff;">
+         <div class="time-box" style="text-align:center;"><span id="days" style="font-size:32px; font-weight:700; display:block;">00</span><small>Days</small></div>
+         <div class="time-box" style="text-align:center;"><span id="hours" style="font-size:32px; font-weight:700; display:block;">00</span><small>Hours</small></div>
+         <div class="time-box" style="text-align:center;"><span id="mins" style="font-size:32px; font-weight:700; display:block;">00</span><small>Mins</small></div>
+         <div class="time-box" style="text-align:center;"><span id="secs" style="font-size:32px; font-weight:700; display:block;">00</span><small>Secs</small></div>
+      </div>
+      <a href="/shop"><button class="normal">Explore Now</button></a>
+    </section>
+
+    <script>
+      const countDownDate = new Date("<%= flashSale.endTime %>").getTime();
+      const x = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = countDownDate - now;
+        
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById("days").innerHTML = days < 10 ? "0" + days : days;
+        document.getElementById("hours").innerHTML = hours < 10 ? "0" + hours : hours;
+        document.getElementById("mins").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+        document.getElementById("secs").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+        
+        if (distance < 0) {
+          clearInterval(x);
+          document.getElementById("countdown").innerHTML = "SALE EXPIRED";
+        }
+      }, 1000);
+    </script>
+  <% } else { %>
+    <section id="banner" class="section-m1">
+      <h4>Repair service</h4>
+      <h2>Up to <span>70% off</span> - All T-Shirts &amp; Accessories</h2>
+      <a href="/shop"><button class="normal">Explore More</button></a>
+    </section>
+  <% } %>
 
   <!-- Small Banners -->
   <section id="sm-banner" class="section-p1">
@@ -145,10 +192,10 @@
       <h4>Sign Up For Newsletter</h4>
       <p>Get E-mail updates about our latest shop and <span>special offers.</span></p>
     </div>
-    <div class="form">
-      <input type="text" placeholder="Your E-mail address">
-      <button class="normal">Sign Up</button>
-    </div>
+    <form class="form" action="/subscribe-newsletter" method="POST">
+      <input type="email" name="email" placeholder="Your E-mail address" required>
+      <button type="submit" class="normal">Sign Up</button>
+    </form>
   </section>
 
   <%- include('./partials/footer') %>

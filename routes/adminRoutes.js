@@ -35,6 +35,13 @@ const {
   deleteCoupon,
   getBulkUpload,
   postBulkUpload,
+  getMarketing,
+  postAddBanner,
+  deleteBanner,
+  postUpdateFlashSale,
+  deleteSubscriber,
+  getInventory,
+  postUpdateStock,
 } = require('../controllers/adminController');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../middleware/auth');
 
@@ -115,5 +122,16 @@ router.delete('/blogs/delete/:id', isAdminAuthenticated, deleteBlog);
  router.get('/coupons/edit/:id', isAdminAuthenticated, getEditCoupon);
  router.post('/coupons/edit/:id', isAdminAuthenticated, postEditCoupon);
  router.post('/coupons/delete/:id', isAdminAuthenticated, deleteCoupon);
+
+// Marketing
+router.get('/marketing', isAdminAuthenticated, getMarketing);
+router.post('/marketing/banner', isAdminAuthenticated, upload.single('bannerImage'), postAddBanner);
+router.post('/marketing/banner/delete/:id', isAdminAuthenticated, deleteBanner);
+router.post('/marketing/flash-sale', isAdminAuthenticated, postUpdateFlashSale);
+router.post('/marketing/subscribers/delete/:id', isAdminAuthenticated, deleteSubscriber);
+
+// Inventory Management
+router.get('/inventory', isAdminAuthenticated, getInventory);
+router.post('/inventory/update-stock/:id', isAdminAuthenticated, postUpdateStock);
 
 module.exports = router;

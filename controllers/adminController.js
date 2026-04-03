@@ -5,6 +5,9 @@ const Order = require('../models/Order');
 const Blog = require('../models/Blog');
 const Settings = require('../models/Settings');
 const Coupon = require('../models/Coupon');
+const HeroBanner = require('../models/HeroBanner');
+const FlashSale = require('../models/FlashSale');
+const Newsletter = require('../models/Newsletter');
 const path = require('path');
 const fs = require('fs');
 const csv = require('csv-parser');
@@ -499,6 +502,158 @@ const deleteBlog = async (req, res) => {
   res.redirect('/admin/blogs');
 };
 
+// MARKETING TOOLS
+
+// GET /admin/marketing
+const getMarketing = async (req, res) => {
+  try {
+    const [banners, flashSales, subscribers] = await Promise.all([
+      HeroBanner.find().sort({ createdAt: -1 }),
+      FlashSale.find().sort({ createdAt: -1 }),
+      Newsletter.find().sort({ subscribedAt: -1 })
+    ]);
+
+    res.render('admin/marketing', {
+      title: 'Marketing Tools - EcomSphere',
+      adminUsername: req.session.adminUsername,
+      banners,
+      flashSales,
+      subscribers,
+      errors: req.flash('error'),
+      success: req.flash('success'),
+    });
+  } catch (error) {
+    console.error('Marketing tools error:', error);
+    req.flash('error', 'Failed to load marketing tools');
+    res.redirect('/admin/dashboard');
+  }
+};
+
+// POST /admin/marketing/banner
+const postAddBanner = async (req, res) => {
+  try {
+    const { title, subtitle, buttonText, buttonLink } = req.body;
+    const image = req.file ? req.file.filename : null;
+
+    if (!image) {
+      req.flash('error', 'Banner image is required');
+      return res.redirect('/admin/marketing');
+    }
+
+    await HeroBanner.create({ title, subtitle, buttonText, buttonLink, image });
+    req.flash('success', 'Banner added successfully');
+    res.redirect('/admin/marketing');
+  } catch (error) {
+    console.error('Add banner error:', error);
+    req.flash('error', 'Failed to add banner');
+    res.redirect('/admin/marketing');
+  }
+};
+
+// POST /admin/marketing/banner/delete/:id
+const deleteBanner = async (req, res) => {
+  try {
+    await HeroBanner.findByIdAndDelete(req.params.id);
+    req.flash('success', 'Banner deleted successfully');
+    res.redirect('/admin/marketing');
+  } catch (error) {
+    req.flash('error', 'Failed to delete banner');
+    res.redirect('/admin/marketing');
+  }
+};
+
+// POST /admin/marketing/flash-sale
+const postUpdateFlashSale = async (req, res) => {
+  try {
+    const { title, discountText, endTime, isActive } = req.body;
+    
+    // For simplicity, we only allow one active flash sale for now or just manage them and select latest active on frontend.
+    // Let's just create a new one and mark others inactive or just use one.
+    // Let's just use what's sent.
+    await FlashSale.create({ 
+      title, 
+      discountText, 
+      endTime: new Date(endTime),
+      isActive: isActive === 'on'
+    });
+
+    req.flash('success', 'Flash sale updated');
+    res.redirect('/admin/marketing');
+  } catch (error) {
+    console.error('Flash sale error:', error);
+    req.flash('error', 'Failed to update flash sale');
+    res.redirect('/admin/marketing');
+  }
+};
+
+// POST /admin/marketing/subscribers/delete/:id
+const deleteSubscriber = async (req, res) => {
+  try {
+    await Newsletter.findByIdAndDelete(req.params.id);
+    req.flash('success', 'Subscriber removed');
+    res.redirect('/admin/marketing');
+  } catch (error) {
+    req.flash('error', 'Failed to remove subscriber');
+    res.redirect('/admin/marketing');
+  }
+};
+
+// INVENTORY MANAGEMENT
+
+// GET /admin/inventory
+const getInventory = async (req, res) => {
+  try {
+    const products = await Product.find().sort({ countInStock: 1 });
+    
+    res.render('admin/inventory', {
+      title: 'Inventory Management - EcomSphere',
+      adminUsername: req.session.adminUsername,
+      products,
+      errors: req.flash('error'),
+      success: req.flash('success'),
+    });
+  } catch (error) {
+    console.error('Inventory load error:', error);
+    req.flash('error', 'Failed to load inventory');
+    res.redirect('/admin/dashboard');
+  }
+};
+
+// POST /admin/inventory/update-stock/:id
+const postUpdateStock = async (req, res) => {
+  try {
+    const { countInStock } = req.body;
+    const product = await Product.findById(req.params.id);
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    product.countInStock = parseInt(countInStock);
+    await product.save();
+
+    // If AJAX request
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.json({ 
+        success: true, 
+        message: 'Stock updated', 
+        newStatus: product.status,
+        newStock: product.countInStock 
+      });
+    }
+
+    req.flash('success', `${product.name} stock updated successfully`);
+    res.redirect('/admin/inventory');
+  } catch (error) {
+    console.error('Update stock error:', error);
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.status(500).json({ success: false, message: 'Failed to update stock' });
+    }
+    req.flash('error', 'Failed to update stock');
+    res.redirect('/admin/inventory');
+  }
+};
+
 module.exports = {
   getAdminLogin,
   postAdminLogin,
@@ -532,6 +687,13 @@ module.exports = {
   deleteCoupon,
   getBulkUpload,
   postBulkUpload,
+  getMarketing,
+  postAddBanner,
+  deleteBanner,
+  postUpdateFlashSale,
+  deleteSubscriber,
+  getInventory,
+  postUpdateStock,
 };
  
  // GET /admin/products/bulk

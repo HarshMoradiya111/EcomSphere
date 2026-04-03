@@ -51,7 +51,7 @@
     </div>
   </div>
   <% if (lowStockCount > 0) { %>
-    <div class="stat-card" style="border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.05);">
+    <a href="/admin/inventory" class="stat-card" style="border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.05); text-decoration: none;">
       <div class="stat-icon" style="background:linear-gradient(135deg,#ff9a9e,#fecfef);">
         <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i>
       </div>
@@ -59,58 +59,9 @@
         <h3 style="color:#ef4444;"><%= lowStockCount %></h3>
         <p>Stock Alerts</p>
       </div>
-    </div>
+    </a>
   <% } %>
 </div>
-
-<!-- Inventory Alerts Table -->
-<% if (lowStockCount > 0) { %>
-<div id="inventory-alerts" class="admin-card" style="margin-top:30px; border: 1px solid #ef4444; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.1);">
-  <div class="card-header" style="background: rgba(239, 68, 68, 0.05); border-bottom-color: rgba(239, 68, 68, 0.2);">
-    <h3 style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock Alerts</h3>
-    <span class="badge" style="background:#ef4444; color:#fff;"><%= lowStockCount %> items needing attention</span>
-  </div>
-  <div class="table-responsive">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Product Name</th>
-          <th>Current Stock</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% lowStockProducts.forEach(product => { %>
-          <tr style="background: <%= product.countInStock === 0 ? 'rgba(239, 68, 68, 0.05)' : 'transparent' %>;">
-            <td>
-              <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
-                class="product-thumb" onerror="this.src='/img/placeholder.jpg'" style="border: 1px solid #ddd;">
-            </td>
-            <td><strong><%= product.name %></strong><br><small style="color:#667eea;"><%= product.category %></small></td>
-            <td>
-              <span style="font-weight:700; color: <%= product.countInStock === 0 ? '#ef4444' : '#f59e0b' %>">
-                <%= product.countInStock %> units left
-              </span>
-            </td>
-            <td>
-              <span class="badge badge-<%= product.countInStock === 0 ? 'error' : 'warning' %>" style="background: <%= product.countInStock === 0 ? '#ef4444' : '#f59e0b' %>; color: white;">
-                <%= product.countInStock === 0 ? 'Out of Stock' : 'Low Stock' %>
-              </span>
-            </td>
-            <td>
-              <a href="/admin/products/edit/<%= product._id %>" class="admin-btn btn-warning btn-sm" style="display:inline-flex; align-items:center; gap:5px;">
-                <i class="fa-solid fa-plus-circle"></i> Restock
-              </a>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
-</div>
-<% } %>
 
 <!-- Charts Section -->
 <div class="charts-grid">
@@ -134,8 +85,8 @@
 
 <script>
   // Prepare data from EJS
-  const dailyRevenue = <%- JSON.stringify(dailyRevenue) %>;
-  const categorySales = <%- JSON.stringify(categorySales) %>;
+  const dailyRevenue = <%- JSON.stringify(dailyRevenue || []) %>;
+  const categorySales = <%- JSON.stringify(categorySales || []) %>;
 
   // 1. Revenue Chart (Line)
   const revCtx = document.getElementById('revenueChart').getContext('2d');

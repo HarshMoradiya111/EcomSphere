@@ -4,6 +4,9 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const path = require('path');
 const fs = require('fs');
+const HeroBanner = require('../models/HeroBanner');
+const FlashSale = require('../models/FlashSale');
+const Newsletter = require('../models/Newsletter');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
@@ -31,11 +34,16 @@ const getHomepage = async (req, res) => {
       productsByCategory[category] = products;
     }
 
+    const banners = await HeroBanner.find({ isActive: true }).sort({ createdAt: -1 });
+    const flashSale = await FlashSale.findOne({ isActive: true }).sort({ createdAt: -1 });
+
     res.render('index', {
       title: 'EcomSphere - Shop Everything',
       productsByCategory,
       categories: CATEGORIES,
       user: req.session.username || null,
+      banners,
+      flashSale,
       success: req.flash('success'),
       errors: req.flash('error'),
     });
@@ -384,6 +392,31 @@ const getSearchApi = async (req, res) => {
   }
 };
  
+// POST /subscribe-newsletter
+const subscribeNewsletter = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      req.flash('error', 'Please provide an email address');
+      return res.redirect(req.get('referer') || '/');
+    }
+
+    const existing = await Newsletter.findOne({ email });
+    if (existing) {
+      req.flash('error', 'You are already subscribed!');
+      return res.redirect(req.get('referer') || '/');
+    }
+
+    await Newsletter.create({ email });
+    req.flash('success', 'Thank you for subscribing to our newsletter!');
+    res.redirect(req.get('referer') || '/');
+  } catch (error) {
+    console.error('Newsletter error:', error);
+    req.flash('error', 'Subscription failed. Please try again.');
+    res.redirect(req.get('referer') || '/');
+  }
+};
+
 module.exports = {
   getHomepage,
   getShop,
@@ -396,4 +429,5 @@ module.exports = {
   postAddAddress,
   postDeleteAddress,
   getSearchApi,
+  subscribeNewsletter,
 };

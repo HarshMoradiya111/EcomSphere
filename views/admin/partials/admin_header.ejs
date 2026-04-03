@@ -39,6 +39,16 @@
       <a href="/admin/settings" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">
         <i class="fa-solid fa-gear"></i> Settings
       </a>
+      <a href="/admin/marketing" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'marketing' ? 'active' : '' %>">
+        <i class="fa-solid fa-bullhorn"></i> Marketing
+      </a>
+      <a href="/admin/inventory" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'inventory' ? 'active' : '' %>">
+        <i class="fa-solid fa-warehouse"></i> 
+        Inventory 
+        <% if (globalLowStockCount > 0) { %>
+          <span class="sidebar-badge" style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:10px; font-size:11px; margin-left:auto;"><%= globalLowStockCount %></span>
+        <% } %>
+      </a>
       <hr style="border-color:rgba(255,255,255,0.1); margin:15px 0;">
       <a href="/" class="nav-item" target="_blank">
         <i class="fa-solid fa-globe"></i> View Site
@@ -60,13 +70,8 @@
           <i class="fa-solid fa-bars"></i>
         </button>
         <h1 class="page-title"><%= title %></h1>
+      </div>
       <div style="display:flex; align-items:center; gap:15px;">
-        <% if (globalLowStockCount > 0) { %>
-          <a href="/admin/dashboard#inventory-alerts" class="admin-badge" style="background:#ef4444; color:#fff; border:none; text-decoration:none;">
-            <i class="fa-solid fa-triangle-exclamation"></i> 
-            <%= globalLowStockCount %> Alerts
-          </a>
-        <% } %>
         <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> <%= locals.adminUsername || 'Admin' %></span>
       </div>
     </div>

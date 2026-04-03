@@ -2,7 +2,20 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { getHomepage, getShop, getSingleProduct, getProfile, postProfilePhoto, getBlogPage, postAddReview, postUpdateProfile, postAddAddress, postDeleteAddress, getSearchApi } = require('../controllers/productController');
+const { 
+  getHomepage, 
+  getShop, 
+  getSingleProduct, 
+  getProfile, 
+  postProfilePhoto, 
+  getBlogPage, 
+  postAddReview, 
+  postUpdateProfile, 
+  postAddAddress, 
+  postDeleteAddress, 
+  getSearchApi,
+  subscribeNewsletter 
+} = require('../controllers/productController');
 const { isAuthenticated } = require('../middleware/auth');
 
 // Multer configuration for profile photo uploads
@@ -31,6 +44,9 @@ const upload = multer({
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 },
 });
+
+// Routes
+router.post('/subscribe-newsletter', subscribeNewsletter);
 
 // Homepage (requires auth)
 router.get('/', isAuthenticated, getHomepage);
