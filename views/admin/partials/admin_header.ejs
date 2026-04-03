@@ -60,6 +60,13 @@
           <i class="fa-solid fa-bars"></i>
         </button>
         <h1 class="page-title"><%= title %></h1>
+      <div style="display:flex; align-items:center; gap:15px;">
+        <% if (globalLowStockCount > 0) { %>
+          <a href="/admin/dashboard#inventory-alerts" class="admin-badge" style="background:#ef4444; color:#fff; border:none; text-decoration:none;">
+            <i class="fa-solid fa-triangle-exclamation"></i> 
+            <%= globalLowStockCount %> Alerts
+          </a>
+        <% } %>
+        <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> <%= locals.adminUsername || 'Admin' %></span>
       </div>
-      <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> <%= locals.adminUsername || 'Admin' %></span>
     </div>

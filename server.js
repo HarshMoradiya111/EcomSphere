@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const methodOverride = require('method-override');
 const path = require('path');
 const Settings = require('./models/Settings');
+const Product = require('./models/Product');
 const passport = require('./config/passport');
 
 const connectDB = require('./config/db');
@@ -98,6 +99,17 @@ app.use(async (req, res, next) => {
     res.locals.settings = settings;
   } catch(e) {
     res.locals.settings = { address: "SSCCS", phone: "+91 8160730726", hours: "10:00 - 18:00", email: "", logo: "/img/logo1.png" };
+  }
+
+  // Fetch low stock count for admin global header
+  if (res.locals.isAdmin) {
+    try {
+      res.locals.globalLowStockCount = await Product.countDocuments({ countInStock: { $lte: 5 } });
+    } catch (e) {
+      res.locals.globalLowStockCount = 0;
+    }
+  } else {
+    res.locals.globalLowStockCount = 0;
   }
   
   next();

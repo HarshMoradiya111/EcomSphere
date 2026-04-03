@@ -59,12 +59,14 @@ const adminLogout = (req, res) => {
 // GET /admin/dashboard
 const getDashboard = async (req, res) => {
   try {
-    const [productCount, userCount, orderCount, products] = await Promise.all([
+    const [productCount, userCount, orderCount, products, lowStockProducts] = await Promise.all([
       Product.countDocuments(),
       User.countDocuments(),
       Order.countDocuments(),
       Product.find().sort({ createdAt: -1 }),
+      Product.find({ countInStock: { $lte: 5 } }).sort({ countInStock: 1 }),
     ]);
+    const lowStockCount = lowStockProducts.length;
 
     const recentOrders = await Order.find()
       .populate('userId', 'username email')
@@ -121,6 +123,8 @@ const getDashboard = async (req, res) => {
       recentOrders,
       dailyRevenue,
       categorySales,
+      lowStockCount,
+      lowStockProducts,
       errors: req.flash('error'),
       success: req.flash('success'),
     });
