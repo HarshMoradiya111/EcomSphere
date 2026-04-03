@@ -1,6 +1,10 @@
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Coupon = require('../models/Coupon');
+const User = require('../models/User');
+
+// ... (other functions remain the same)
+// I will use replace_file_content carefully.
 
 // GET /api/cart - Fetch user's cart
 const getCart = async (req, res) => {
@@ -190,7 +194,72 @@ module.exports = {
   removeFromCart,
   applyCoupon,
   removeCoupon,
+  applyPoints,
+  removePoints,
 };
+
+// ... (existing applyCoupon/removeCoupon functions)
+
+async function applyPoints(req, res) {
+  try {
+    const { points } = req.body;
+    const cart = await Cart.findOne({ userId: req.session.userId });
+    const user = await User.findById(req.session.userId);
+
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ success: false, error: 'Your cart is empty' });
+    }
+
+    const pointsToUse = parseInt(points);
+    if (isNaN(pointsToUse) || pointsToUse <= 0) {
+      return res.status(400).json({ success: false, error: 'Invalid points' });
+    }
+
+    if (pointsToUse > user.loyaltyPoints) {
+      return res.status(400).json({ success: false, error: `You only have ${user.loyaltyPoints} points` });
+    }
+
+    const total = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const maxDiscount = total * 0.5; // Cap at 50% of total
+    const pointsDiscount = Math.min(pointsToUse, maxDiscount);
+
+    cart.pointsUsed = pointsToUse;
+    cart.pointsDiscount = pointsDiscount;
+    await cart.save();
+
+    return res.json({
+      success: true,
+      message: 'Points applied!',
+      pointsUsed: pointsToUse,
+      pointsDiscount: pointsDiscount,
+      total: parseFloat((total - cart.discountAmount - pointsDiscount).toFixed(2))
+    });
+  } catch (error) {
+    console.error('Apply points error:', error);
+    return res.status(500).json({ success: false, error: 'Failed to apply points' });
+  }
+}
+
+async function removePoints(req, res) {
+  try {
+    const cart = await Cart.findOne({ userId: req.session.userId });
+    if (!cart) return res.status(404).json({ success: false, error: 'Cart not found' });
+
+    cart.pointsUsed = 0;
+    cart.pointsDiscount = 0;
+    await cart.save();
+
+    const total = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return res.json({
+      success: true,
+      message: 'Points removed',
+      total: parseFloat((total - cart.discountAmount).toFixed(2))
+    });
+  } catch (error) {
+    console.error('Remove points error:', error);
+    return res.status(500).json({ success: false, error: 'Failed to remove points' });
+  }
+}
  
  async function applyCoupon(req, res) {
    try {

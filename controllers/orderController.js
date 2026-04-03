@@ -21,7 +21,8 @@ const getCheckout = async (req, res) => {
  
     const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const discount = cart.discountAmount || 0;
-    const finalTotal = subtotal - discount;
+    const pointsDiscountNum = cart.pointsDiscount || 0;
+    const finalTotal = subtotal - discount - pointsDiscountNum;
  
     res.render('checkout', {
       title: 'Checkout - EcomSphere',
@@ -30,6 +31,8 @@ const getCheckout = async (req, res) => {
       discount: parseFloat(discount.toFixed(2)),
       total: parseFloat(finalTotal.toFixed(2)),
       appliedCoupon: cart.appliedCoupon,
+      pointsUsed: cart.pointsUsed || 0,
+      pointsDiscount: cart.pointsDiscount || 0,
       user: user,
       username: req.session.username || null,
       errors: req.flash('error'),
@@ -97,14 +100,42 @@ const placeOrder = async (req, res) => {
       },
       totalQuantity,
       subtotal: parseFloat(subtotal.toFixed(2)),
-      discount: parseFloat(discountAmount.toFixed(2)),
+      discount: parseFloat((discountAmount + (cart.pointsDiscount || 0)).toFixed(2)),
       appliedCoupon: cart.appliedCoupon,
+      loyaltyPointsUsed: cart.pointsUsed || 0,
+      loyaltyPointsEarned: Math.floor(totalPrice / 50),
       totalPrice: parseFloat(totalPrice.toFixed(2)),
-      totalAmount: parseFloat(totalPrice.toFixed(2)),
+      totalAmount: parseFloat((totalPrice - (cart.pointsDiscount || 0)).toFixed(2)),
       status: 'Pending',
     });
 
     await order.save();
+
+    // Reward Loyalty Points & Deduct Used Points
+    const pointsEarned = order.loyaltyPointsEarned;
+    const pointsUsed = order.loyaltyPointsUsed;
+    
+    const userToUpdate = await User.findById(req.session.userId);
+    if (userToUpdate) {
+      if (pointsUsed > 0) {
+        userToUpdate.loyaltyPoints -= pointsUsed;
+        userToUpdate.loyaltyHistory.push({
+          points: pointsUsed,
+          reason: `Redeemed for Order #${order._id.toString().slice(-6).toUpperCase()}`,
+          type: 'redeem'
+        });
+      }
+      
+      if (pointsEarned > 0) {
+        userToUpdate.loyaltyPoints += pointsEarned;
+        userToUpdate.loyaltyHistory.push({
+          points: pointsEarned,
+          reason: `Earned from Order #${order._id.toString().slice(-6).toUpperCase()}`,
+          type: 'earn'
+        });
+      }
+      await userToUpdate.save();
+    }
  
     // Decrement stock for each item
     for (const item of cart.items) {
@@ -118,6 +149,8 @@ const placeOrder = async (req, res) => {
     cart.items = [];
     cart.appliedCoupon = null;
     cart.discountAmount = 0;
+    cart.pointsUsed = 0;
+    cart.pointsDiscount = 0;
     await cart.save();
 
     res.redirect(`/order-success/${order._id}`);

@@ -55,7 +55,47 @@
         <% }) %>
       </table>
 
-      <h3 class="checkout-total">Order Total: ₹<%= total.toLocaleString('en-IN') %></h3>
+      <h3 class="checkout-total">
+        Order Total: ₹<%= total.toLocaleString('en-IN') %>
+        <% if (pointsUsed > 0) { %>
+          <span style="font-size:14px; color:#088178; display:block; font-weight:500;">(Points Discount: -₹<%= pointsDiscount.toLocaleString('en-IN') %>)</span>
+        <% } %>
+      </h3>
+
+      <% if (user && (user.loyaltyPoints > 0 || pointsUsed > 0)) { %>
+        <div id="loyalty-section" class="loyalty-card" style="background:#f0f9f8; border:1px dashed #088178; padding:15px; border-radius:8px; margin:25px 0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h5 style="margin:0; color:#088178; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-crown" style="font-size:18px;"></i> 
+                EcomSphere Loyalty Points
+              </h5>
+              <p style="margin:5px 0 0; font-size:14px; color:#555;">
+                Available Points: <strong id="available-points"><%= user.loyaltyPoints %></strong> 
+                <span style="color:#888; font-size:12px; margin-left:8px;">(1 Point = ₹1.00)</span>
+              </p>
+            </div>
+            <div id="loyalty-actions" class="<%= pointsUsed > 0 ? 'loyalty-hide' : 'loyalty-show' %>" style="gap:10px; align-items:center;">
+              <input type="number" id="points-to-redeem" placeholder="Enter points" 
+                     max="<%= user.loyaltyPoints %>" min="1"
+                     style="width:110px; padding:8px 12px; border:1px solid #ddd; border-radius:4px; font-size:14px; outline:none;">
+              <button type="button" id="apply-loyalty-btn" class="normal" 
+                      style="background:#088178; color:#fff; padding:8px 18px; font-size:13px; border-radius:4px; cursor:pointer; font-weight:600;">
+                Redeem
+              </button>
+            </div>
+            <div id="loyalty-applied" class="<%= pointsUsed > 0 ? 'loyalty-show' : 'loyalty-hide' %>" style="align-items:center; gap:15px; background:rgba(8, 129, 120, 0.1); padding:8px 15px; border-radius:6px;">
+               <span style="color:#088178; font-weight:700; font-size:14px;">
+                 <i class="fa-solid fa-check-circle"></i> <span id="applied-points-text"><%= pointsUsed %></span> points applied!
+               </span>
+               <button type="button" id="remove-loyalty-btn" 
+                       style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:13px; text-decoration:underline;">
+                 Remove
+               </button>
+            </div>
+          </div>
+        </div>
+      <% } %>
 
       <form class="checkout-form" action="/checkout/place-order" method="POST">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
@@ -120,10 +160,57 @@
           if (selector.value !== "") {
             fillAddress(selector.value);
           }
-        } else {
-          // Default fallback even if no selector
-          nameInput.value = "<%= user ? user.username : '' %>";
           phoneInput.value = "<%= user ? user.phone : '' %>";
+        }
+
+        // Loyalty Points Logic
+        const applyBtn = document.getElementById('apply-loyalty-btn');
+        const removeBtn = document.getElementById('remove-loyalty-btn');
+        const pointsInput = document.getElementById('points-to-redeem');
+        const actionsDiv = document.getElementById('loyalty-actions');
+        const appliedDiv = document.getElementById('loyalty-applied');
+        const appliedText = document.getElementById('applied-points-text');
+
+        if (applyBtn) {
+          applyBtn.addEventListener('click', async () => {
+            const points = pointsInput.value;
+            if (!points || points <= 0) return alert('Please enter valid points');
+            
+            try {
+              const res = await fetch('/api/cart/loyalty/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ points })
+              });
+              const data = await res.json();
+              if (data.success) {
+                appliedText.innerText = data.pointsUsed;
+                actionsDiv.style.display = 'none';
+                appliedDiv.style.display = 'flex';
+                // Reload to update total or update DOM
+                window.location.reload(); 
+              } else {
+                alert(data.error);
+              }
+            } catch (err) {
+              console.error(err);
+              alert('Error applying points');
+            }
+          });
+        }
+
+        if (removeBtn) {
+          removeBtn.addEventListener('click', async () => {
+            try {
+              const res = await fetch('/api/cart/loyalty/remove', { method: 'POST' });
+              const data = await res.json();
+              if (data.success) {
+                window.location.reload();
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          });
         }
       </script>
     <% } else { %>

@@ -24,6 +24,11 @@
     .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
     .form-input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; transition: 0.3s; }
     .form-input:focus { border-color: #088178; box-shadow: 0 0 0 3px rgba(8, 129, 120, 0.1); }
+    
+    .pts-earn { color: #22c55e !important; }
+    .pts-redeem { color: #ef4444 !important; }
+    .bg-pts-earn { background: rgba(34,197,94,0.1) !important; color: #22c55e !important; }
+    .bg-pts-redeem { background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; }
   </style>
 </head>
 <body>
@@ -45,6 +50,7 @@
         <li class="profile-tab" data-tab="edit-profile">Personal Info</li>
         <li class="profile-tab" data-tab="addresses">My Addresses</li>
         <li class="profile-tab" data-tab="orders">Order History</li>
+        <li class="profile-tab" data-tab="rewards" style="color:#088178; border-color:transparent;"><i class="fa-solid fa-crown"></i> My Rewards</li>
       </ul>
 
       <!-- Overview Tab -->
@@ -77,8 +83,11 @@
                 <p style="margin:0; font-weight:700;"><%= orders ? orders.length : 0 %></p>
               </div>
               <div>
-                <p style="margin:0; color:#888; font-size:12px; text-transform:uppercase;">Phone</p>
                 <p style="margin:0; font-weight:700;"><%= user.phone || 'Not provided' %></p>
+              </div>
+              <div style="background:#f0f9f8; padding:10px 15px; border-radius:8px; border:1px solid #088178;">
+                <p style="margin:0; color:#088178; font-size:12px; text-transform:uppercase; font-weight:700;">Loyalty Points</p>
+                <p style="margin:0; font-weight:800; font-size:22px; color:#088178;"><%= user.loyaltyPoints || 0 %></p>
               </div>
             </div>
             <div style="margin-top:30px;">
@@ -249,8 +258,58 @@
         <% } %>
       </div>
 
-    </div>
-  </section>
+      <!-- Rewards Tab -->
+      <div id="rewards" class="tab-content">
+        <div class="info-card" style="display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, #088178, #06b6d4); color:#fff; border:none; padding:40px;">
+          <div>
+            <h2 style="margin:0; font-size:32px; font-weight:800;"><%= user.loyaltyPoints || 0 %></h2>
+            <p style="margin:5px 0 0; opacity:0.9; font-size:16px;">Current Loyalty Balance</p>
+          </div>
+          <div style="font-size:50px; opacity:0.3;">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+        </div>
+
+        <div class="info-card" style="padding:0; overflow:hidden;">
+          <div style="padding:20px 25px; border-bottom:1px solid #eee;">
+            <h4 style="margin:0;">Points History</h4>
+          </div>
+          <div class="table-responsive">
+            <table style="width:100%; border-collapse:collapse; min-width:600px;">
+              <thead style="background:#f9f9f9; text-align:left;">
+                <tr>
+                  <th style="padding:15px 25px; font-size:12px; color:#888; text-transform:uppercase;">Date</th>
+                  <th style="padding:15px 25px; font-size:12px; color:#888; text-transform:uppercase;">Transaction Details</th>
+                  <th style="padding:15px 25px; font-size:12px; color:#888; text-transform:uppercase;">Points</th>
+                  <th style="padding:15px 25px; font-size:12px; color:#888; text-transform:uppercase;">Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (user.loyaltyHistory && user.loyaltyHistory.length > 0) { %>
+                  <% user.loyaltyHistory.reverse().forEach(item => { %>
+                    <tr style="border-bottom:1px solid #f6f6f6;">
+                      <td style="padding:15px 25px; font-size:14px;"><%= new Date(item.date).toLocaleDateString('en-IN') %></td>
+                      <td style="padding:15px 25px; font-size:14px; font-weight:500;"><%= item.reason %></td>
+                      <td style="padding:15px 25px; font-size:14px; font-weight:700;" class="pts-<%= item.type %>">
+                        <%= item.type === 'earn' ? '+' : '-' %><%= item.points %>
+                      </td>
+                      <td style="padding:15px 25px;">
+                        <span class="bg-pts-<%= item.type %>" style="padding:4px 10px; border-radius:4px; font-size:11px; font-weight:800; text-transform:uppercase;">
+                          <%= item.type %>
+                        </span>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" style="padding:40px; text-align:center; color:#999;">No loyalty transactions yet.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
   <%- include('./partials/footer') %>
 

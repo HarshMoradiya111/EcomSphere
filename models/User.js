@@ -64,6 +64,16 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
   }],
+  loyaltyPoints: {
+    type: Number,
+    default: 0
+  },
+  loyaltyHistory: [{
+    points: { type: Number, required: true },
+    reason: { type: String, required: true },
+    date: { type: Date, default: Date.now },
+    type: { type: String, enum: ['earn', 'redeem'], default: 'earn' }
+  }],
   createdAt: {
     type: Date,
     default: Date.now,

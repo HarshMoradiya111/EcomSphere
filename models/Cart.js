@@ -33,7 +33,15 @@ const cartSchema = new mongoose.Schema({
   },
   discountAmount: {
     type: Number,
-    default: 0,
+    default: 0
+  },
+  pointsUsed: {
+    type: Number,
+    default: 0
+  },
+  pointsDiscount: {
+    type: Number,
+    default: 0
   },
 
   updatedAt: {

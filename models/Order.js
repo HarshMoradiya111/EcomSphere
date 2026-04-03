@@ -56,6 +56,14 @@ const orderSchema = new mongoose.Schema({
     enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending',
   },
+  loyaltyPointsUsed: {
+    type: Number,
+    default: 0
+  },
+  loyaltyPointsEarned: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now,
