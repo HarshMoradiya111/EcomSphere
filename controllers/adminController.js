@@ -65,14 +65,60 @@ const adminLogout = (req, res) => {
 // GET /admin/dashboard
 const getDashboard = async (req, res) => {
   try {
-    const [productCount, userCount, orderCount, products, lowStockProducts] = await Promise.all([
+    const [productCount, userCount, orderCount, products, lowStockProducts, zeroStockCount] = await Promise.all([
       Product.countDocuments(),
       User.countDocuments(),
       Order.countDocuments(),
       Product.find().sort({ createdAt: -1 }),
       Product.find({ countInStock: { $lte: 5 } }).sort({ countInStock: 1 }),
+      Product.countDocuments({ countInStock: 0 }),
     ]);
     const lowStockCount = lowStockProducts.length;
+
+    // Logistics: Order Status Matrix
+    const statusCounts = await Order.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
+
+    // Logistics: Financial Pipeline (Revenue in Shipped status)
+    const pipelineRevenueData = await Order.aggregate([
+      { $match: { status: 'Shipped' } },
+      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+    ]);
+    const pipelineRevenue = pipelineRevenueData[0]?.total || 0;
+
+    // Logistics: Top Selling Products (Velocity)
+    const topSellers = await Order.aggregate([
+      { $match: { status: { $ne: 'Cancelled' } } },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.productId",
+          totalQuantity: { $sum: "$items.quantity" },
+          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+        }
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "productInfo"
+        }
+      },
+      { $unwind: "$productInfo" },
+      {
+        $project: {
+          totalQuantity: 1,
+          revenue: 1,
+          "productInfo.name": 1,
+          "productInfo.image": 1,
+          "productInfo.countInStock": { $ifNull: ["$productInfo.countInStock", 0] }
+        }
+      }
+    ]);
 
     const recentOrders = await Order.find()
       .populate('userId', 'username email')
@@ -131,6 +177,10 @@ const getDashboard = async (req, res) => {
       categorySales,
       lowStockCount,
       lowStockProducts,
+      zeroStockCount,
+      statusCounts: statusCounts.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {}),
+      pipelineRevenue,
+      topSellers,
       errors: req.flash('error'),
       success: req.flash('success'),
     });

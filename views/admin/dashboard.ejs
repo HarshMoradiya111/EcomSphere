@@ -12,6 +12,36 @@
   </div>
 <% } %>
 
+<!-- Logistics Pipeline & Orders Matrix -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 30px;">
+  <div class="stat-card" style="border-left: 5px solid #0ea5e9;">
+    <div class="stat-info">
+      <h3 style="color: #0ea5e9;"><%= statusCounts['Processing'] || 0 %></h3>
+      <p>Processing Now</p>
+    </div>
+  </div>
+  <div class="stat-card" style="border-left: 5px solid #8b5cf6;">
+    <div class="stat-info">
+      <h3 style="color: #8b5cf6;"><%= statusCounts['Shipped'] || 0 %></h3>
+      <p>Out for Delivery</p>
+    </div>
+  </div>
+  <div class="stat-card" style="border-left: 5px solid #22c55e;">
+    <div class="stat-info">
+      <h3 style="color: #22c55e;">₹<%= pipelineRevenue.toLocaleString('en-IN') %></h3>
+      <p>Pipeline Value</p>
+    </div>
+  </div>
+  <% if (zeroStockCount > 0) { %>
+  <div class="stat-card" style="border-left: 5px solid #ef4444; background: #fff1f2;">
+    <div class="stat-info">
+      <h3 style="color: #ef4444;"><%= zeroStockCount %></h3>
+      <p>Out of Stock Items</p>
+    </div>
+  </div>
+  <% } %>
+</div>
+
 <!-- Stats Cards -->
 <div class="stats-grid">
   <div class="stat-card">
@@ -210,6 +240,53 @@
   </div>
 </div>
 <% } %>
+
+<!-- Top Sellers (Velocity) -->
+<div class="admin-card" style="margin-top:30px;">
+  <div class="card-header" style="background: linear-gradient(135deg, #0ea5e9, #2563eb); color: #fff; display: flex; justify-content: space-between; align-items: center;">
+    <h3 style="color: #fff; margin: 0;"><i class="fa-solid fa-rocket"></i> Top Sellers (Product Velocity)</h3>
+    <span style="opacity: 0.8; font-size: 14px;">High Performance Products</span>
+  </div>
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Product</th>
+          <th>Units Sold</th>
+          <th>Total Revenue</th>
+          <th>Current Stock</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% topSellers.forEach((item, index) => { %>
+          <tr>
+            <td><strong>#<%= index + 1 %></strong></td>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="/uploads/<%= item.productInfo.image %>" width="40" height="40" style="border-radius:5px; object-fit:cover;" onerror="this.src='/img/placeholder.jpg'">
+                <span><%= item.productInfo.name %></span>
+              </div>
+            </td>
+            <td><span class="badge badge-category"><%= item.totalQuantity %> sold</span></td>
+            <td>₹<%= item.revenue.toLocaleString('en-IN') %></td>
+            <td>
+              <% if ((item.productInfo.countInStock || 0) <= 5) { %>
+                <span style="color: #ef4444; font-weight: bold;">
+                  <%= item.productInfo.countInStock ?? 0 %> left
+                </span>
+              <% } else { %>
+                <span style="color: #22c55e; font-weight: bold;">
+                  <%= item.productInfo.countInStock ?? 0 %> left
+                </span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <!-- Products Table -->
 <div class="admin-card" style="margin-top:30px;">
