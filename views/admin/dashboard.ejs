@@ -83,10 +83,17 @@
   </div>
 </div>
 
+  <div id="dashboard-data" 
+       data-revenue="<%= JSON.stringify(dailyRevenue || []) %>" 
+       data-categories="<%= JSON.stringify(categorySales || []) %>"
+       style="display:none;"></div>
+
+
 <script>
-  // Prepare data from EJS
-  const dailyRevenue = <%- JSON.stringify(dailyRevenue || []) %>;
-  const categorySales = <%- JSON.stringify(categorySales || []) %>;
+  // Prepare data from data attributes
+  const dashboardData = document.getElementById('dashboard-data').dataset;
+  const dailyRevenue = JSON.parse(dashboardData.revenue);
+  const categorySales = JSON.parse(dashboardData.categories);
 
   // 1. Revenue Chart (Line)
   const revCtx = document.getElementById('revenueChart').getContext('2d');

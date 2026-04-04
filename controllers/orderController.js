@@ -7,6 +7,7 @@ const Settings = require('../models/Settings');
 const PDFDocument = require('pdfkit');
 const path = require('path');
 const fs = require('fs');
+const { sendMail } = require('../config/mailer');
  
 // GET /checkout - Checkout page
 const getCheckout = async (req, res) => {
@@ -137,11 +138,27 @@ const placeOrder = async (req, res) => {
       await userToUpdate.save();
     }
  
-    // Decrement stock for each item
+    // Decrement stock for each item and check for low stock
     for (const item of cart.items) {
-      await Product.findByIdAndUpdate(item.productId, {
+      const updatedProduct = await Product.findByIdAndUpdate(item.productId, {
         $inc: { countInStock: -item.quantity }
-      });
+      }, { new: true });
+
+      // Low Stock Alert
+      if (updatedProduct && updatedProduct.countInStock <= 5) {
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@gmail.com';
+        sendMail(adminEmail, `⚠️ Low Stock Alert: ${updatedProduct.name}`, `
+          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ffbd27; border-radius: 8px;">
+            <h2 style="color: #d32f2f;">⚠️ Low Stock Alert</h2>
+            <p>The following product is nearly out of stock and requires restocking:</p>
+            <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 15px 0;">
+              <p><strong>Product:</strong> ${updatedProduct.name}</p>
+              <p><strong>Current Inventory:</strong> <span style="color: #d32f2f; font-weight: bold;">${updatedProduct.countInStock} units remaining</span></p>
+            </div>
+            <a href="${req.protocol}://${req.get('host')}/admin/products/edit/${updatedProduct._id}" style="display: inline-block; background: #088178; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Inventory Manager &rarr;</a>
+          </div>
+        `);
+      }
     }
 
 
@@ -152,6 +169,55 @@ const placeOrder = async (req, res) => {
     cart.pointsUsed = 0;
     cart.pointsDiscount = 0;
     await cart.save();
+
+    // TRIGGER: Automated Notifications (Async)
+    (async () => {
+       try {
+         const user = await User.findById(req.session.userId);
+         if (user && user.email) {
+           const mailContent = `
+             <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+               <h2 style="color: #088178; text-align: center;">Order Confirmed!</h2>
+               <p>Hi ${user.username},</p>
+               <p>Thank you for your order! We've received it and are preparing it for shipment.</p>
+               <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                 <h3 style="margin-top: 0;">Order Summary</h3>
+                 <p><strong>Order ID:</strong> #${order._id.toString().slice(-6).toUpperCase()}</p>
+                 <p><strong>Total Amount:</strong> ₹${order.totalAmount.toLocaleString('en-IN')}</p>
+                 <p><strong>Delivery Name:</strong> ${order.checkoutInfo.name}</p>
+                 <p><strong>Status:</strong> Pending Processing</p>
+               </div>
+               <p>Our team is now busy packing your items. You'll receive another email when your order is shipped!</p>
+               <div style="text-align: center; margin-top: 30px;">
+                 <a href="${req.protocol}://${req.get('host')}/profile" style="background: #088178; font-family: 'Poppins', sans-serif; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 14px;">View Order History</a>
+               </div>
+               <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+               <p style="font-size: 12px; color: #888; text-align: center;">&copy; 2026 EcomSphere. All rights reserved.</p>
+             </div>
+           `;
+           await sendMail(user.email, `🛍️ Order Confirmed: #${order._id.toString().slice(-6).toUpperCase()}`, mailContent);
+         }
+         
+         // Notify Admin
+         const adminEmail = process.env.ADMIN_EMAIL || 'admin@gmail.com';
+         const adminContent = `
+           <div style="font-family: sans-serif; padding: 20px; border: 1px solid #088178; border-radius: 10px;">
+             <h2 style="color: #088178;">🔥 New Order Received!</h2>
+             <p>A new order has been placed on EcomSphere.</p>
+             <div style="margin: 20px 0;">
+               <p><strong>Order ID:</strong> #${order._id}</p>
+               <p><strong>Customer:</strong> ${user?.username || 'Customer'} (${user?.email || 'N/A'})</p>
+               <p><strong>Total Revenue:</strong> ₹${order.totalAmount.toLocaleString('en-IN')}</p>
+             </div>
+             <a href="${req.protocol}://${req.get('host')}/admin/orders/${order._id}" style="color: #088178; font-weight: bold;">Manage this order in Admin Panel &rarr;</a>
+           </div>
+         `;
+         await sendMail(adminEmail, `🔥 New Alert: Order #${order._id.toString().slice(-6).toUpperCase()} Received`, adminContent);
+
+       } catch (err) {
+         console.error('Notification Trigger Error:', err);
+       }
+    })();
 
     res.redirect(`/order-success/${order._id}`);
   } catch (error) {

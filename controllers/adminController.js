@@ -8,6 +8,7 @@ const Coupon = require('../models/Coupon');
 const HeroBanner = require('../models/HeroBanner');
 const FlashSale = require('../models/FlashSale');
 const Newsletter = require('../models/Newsletter');
+const { sendMail } = require('../config/mailer');
 const FAQ = require('../models/FAQ');
 const SearchAnalytics = require('../models/SearchAnalytics');
 const path = require('path');
@@ -402,7 +403,43 @@ const updateOrderStatus = async (req, res) => {
       return res.redirect(`/admin/orders/${req.params.id}`);
     }
 
-    await Order.findByIdAndUpdate(req.params.id, { status });
+    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true }).populate('userId');
+
+    // Trigger Status Update Email (Async)
+    if (order && order.userId && order.userId.email) {
+       (async () => {
+          try {
+             const statusColors = {
+                'processing': '#0ea5e9',
+                'shipped': '#8b5cf6',
+                'delivered': '#22c55e',
+                'cancelled': '#ef4444'
+             };
+             const color = statusColors[status.toLowerCase()] || '#088178';
+             
+             const emailHtml = `
+                <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+                  <h2 style="color: #088178; text-align: center;">Order Update: #${order._id.toString().slice(-6).toUpperCase()}</h2>
+                  <p>Hi ${order.userId.username},</p>
+                  <p>Your order's progress has been updated!</p>
+                  <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                    <p style="margin: 0; font-size: 14px; color: #666;">New Status:</p>
+                    <h2 style="margin: 5px 0; color: ${color}; text-transform: uppercase;">${status}</h2>
+                  </div>
+                  <p>You can track your order details anytime in your profile dashboard.</p>
+                  <div style="text-align: center; margin-top: 30px;">
+                    <a href="${req.protocol}://${req.get('host')}/profile" style="background: #088178; font-family: 'Poppins', sans-serif; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 14px;">Track My Order</a>
+                  </div>
+                  <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+                  <p style="font-size: 12px; color: #888; text-align: center;">Need help? Just reply to this email or visit our Help Center.</p>
+                </div>
+             `;
+             await sendMail(order.userId.email, `📦 Update: Your Order #${order._id.toString().slice(-6).toUpperCase()} is now ${status}`, emailHtml);
+          } catch (err) {
+             console.error('Status Email Error:', err);
+          }
+       })();
+    }
 
     req.flash('success', `Order status updated to ${status}`);
     res.redirect(`/admin/orders/${req.params.id}`);
