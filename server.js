@@ -5,6 +5,10 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 const morgan = require('morgan');
 const methodOverride = require('method-override');
 const path = require('path');
@@ -27,12 +31,33 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Security middleware
+// Security middleware: Set security HTTP headers
 app.use(
   helmet({
     contentSecurityPolicy: false,
   })
 );
+
+// Rate limiting: Anti-Brute Force Protection
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100, // Limit each IP to 100 requests per 15 minutes
+  message: '🛑 Too many requests from this IP! Security lockdown engaged. Please try again after 15 minutes.',
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+// Apply to sensitive routes
+app.use('/auth/login', limiter);
+app.use('/api', limiter); 
+
+// Data Sanitization: Defensive against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data Sanitization: Defensive against XSS (Cross Site Scripting)
+app.use(xss());
+
+// Prevent Parameter Pollution (e.g. multiple "sort" params)
+app.use(hpp());
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
