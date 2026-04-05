@@ -55,7 +55,11 @@
         <% }) %>
       </table>
 
-        <h3 class="checkout-total" id="checkout-total-display" style="margin-top:10px; padding-top:10px; border-top:1px dashed #ddd;">
+        <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px dashed #ddd; font-weight: 500; color: #555;">
+          <span>Tax (18% GST):</span>
+          <span>+ ₹<span id="tax-display-amount"><%= taxAmount.toLocaleString('en-IN') %></span></span>
+        </div>
+        <h3 class="checkout-total" id="checkout-total-display" style="margin-top:10px; padding-top:10px; border-top:1px solid #ddd;">
           Order Total: ₹<span id="grand-total-amount"><%= total.toLocaleString('en-IN') %></span>
           <% if (pointsUsed > 0) { %>
             <span style="font-size:14px; color:#088178; display:block; font-weight:500;">(Points Discount: -₹<%= pointsDiscount.toLocaleString('en-IN') %>)</span>
@@ -244,13 +248,16 @@
         const stateInput = document.getElementById('delivery-state');
         const grandTotalSpan = document.getElementById('grand-total-amount');
         const shippingDisplay = document.getElementById('shipping-display');
-        const baseTotal = <%= total %>;
+        const subtotal = <%= subtotal %>;
+        const discountAmount = <%= discount %>;
+        const taxAmount = <%= taxAmount %>;
+        const pointsDiscountAmt = <%= typeof pointsDiscount !== 'undefined' ? pointsDiscount : 0 %>;
 
         function updateShippingDisplay() {
             if (!stateInput) return;
             const state = stateInput.value;
             let shippingFee = 0;
-            if (baseTotal > 1500) {
+            if (subtotal > 1500) {
                shippingFee = 0;
             } else if (state === 'MH') {
                shippingFee = 50;
@@ -268,7 +275,8 @@
                 shippingDisplay.innerText = '';
             }
             
-            grandTotalSpan.innerText = (baseTotal + shippingFee).toLocaleString('en-IN');
+            const finalTotal = subtotal - discountAmount + taxAmount + shippingFee - pointsDiscountAmt;
+            grandTotalSpan.innerText = Math.max(0, finalTotal).toLocaleString('en-IN');
         }
 
         if (stateInput) {

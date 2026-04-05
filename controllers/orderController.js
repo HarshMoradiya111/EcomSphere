@@ -29,14 +29,16 @@ const getCheckout = async (req, res) => {
  
     const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const discount = cart.discountAmount || 0;
+    const taxAmount = (subtotal - discount) * 0.18;
     const pointsDiscountNum = cart.pointsDiscount || 0;
-    const finalTotal = subtotal - discount - pointsDiscountNum;
+    const finalTotal = subtotal - discount + taxAmount - pointsDiscountNum;
  
     res.render('checkout', {
       title: 'Checkout - EcomSphere',
       cart: cart.items,
       subtotal: parseFloat(subtotal.toFixed(2)),
       discount: parseFloat(discount.toFixed(2)),
+      taxAmount: parseFloat(taxAmount.toFixed(2)),
       total: parseFloat(finalTotal.toFixed(2)),
       appliedCoupon: cart.appliedCoupon,
       pointsUsed: cart.pointsUsed || 0,
@@ -69,13 +71,14 @@ const createRazorpayOrder = async (req, res) => {
 
     const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const discountAmount = cart.discountAmount || 0;
+    const taxAmount = (subtotal - discountAmount) * 0.18;
     
     let shippingFee = 0;
     if (subtotal > 1500) { shippingFee = 0; }
     else if (state === 'MH') { shippingFee = 50; }
     else if (state) { shippingFee = 100; }
 
-    let totalPrice = subtotal - discountAmount - (cart.pointsDiscount || 0) + shippingFee;
+    let totalPrice = subtotal - discountAmount + taxAmount - (cart.pointsDiscount || 0) + shippingFee;
     
     if (totalPrice <= 0) totalPrice = 1;
 
@@ -147,13 +150,14 @@ const placeOrder = async (req, res) => {
     const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const discountAmount = cart.discountAmount || 0;
+    const taxAmount = (subtotal - discountAmount) * 0.18;
     
     let shippingFee = 0;
     if (subtotal > 1500) { shippingFee = 0; }
     else if (state === 'MH') { shippingFee = 50; }
     else if (state) { shippingFee = 100; }
 
-    const totalPrice = subtotal - discountAmount + shippingFee;
+    const totalPrice = subtotal - discountAmount + taxAmount + shippingFee;
 
     // Create order with embedded items
     const order = new Order({
@@ -176,6 +180,7 @@ const placeOrder = async (req, res) => {
       subtotal: parseFloat(subtotal.toFixed(2)),
       discount: parseFloat((discountAmount + (cart.pointsDiscount || 0)).toFixed(2)),
       shippingFee: parseFloat(shippingFee.toFixed(2)),
+      taxAmount: parseFloat(taxAmount.toFixed(2)),
       appliedCoupon: cart.appliedCoupon,
       loyaltyPointsUsed: cart.pointsUsed || 0,
       loyaltyPointsEarned: Math.floor((totalPrice - shippingFee) / 50),
