@@ -6,12 +6,12 @@ const { dbCache } = require('../../../utils/cacheManager');
 // GET /api/v1/products - JSON API for the future React/Next.js frontend
 router.get('/', async (req, res) => {
   try {
-    let products = dbCache.get('api_v1_products');
+    let products = await dbCache.get('api_v1_products');
     
     if (!products) {
       products = await Product.find({}).sort({ createdAt: -1 }).lean();
       // Cache the API payload for 5 minutes
-      dbCache.set('api_v1_products', products);
+      await dbCache.set('api_v1_products', products);
     }
     
     // Stateless JSON Response instead of res.render('shop', ...)

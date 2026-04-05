@@ -16,9 +16,9 @@ const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Co
 // GET / - Homepage with products by category
 const getHomepage = async (req, res) => {
   try {
-    let rawProductsByCategory = dbCache.get('home_products');
-    let banners = dbCache.get('home_banners');
-    let flashSale = dbCache.get('home_flashSale');
+    let rawProductsByCategory = await dbCache.get('home_products');
+    let banners = await dbCache.get('home_banners');
+    let flashSale = await dbCache.get('home_flashSale');
 
     // 1. REDIS-STYLE CACHING
     // If not in RAM, query the Database and save it to Cache
@@ -27,17 +27,17 @@ const getHomepage = async (req, res) => {
       for (const category of CATEGORIES) {
         rawProductsByCategory[category] = await Product.find({ category }).sort({ createdAt: -1 }).lean();
       }
-      dbCache.set('home_products', rawProductsByCategory);
+      await dbCache.set('home_products', rawProductsByCategory);
     }
 
     if (!banners) {
       banners = await HeroBanner.find({ isActive: true }).sort({ createdAt: -1 }).lean();
-      dbCache.set('home_banners', banners);
+      await dbCache.set('home_banners', banners);
     }
 
     if (!flashSale) {
       flashSale = await FlashSale.findOne({ isActive: true }).sort({ createdAt: -1 }).lean();
-      dbCache.set('home_flashSale', flashSale);
+      await dbCache.set('home_flashSale', flashSale);
     }
 
     // Deep clone to avoid mutating the cached object for specific users

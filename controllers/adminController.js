@@ -11,6 +11,7 @@ const Newsletter = require('../models/Newsletter');
 const { sendMail } = require('../config/mailer');
 const FAQ = require('../models/FAQ');
 const SearchAnalytics = require('../models/SearchAnalytics');
+const { dbCache } = require('../utils/cacheManager');
 const path = require('path');
 const fs = require('fs');
 const csv = require('csv-parser');
@@ -275,6 +276,11 @@ const postAddProduct = async (req, res) => {
 
     await product.save();
 
+    // 🏆 CACHE INVALIDATION
+    // Force Redis to wipe the old homepage data so the new product appears instantly
+    await dbCache.del('home_products');
+    await dbCache.del('api_v1_products');
+
     req.flash('success', 'Product added successfully!');
     res.redirect('/admin/products');
   } catch (error) {
@@ -351,6 +357,10 @@ const postEditProduct = async (req, res) => {
  
     await product.save();
 
+    // 🏆 CACHE INVALIDATION
+    await dbCache.del('home_products');
+    await dbCache.del('api_v1_products');
+
     req.flash('success', 'Product updated successfully!');
     res.redirect('/admin/products');
   } catch (error) {
@@ -387,6 +397,10 @@ const deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(req.params.id);
+
+    // 🏆 CACHE INVALIDATION
+    await dbCache.del('home_products');
+    await dbCache.del('api_v1_products');
 
     req.flash('success', 'Product deleted successfully!');
     res.redirect('/admin/products');
@@ -630,6 +644,10 @@ const postAddBanner = async (req, res) => {
     }
 
     await HeroBanner.create({ title, subtitle, buttonText, buttonLink, image });
+    
+    // 🏆 CACHE INVALIDATION
+    await dbCache.del('home_banners');
+
     req.flash('success', 'Banner added successfully');
     res.redirect('/admin/marketing');
   } catch (error) {
@@ -643,6 +661,10 @@ const postAddBanner = async (req, res) => {
 const deleteBanner = async (req, res) => {
   try {
     await HeroBanner.findByIdAndDelete(req.params.id);
+    
+    // 🏆 CACHE INVALIDATION
+    await dbCache.del('home_banners');
+
     req.flash('success', 'Banner deleted successfully');
     res.redirect('/admin/marketing');
   } catch (error) {
@@ -665,6 +687,9 @@ const postUpdateFlashSale = async (req, res) => {
       endTime: new Date(endTime),
       isActive: isActive === 'on'
     });
+
+    // 🏆 CACHE INVALIDATION
+    await dbCache.del('home_flashSale');
 
     req.flash('success', 'Flash sale updated');
     res.redirect('/admin/marketing');
@@ -720,6 +745,10 @@ const postUpdateStock = async (req, res) => {
 
     product.countInStock = parseInt(countInStock);
     await product.save();
+
+    // 🏆 CACHE INVALIDATION
+    await dbCache.del('home_products');
+    await dbCache.del('api_v1_products');
 
     // If AJAX request
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {
