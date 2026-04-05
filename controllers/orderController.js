@@ -525,22 +525,45 @@ const getTrackOrder = async (req, res) => {
       doc.font('Helvetica-Bold').fontSize(10).text('SUBTOTAL', 380, summaryY + 10);
       doc.font('Helvetica').text(`INR ${order.subtotal.toLocaleString('en-IN')}`, 460, summaryY + 10, { align: 'right', width: 90 });
   
+      let currentY = summaryY + 30;
+
       if (order.discount > 0) {
         doc.fillColor(primaryColor);
-        doc.font('Helvetica-Bold').text('DISCOUNT', 380, summaryY + 30);
-        doc.font('Helvetica').text(`- INR ${order.discount.toLocaleString('en-IN')}`, 460, summaryY + 30, { align: 'right', width: 90 });
+        doc.font('Helvetica-Bold').text('DISCOUNT (COUPON)', 380, currentY);
+        doc.font('Helvetica').text(`- INR ${order.discount.toLocaleString('en-IN')}`, 460, currentY, { align: 'right', width: 90 });
         doc.fillColor(textColor);
+        currentY += 20;
       }
+
+      if (order.loyaltyPointsUsed > 0) {
+        doc.fillColor(primaryColor);
+        doc.font('Helvetica-Bold').text('POINTS USED', 380, currentY);
+        doc.font('Helvetica').text(`- INR ${order.loyaltyPointsUsed.toLocaleString('en-IN')}`, 460, currentY, { align: 'right', width: 90 });
+        doc.fillColor(textColor);
+        currentY += 20;
+      }
+
+      if (order.taxAmount > 0) {
+        doc.font('Helvetica-Bold').text('TAX (18% GST)', 380, currentY);
+        doc.font('Helvetica').text(`+ INR ${order.taxAmount.toLocaleString('en-IN')}`, 460, currentY, { align: 'right', width: 90 });
+        currentY += 20;
+      }
+
+      const shippingLabel = order.shippingFee > 0 ? `+ INR ${order.shippingFee.toLocaleString('en-IN')}` : 'FREE';
+      doc.font('Helvetica-Bold').text('SHIPPING COST', 380, currentY);
+      doc.font('Helvetica').text(shippingLabel, 460, currentY, { align: 'right', width: 90 });
+      currentY += 20;
   
       // Grand Total Box
-      doc.rect(360, summaryY + 55, 200, 35).fill(primaryColor);
+      doc.rect(360, currentY + 5, 200, 35).fill(primaryColor);
       doc.fillColor('#FFFFFF').fontSize(12).font('Helvetica-Bold');
-      doc.text('GRAND TOTAL', 375, summaryY + 67);
-      doc.text(`INR ${order.totalAmount.toLocaleString('en-IN')}`, 460, summaryY + 67, { align: 'right', width: 90 });
+      doc.text('GRAND TOTAL', 375, currentY + 17);
+      doc.text(`INR ${order.totalAmount.toLocaleString('en-IN')}`, 460, currentY + 17, { align: 'right', width: 90 });
   
       // --- FOOTER ---
+      const paymentMode = order.paymentDetails && order.paymentDetails.razorpay_payment_id ? `Prepaid (Razorpay: ${order.paymentDetails.razorpay_payment_id})` : 'Cash on Delivery (COD)';
       doc.fillColor('#94a3b8').fontSize(9).font('Helvetica')
-         .text('Payment Mode: Cash on Delivery / Prepaid Online', 40, 750)
+         .text(`Payment Mode: ${paymentMode}`, 40, 750)
          .text('Generated electronically by EcomSphere Billing System.', 40, 762);
   
       doc.fontSize(10).fillColor(primaryColor).font('Helvetica-Bold')
