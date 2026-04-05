@@ -27,6 +27,10 @@ const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 
+// V2 API REST Routes (React/Next.js Ready)
+const apiV1ProductRoutes = require('./routes/api/v1/productRoutes');
+const apiV1AuthRoutes = require('./routes/api/v1/authRoutes');
+
 const app = express();
 
 // Connect to MongoDB
@@ -149,6 +153,10 @@ app.use('/', cartRoutes);
 app.use('/', orderRoutes);
 app.use('/', wishlistRoutes);
 app.use('/admin', adminRoutes);
+
+// Next.js Ready Decoupled APIs
+app.use('/api/v1/products', apiV1ProductRoutes);
+app.use('/api/v1/auth', apiV1AuthRoutes);
 
 // Redirect root to login if not authenticated
 app.get('/admin', (req, res) => res.redirect('/admin/login'));
