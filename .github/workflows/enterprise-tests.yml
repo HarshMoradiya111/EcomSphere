@@ -1,0 +1,33 @@
+name: EcomSphere CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Run Automated Quality Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+
+    - name: Install Enterprise Dependencies
+      run: npm ci
+
+    - name: Run Jest Logic & Math Validation
+      run: npm test -- --coverage
+      env:
+        CI: true
+        NODE_ENV: test
+        JWT_SECRET: ${{ secrets.JWT_SECRET || 'test_secret_for_ci' }}
+        SESSION_SECRET: ${{ secrets.SESSION_SECRET || 'test_session_secret' }}
