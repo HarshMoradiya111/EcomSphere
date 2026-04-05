@@ -5,11 +5,7 @@ public/uploads/*
 *.log
 npm-debug.log*
 .DS_Store
-Thumbs.db
-readme/*
 tmp/
-MISSING_FEATURES.md
-PENDING_OPERATIONS.md
+FEATURES.md
 google/
-PLATFORM_REPORT.md
-REMAINING_OPERATIONS.md
+ENTERPRISE_SCALING_ROADMAP.md

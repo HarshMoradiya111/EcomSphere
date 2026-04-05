@@ -10,6 +10,7 @@ const fs = require('fs');
 const { sendMail } = require('../config/mailer');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const { calculateCartTotals } = require('../utils/cartCalculator');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || 'dummy_test_key',
@@ -27,19 +28,20 @@ const getCheckout = async (req, res) => {
       return res.redirect('/cart');
     }
  
-    const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const discount = cart.discountAmount || 0;
-    const taxAmount = (subtotal - discount) * 0.18;
-    const pointsDiscountNum = cart.pointsDiscount || 0;
-    const finalTotal = subtotal - discount + taxAmount - pointsDiscountNum;
+    const { subtotal, taxAmount, finalAmount } = calculateCartTotals(
+      cart.items, 
+      cart.discountAmount, 
+      '', 
+      cart.pointsDiscount
+    );
  
     res.render('checkout', {
       title: 'Checkout - EcomSphere',
       cart: cart.items,
-      subtotal: parseFloat(subtotal.toFixed(2)),
-      discount: parseFloat(discount.toFixed(2)),
-      taxAmount: parseFloat(taxAmount.toFixed(2)),
-      total: parseFloat(finalTotal.toFixed(2)),
+      subtotal,
+      discount: parseFloat((cart.discountAmount || 0).toFixed(2)),
+      taxAmount,
+      total: finalAmount,
       appliedCoupon: cart.appliedCoupon,
       pointsUsed: cart.pointsUsed || 0,
       pointsDiscount: cart.pointsDiscount || 0,
@@ -69,21 +71,16 @@ const createRazorpayOrder = async (req, res) => {
 
     const { state } = req.body;
 
-    const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const discountAmount = cart.discountAmount || 0;
-    const taxAmount = (subtotal - discountAmount) * 0.18;
+    const { finalAmount } = calculateCartTotals(
+      cart.items, 
+      cart.discountAmount, 
+      state, 
+      cart.pointsDiscount
+    );
     
-    let shippingFee = 0;
-    if (subtotal > 1500) { shippingFee = 0; }
-    else if (state === 'MH') { shippingFee = 50; }
-    else if (state) { shippingFee = 100; }
-
-    let totalPrice = subtotal - discountAmount + taxAmount - (cart.pointsDiscount || 0) + shippingFee;
-    
-    if (totalPrice <= 0) totalPrice = 1;
-
+    // finalAmount mathematically prevents it from dropping below 1
     const options = {
-      amount: Math.round(totalPrice * 100), // amount in paisa
+      amount: Math.round(finalAmount * 100), // amount in paisa
       currency: "INR",
       receipt: `receipt_order_${new Date().getTime()}`
     };
@@ -148,16 +145,13 @@ const placeOrder = async (req, res) => {
 
 
     const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-    const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const discountAmount = cart.discountAmount || 0;
-    const taxAmount = (subtotal - discountAmount) * 0.18;
-    
-    let shippingFee = 0;
-    if (subtotal > 1500) { shippingFee = 0; }
-    else if (state === 'MH') { shippingFee = 50; }
-    else if (state) { shippingFee = 100; }
 
-    const totalPrice = subtotal - discountAmount + taxAmount + shippingFee;
+    const { subtotal, taxAmount, shippingFee, totalPrice, finalAmount, loyaltyPointsEarned } = calculateCartTotals(
+      cart.items, 
+      cart.discountAmount, 
+      state, 
+      cart.pointsDiscount
+    );
 
     // Create order with embedded items
     const order = new Order({
@@ -177,15 +171,15 @@ const placeOrder = async (req, res) => {
         phone: phone.trim(),
       },
       totalQuantity,
-      subtotal: parseFloat(subtotal.toFixed(2)),
-      discount: parseFloat((discountAmount + (cart.pointsDiscount || 0)).toFixed(2)),
-      shippingFee: parseFloat(shippingFee.toFixed(2)),
-      taxAmount: parseFloat(taxAmount.toFixed(2)),
+      subtotal: subtotal,
+      discount: parseFloat(((cart.discountAmount || 0) + (cart.pointsDiscount || 0)).toFixed(2)),
+      shippingFee: shippingFee,
+      taxAmount: taxAmount,
       appliedCoupon: cart.appliedCoupon,
       loyaltyPointsUsed: cart.pointsUsed || 0,
-      loyaltyPointsEarned: Math.floor((totalPrice - shippingFee) / 50),
-      totalPrice: parseFloat(totalPrice.toFixed(2)),
-      totalAmount: parseFloat((totalPrice - (cart.pointsDiscount || 0)).toFixed(2)),
+      loyaltyPointsEarned: loyaltyPointsEarned,
+      totalPrice: totalPrice,
+      totalAmount: finalAmount,
       status: 'Pending',
       paymentDetails: {
         razorpay_payment_id: paymentMethod !== 'cod' ? razorpay_payment_id : null,
