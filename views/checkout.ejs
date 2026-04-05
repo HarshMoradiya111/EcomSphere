@@ -55,12 +55,13 @@
         <% }) %>
       </table>
 
-      <h3 class="checkout-total">
-        Order Total: ₹<%= total.toLocaleString('en-IN') %>
-        <% if (pointsUsed > 0) { %>
-          <span style="font-size:14px; color:#088178; display:block; font-weight:500;">(Points Discount: -₹<%= pointsDiscount.toLocaleString('en-IN') %>)</span>
-        <% } %>
-      </h3>
+        <h3 class="checkout-total" id="checkout-total-display" style="margin-top:10px; padding-top:10px; border-top:1px dashed #ddd;">
+          Order Total: ₹<span id="grand-total-amount"><%= total.toLocaleString('en-IN') %></span>
+          <% if (pointsUsed > 0) { %>
+            <span style="font-size:14px; color:#088178; display:block; font-weight:500;">(Points Discount: -₹<%= pointsDiscount.toLocaleString('en-IN') %>)</span>
+          <% } %>
+        </h3>
+        <p id="shipping-display" style="text-align:center; color:#e63946; font-weight:600; margin-top:5px;"></p>
 
       <% if (user && (user.loyaltyPoints > 0 || pointsUsed > 0)) { %>
         <div id="loyalty-section" class="loyalty-card" style="background:#f0f9f8; border:1px dashed #088178; padding:15px; border-radius:8px; margin:25px 0;">
@@ -97,7 +98,10 @@
         </div>
       <% } %>
 
-      <form class="checkout-form" action="/checkout/place-order" method="POST">
+      <form class="checkout-form" action="/checkout/place-order" method="POST" id="checkout-form">
+        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
           <h3 style="margin:0; color:#333;">Delivery Information</h3>
           
@@ -117,13 +121,35 @@
         </div>
 
         <input type="text" name="name" id="delivery-name" placeholder="Full Name" required autocomplete="name">
-        <input type="text" name="address" id="delivery-address" placeholder="Shipping Address" required autocomplete="street-address">
+        <input type="text" name="address" id="delivery-address" placeholder="Street Address & City" required autocomplete="street-address">
+        <select name="state" id="delivery-state" required style="width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
+            <option value="">-- Select Shipping Region --</option>
+            <option value="MH">Maharashtra (Local)</option>
+            <option value="DL">Delhi</option>
+            <option value="KA">Karnataka</option>
+            <option value="GJ">Gujarat</option>
+            <option value="OTHER">Other State (National)</option>
+        </select>
         <input type="tel" name="phone" id="delivery-phone" placeholder="Phone Number" required autocomplete="tel">
-        <button type="submit">
-          <i class="fa-solid fa-check-circle"></i> Place Order — ₹<%= total.toLocaleString('en-IN') %>
+        
+        <div style="margin: 20px 0; background: #fafafa; padding: 18px; border-radius: 8px; border: 1px solid #e0e0e0;">
+          <h4 style="margin-top: 0; margin-bottom: 15px; color:#333; font-size:16px;"><i class="fa-solid fa-credit-card"></i> Payment Method</h4>
+          <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px; cursor:pointer; font-size:15px;">
+            <input type="radio" name="paymentMethod" value="razorpay" checked style="width:auto; margin:0;"> 
+            <span><strong>Online Payment</strong> (Card, UPI, Netbanking)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:15px;">
+            <input type="radio" name="paymentMethod" value="cod" style="width:auto; margin:0;"> 
+            <span><strong>Cash on Delivery</strong> (Pay when you receive)</span>
+          </label>
+        </div>
+
+        <button type="button" id="pay-btn">
+          <i class="fa-solid fa-lock"></i> Pay Securely — ₹<%= total.toLocaleString('en-IN') %>
         </button>
       </form>
 
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       <!-- Data source for script -->
       <script id="user-data" type="application/json">
         <%- JSON.stringify({
@@ -154,6 +180,7 @@
         if (selector) {
           selector.addEventListener('change', function() {
             fillAddress(this.value);
+            if (typeof updateShippingDisplay === 'function') updateShippingDisplay();
           });
 
           // Pre-fill on load if default exists
@@ -209,6 +236,126 @@
               }
             } catch (err) {
               console.error(err);
+            }
+          });
+        }
+
+        // --- DYNAMIC SHIPPING COST ---
+        const stateInput = document.getElementById('delivery-state');
+        const grandTotalSpan = document.getElementById('grand-total-amount');
+        const shippingDisplay = document.getElementById('shipping-display');
+        const baseTotal = <%= total %>;
+
+        function updateShippingDisplay() {
+            if (!stateInput) return;
+            const state = stateInput.value;
+            let shippingFee = 0;
+            if (baseTotal > 1500) {
+               shippingFee = 0;
+            } else if (state === 'MH') {
+               shippingFee = 50;
+            } else if (state) {
+               shippingFee = 100;
+            }
+            
+            if (shippingFee > 0) {
+                shippingDisplay.innerText = `+ ₹${shippingFee} Shipping Fee`;
+                shippingDisplay.style.color = '#e63946';
+            } else if (state) {
+                shippingDisplay.innerText = `🎉 Eligible for Free Shipping!`;
+                shippingDisplay.style.color = '#088178';
+            } else {
+                shippingDisplay.innerText = '';
+            }
+            
+            grandTotalSpan.innerText = (baseTotal + shippingFee).toLocaleString('en-IN');
+        }
+
+        if (stateInput) {
+            stateInput.addEventListener('change', updateShippingDisplay);
+        }
+
+        // --- RAZORPAY INTEGRATION ---
+        const payBtn = document.getElementById('pay-btn');
+        const checkoutForm = document.getElementById('checkout-form');
+        
+        if (payBtn) {
+          payBtn.addEventListener('click', async () => {
+            if (!nameInput.value || !addressInput.value || !phoneInput.value) {
+              return alert('Please fill in all delivery details before paying.');
+            }
+
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+            if (paymentMethod === 'cod') {
+               payBtn.innerText = 'Processing Order...';
+               payBtn.disabled = true;
+               checkoutForm.submit();
+               return;
+            }
+            
+            payBtn.innerText = 'Creating Secure Session...';
+            payBtn.disabled = true;
+
+            try {
+              // 1. Ask backend to create order
+              const res = await fetch('/checkout/razorpay/create', { 
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ state: stateInput.value })
+              });
+              const data = await res.json();
+
+              if (!data.success) {
+                  alert(data.error || 'Failed to initialize payment');
+                  payBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay Securely';
+                  payBtn.disabled = false;
+                  return;
+              }
+
+              // 2. Initialize Razorpay Checkout
+              const options = {
+                  key: data.key_id,
+                  amount: data.amount,
+                  currency: data.currency,
+                  name: "EcomSphere",
+                  description: "Order Checkout",
+                  order_id: data.id,
+                  prefill: {
+                      name: nameInput.value,
+                      contact: phoneInput.value,
+                      email: "<%= user ? user.email : '' %>"
+                  },
+                  theme: { color: "#088178" },
+                  handler: function (response) {
+                      // 3. Payment Success - Append details and submit
+                      document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                      document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+                      document.getElementById('razorpay_signature').value = response.razorpay_signature;
+                      
+                      payBtn.innerText = 'Processing Order...';
+                      checkoutForm.submit();
+                  }
+              };
+
+              options.modal = {
+                  ondismiss: function() {
+                      payBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay Securely';
+                      payBtn.disabled = false;
+                  }
+              };
+
+              const rzp = new Razorpay(options);
+              rzp.on('payment.failed', function (response){
+                  alert('Payment Failed: ' + response.error.description);
+              });
+              rzp.open();
+              
+            } catch (err) {
+               console.error(err);
+               alert('An error occurred during checkout');
+               payBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay Securely';
+               payBtn.disabled = false;
             }
           });
         }

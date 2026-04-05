@@ -39,6 +39,10 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  shippingFee: {
+    type: Number,
+    default: 0,
+  },
   appliedCoupon: {
     type: String,
     default: null,
@@ -55,6 +59,12 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending',
+  },
+  paymentDetails: {
+    razorpay_payment_id: { type: String, default: null },
+    razorpay_order_id: { type: String, default: null },
+    razorpay_signature: { type: String, default: null },
+    status: { type: String, enum: ['Paid', 'Pending', 'Failed'], default: 'Pending' }
   },
   loyaltyPointsUsed: {
     type: Number,

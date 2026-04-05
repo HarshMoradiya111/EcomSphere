@@ -8,7 +8,14 @@ const PDFDocument = require('pdfkit');
 const path = require('path');
 const fs = require('fs');
 const { sendMail } = require('../config/mailer');
- 
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || 'dummy_test_key',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_test_secret'
+});
+
 // GET /checkout - Checkout page
 const getCheckout = async (req, res) => {
   try {
@@ -50,14 +57,74 @@ const getCheckout = async (req, res) => {
   }
 };
 
+// POST /checkout/razorpay/create - Create Razorpay Order
+const createRazorpayOrder = async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ userId: req.session.userId });
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    const { state } = req.body;
+
+    const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discountAmount = cart.discountAmount || 0;
+    
+    let shippingFee = 0;
+    if (subtotal > 1500) { shippingFee = 0; }
+    else if (state === 'MH') { shippingFee = 50; }
+    else if (state) { shippingFee = 100; }
+
+    let totalPrice = subtotal - discountAmount - (cart.pointsDiscount || 0) + shippingFee;
+    
+    if (totalPrice <= 0) totalPrice = 1;
+
+    const options = {
+      amount: Math.round(totalPrice * 100), // amount in paisa
+      currency: "INR",
+      receipt: `receipt_order_${new Date().getTime()}`
+    };
+
+    const order = await razorpay.orders.create(options);
+    
+    res.json({
+      success: true,
+      amount: order.amount,
+      id: order.id,
+      currency: order.currency,
+      key_id: process.env.RAZORPAY_KEY_ID || 'dummy_test_key'
+    });
+  } catch (error) {
+    console.error('Razorpay create order error:', error);
+    res.status(500).json({ error: 'Failed to create Razorpay order' });
+  }
+};
+
 // POST /checkout/place-order - Place order
 const placeOrder = async (req, res) => {
   try {
-    const { name, address, phone } = req.body;
+    const { name, address, state, phone, paymentMethod, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
 
-    if (!name || !address || !phone) {
+    if (!name || !address || !phone || !state) {
       req.flash('error', 'All delivery details are required');
       return res.redirect('/checkout');
+    }
+
+    if (paymentMethod !== 'cod') {
+      if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+         req.flash('error', 'Payment verification failed. Please complete the payment.');
+         return res.redirect('/checkout');
+      }
+
+      // Verify Signature
+      const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'dummy_test_secret');
+      hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+      const generated_signature = hmac.digest('hex');
+
+      if (generated_signature !== razorpay_signature) {
+        req.flash('error', 'Payment signature mismatch. Transaction failed.');
+        return res.redirect('/checkout');
+      }
     }
 
     const cart = await Cart.findOne({ userId: req.session.userId });
@@ -80,7 +147,13 @@ const placeOrder = async (req, res) => {
     const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const discountAmount = cart.discountAmount || 0;
-    const totalPrice = subtotal - discountAmount;
+    
+    let shippingFee = 0;
+    if (subtotal > 1500) { shippingFee = 0; }
+    else if (state === 'MH') { shippingFee = 50; }
+    else if (state) { shippingFee = 100; }
+
+    const totalPrice = subtotal - discountAmount + shippingFee;
 
     // Create order with embedded items
     const order = new Order({
@@ -96,18 +169,25 @@ const placeOrder = async (req, res) => {
       })),
       checkoutInfo: {
         name: name.trim(),
-        address: address.trim(),
+        address: `${address.trim()}, State: ${state}`,
         phone: phone.trim(),
       },
       totalQuantity,
       subtotal: parseFloat(subtotal.toFixed(2)),
       discount: parseFloat((discountAmount + (cart.pointsDiscount || 0)).toFixed(2)),
+      shippingFee: parseFloat(shippingFee.toFixed(2)),
       appliedCoupon: cart.appliedCoupon,
       loyaltyPointsUsed: cart.pointsUsed || 0,
-      loyaltyPointsEarned: Math.floor(totalPrice / 50),
+      loyaltyPointsEarned: Math.floor((totalPrice - shippingFee) / 50),
       totalPrice: parseFloat(totalPrice.toFixed(2)),
       totalAmount: parseFloat((totalPrice - (cart.pointsDiscount || 0)).toFixed(2)),
       status: 'Pending',
+      paymentDetails: {
+        razorpay_payment_id: paymentMethod !== 'cod' ? razorpay_payment_id : null,
+        razorpay_order_id: paymentMethod !== 'cod' ? razorpay_order_id : null,
+        razorpay_signature: paymentMethod !== 'cod' ? razorpay_signature : null,
+        status: paymentMethod !== 'cod' ? 'Paid' : 'Pending'
+      }
     });
 
     await order.save();
@@ -470,6 +550,7 @@ const getTrackOrder = async (req, res) => {
  
  module.exports = {
    getCheckout,
+   createRazorpayOrder,
    placeOrder,
    getOrderSuccess,
    getUserOrders,

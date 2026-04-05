@@ -1,4 +1,5 @@
 require('dotenv').config();
+// Trigger nodemon restart for .env changes
 
 const express = require('express');
 const session = require('express-session');
@@ -35,6 +36,7 @@ connectDB();
 app.use(
   helmet({
     contentSecurityPolicy: false,
+    crossOriginOpenerPolicy: false,
   })
 );
 
