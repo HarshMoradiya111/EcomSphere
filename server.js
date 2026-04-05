@@ -13,6 +13,7 @@ const hpp = require('hpp');
 const morgan = require('morgan');
 const methodOverride = require('method-override');
 const path = require('path');
+const cors = require('cors');
 const Settings = require('./models/Settings');
 const Product = require('./models/Product');
 const passport = require('./config/passport');
@@ -36,11 +37,19 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+// Enable CORS for Next.js Frontend
+app.use(cors({
+  origin: 'http://localhost:3001',
+  credentials: true
+}));
+
 // Security middleware: Set security HTTP headers
 app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginOpenerPolicy: false,
+    // Explicitly allow images to be loaded cross-origin
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 
