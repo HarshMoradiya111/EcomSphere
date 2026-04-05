@@ -9,13 +9,39 @@ const FlashSale = require('../models/FlashSale');
 const Newsletter = require('../models/Newsletter');
 const FAQ = require('../models/FAQ');
 const SearchAnalytics = require('../models/SearchAnalytics');
+const { dbCache } = require('../utils/cacheManager');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
 // GET / - Homepage with products by category
 const getHomepage = async (req, res) => {
   try {
-    const productsByCategory = {};
+    let rawProductsByCategory = dbCache.get('home_products');
+    let banners = dbCache.get('home_banners');
+    let flashSale = dbCache.get('home_flashSale');
+
+    // 1. REDIS-STYLE CACHING
+    // If not in RAM, query the Database and save it to Cache
+    if (!rawProductsByCategory) {
+      rawProductsByCategory = {};
+      for (const category of CATEGORIES) {
+        rawProductsByCategory[category] = await Product.find({ category }).sort({ createdAt: -1 }).lean();
+      }
+      dbCache.set('home_products', rawProductsByCategory);
+    }
+
+    if (!banners) {
+      banners = await HeroBanner.find({ isActive: true }).sort({ createdAt: -1 }).lean();
+      dbCache.set('home_banners', banners);
+    }
+
+    if (!flashSale) {
+      flashSale = await FlashSale.findOne({ isActive: true }).sort({ createdAt: -1 }).lean();
+      dbCache.set('home_flashSale', flashSale);
+    }
+
+    // Deep clone to avoid mutating the cached object for specific users
+    let productsByCategory = JSON.parse(JSON.stringify(rawProductsByCategory));
 
     // Mark items in wishlist if logged in
     let wishlistIds = [];
@@ -24,20 +50,15 @@ const getHomepage = async (req, res) => {
       if (user) wishlistIds = user.wishlist.map(id => id.toString());
     }
 
-    for (const category of CATEGORIES) {
-      let products = await Product.find({ category }).sort({ createdAt: -1 });
-      if (wishlistIds.length > 0) {
-        products = products.map(p => {
-          const productObj = p.toObject();
-          productObj.isInWishlist = wishlistIds.includes(p._id.toString());
-          return productObj;
+    // Apply specific user wishlist bindings to the cached data
+    if (wishlistIds.length > 0) {
+      for (const category of CATEGORIES) {
+        productsByCategory[category] = productsByCategory[category].map(p => {
+          p.isInWishlist = wishlistIds.includes(p._id.toString());
+          return p;
         });
       }
-      productsByCategory[category] = products;
     }
-
-    const banners = await HeroBanner.find({ isActive: true }).sort({ createdAt: -1 });
-    const flashSale = await FlashSale.findOne({ isActive: true }).sort({ createdAt: -1 });
 
     res.render('index', {
       title: 'EcomSphere - Shop Everything',
