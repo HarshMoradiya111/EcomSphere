@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # 1. MONGODB DATABASE CONTAINER
+  mongodb:
+    image: mongo:latest
+    container_name: ecom_mongo
+    ports:
+      - "27017:27017" # Maps container port to localhost port
+    volumes:
+      - mongo_data:/data/db # Prevents data deletion when container stops
+
+  # 2. REDIS CACHE CONTAINER
+  redis:
+    image: redis:alpine
+    container_name: ecom_redis
+    ports:
+      - "6379:6379"
+
+  # 3. EXPRESS.JS BACKEND CONTAINER
+  backend:
+    build: .
+    container_name: ecom_backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      # Docker automatically networks these containers together using their service names!
+      - MONGO_URI=mongodb://mongodb:27017/ecomsphere
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=development
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      # Maps local uploads folder to the container so you don't lose admin-uploaded images
+      - ./public/uploads:/app/public/uploads
+
+  # 4. NEXT.JS REACT FRONTEND CONTAINER
+  frontend:
+    build: ./ecomsphere-client
+    container_name: ecom_frontend
+    ports:
+      - "3001:3001"
+    environment:
+      # Frontend reaches across the Docker network to hit the Backend API
+      - NEXT_PUBLIC_API_URL=http://backend:3000/api/v1
+    depends_on:
+      - backend
+
+# Allocate persistent memory volume for MongoDB
+volumes:
+  mongo_data:
