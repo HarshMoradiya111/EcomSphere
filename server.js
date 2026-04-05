@@ -27,6 +27,7 @@ const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
+const apiV1BlogRoutes = require('./routes/api/v1/blogRoutes');
 
 // V2 API REST Routes (React/Next.js Ready)
 const apiV1ProductRoutes = require('./routes/api/v1/productRoutes');
@@ -163,10 +164,14 @@ app.use('/', orderRoutes);
 app.use('/', wishlistRoutes);
 app.use('/admin', adminRoutes);
 
-// Next.js Ready Decoupled APIs
+const apiV1OrderRoutes = require('./routes/api/v1/orderRoutes');
+
+// Next.js Ready Decoupled APIs (V2 Cluster)
 app.use('/api/v1/products', apiV1ProductRoutes);
 app.use('/api/v1/auth', apiV1AuthRoutes);
 app.use('/api/v1/admin', apiV1AdminRoutes);
+app.use('/api/v1/blogs', apiV1BlogRoutes);
+app.use('/api/v1/orders', apiV1OrderRoutes);
 
 // Redirect root to login if not authenticated
 app.get('/admin', (req, res) => res.redirect('/admin/login'));

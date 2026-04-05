@@ -1,9 +1,8 @@
 node_modules/
 .env
 
-# React Next.js Frontend
-/ecomsphere-client/node_modules/
-/ecomsphere-client/.next/
+# React Next.js Frontend (Excluded from project version control)
+ecomsphere-client/
 
 # Uploads
 public/uploads/*

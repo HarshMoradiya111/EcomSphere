@@ -37,20 +37,6 @@ services:
       - mongodb
       - redis
 
-  # 4. NEXT.JS REACT FRONTEND CONTAINER
-  frontend:
-    build: ./ecomsphere-client
-    container_name: ecom_frontend
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./ecomsphere-client:/app
-      - /app/node_modules # Prevents local node_modules from overriding container node_modules
-    environment:
-      # Use 'backend' service name for internal Docker communication
-      - NEXT_PUBLIC_API_URL=http://backend:3000/api/v1
-    depends_on:
-      - backend
 
 # Allocate persistent memory volume for MongoDB
 volumes:
