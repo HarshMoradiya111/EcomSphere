@@ -25,17 +25,17 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    volumes:
+      - .:/app
+      - /app/node_modules # Prevents local node_modules from overriding container node_modules
+      - ./public/uploads:/app/public/uploads
     environment:
-      # Docker automatically networks these containers together using their service names!
       - MONGO_URI=mongodb://mongodb:27017/ecomsphere
       - REDIS_URL=redis://redis:6379
       - NODE_ENV=development
     depends_on:
       - mongodb
       - redis
-    volumes:
-      # Maps local uploads folder to the container so you don't lose admin-uploaded images
-      - ./public/uploads:/app/public/uploads
 
   # 4. NEXT.JS REACT FRONTEND CONTAINER
   frontend:
@@ -43,8 +43,11 @@ services:
     container_name: ecom_frontend
     ports:
       - "3001:3001"
+    volumes:
+      - ./ecomsphere-client:/app
+      - /app/node_modules # Prevents local node_modules from overriding container node_modules
     environment:
-      # Frontend reaches across the Docker network to hit the Backend API
+      # Use 'backend' service name for internal Docker communication
       - NEXT_PUBLIC_API_URL=http://backend:3000/api/v1
     depends_on:
       - backend

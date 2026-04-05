@@ -31,6 +31,7 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 // V2 API REST Routes (React/Next.js Ready)
 const apiV1ProductRoutes = require('./routes/api/v1/productRoutes');
 const apiV1AuthRoutes = require('./routes/api/v1/authRoutes');
+const apiV1AdminRoutes = require('./routes/api/v1/adminRoutes');
 
 const app = express();
 
@@ -39,17 +40,16 @@ connectDB();
 
 // Enable CORS for Next.js Frontend
 app.use(cors({
-  origin: 'http://localhost:3001',
+  origin: ['http://localhost:3001', 'http://127.0.0.1:3001'],
   credentials: true
 }));
 
-// Security middleware: Set security HTTP headers
+// Security middleware (Temporary relaxation for local cross-port development)
 app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginOpenerPolicy: false,
-    // Explicitly allow images to be loaded cross-origin
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginResourcePolicy: false, // 🔓 Setting to false to resolve "Failed to Connect" issues
   })
 );
 
@@ -166,6 +166,7 @@ app.use('/admin', adminRoutes);
 // Next.js Ready Decoupled APIs
 app.use('/api/v1/products', apiV1ProductRoutes);
 app.use('/api/v1/auth', apiV1AuthRoutes);
+app.use('/api/v1/admin', apiV1AdminRoutes);
 
 // Redirect root to login if not authenticated
 app.get('/admin', (req, res) => res.redirect('/admin/login'));

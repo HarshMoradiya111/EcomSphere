@@ -5,8 +5,8 @@ import Link from 'next/link';
 // It securely fetches data from our Express /api/v1 endpoint in the background.
 async function getProducts() {
   try {
-    // Next.js connects seamlessly to our highly scalable JSON API layer
-    const res = await fetch('http://localhost:3000/api/v1/products', { 
+    // 🔥 CRITICAL: On the server, we must use the Docker service name 'backend'
+    const res = await fetch('http://backend:3000/api/v1/products', { 
       cache: 'no-store' 
     });
     
