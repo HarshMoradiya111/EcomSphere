@@ -19,7 +19,7 @@ export default function AdminProducts() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/products');
+      const res = await fetch('${API_URL}/api/v1/admin/products');
       const data = await res.json();
       if (data.success) {
         setProducts(data.products);
@@ -33,7 +33,7 @@ export default function AdminProducts() {
 
   // Ultra-resilient SKU resolution node
   const getImageUrl = (image: any) => {
-    if (!image) return 'http://127.0.0.1:3000/img/placeholder.jpg';
+    if (!image) return '${API_URL}/img/placeholder.jpg';
     
     // Support both single string and array structures
     const imgStr = Array.isArray(image) ? image[0] : image;
@@ -42,20 +42,20 @@ export default function AdminProducts() {
     
     // Defensively handle prefixes
     if (imgStr.startsWith('/uploads') || imgStr.startsWith('uploads/')) {
-       return `http://127.0.0.1:3000${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
+       return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
     }
     
     // Seeded assets like n1.jpg are in the root / or /img/
-    if (imgStr.includes('/')) return `http://127.0.0.1:3000${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
+    if (imgStr.includes('/')) return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
     
     // Default fallback to /uploads/ if it's a raw filename from a recent upload
-    return `http://127.0.0.1:3000/uploads/${imgStr}`;
+    return `${API_URL}/uploads/${imgStr}`;
   };
 
   const updateStock = async (id: string, newStock: number) => {
     setSyncing(id);
     try {
-      const res = await fetch(`http://127.0.0.1:3000/api/v1/admin/products/${id}/stock`, {
+      const res = await fetch(`${API_URL}/api/v1/admin/products/${id}/stock`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ countInStock: newStock }),
@@ -73,7 +73,7 @@ export default function AdminProducts() {
   const deleteProduct = async (id: string) => {
     if (!confirm('🚨 Are you absolutely sure? This will wipe the product from the global database.')) return;
     try {
-      const res = await fetch(`http://127.0.0.1:3000/api/v1/admin/products/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/v1/admin/products/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setProducts(products.filter(p => p._id !== id));
       }

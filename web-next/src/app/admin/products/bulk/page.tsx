@@ -23,7 +23,7 @@ export default function BulkUpload() {
     formData.append('csvFile', file);
 
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/products/bulk', {
+      const res = await fetch('${API_URL}/api/v1/admin/products/bulk', {
         method: 'POST',
         body: formData,
       });

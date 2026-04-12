@@ -10,7 +10,7 @@ export default function BlogHub() {
   // Protocol-aware image resolution node
   // Ultra-resilient image resolution protocol
   const getImageUrl = (image: string) => {
-    if (!image) return 'http://127.0.0.1:3000/img/placeholder.jpg';
+    if (!image) return '${API_URL}/img/placeholder.jpg';
     if (image.startsWith('http')) return image;
     
     // Cleanse structural redundancies
@@ -28,13 +28,13 @@ export default function BlogHub() {
         cleanPath = image;
     }
 
-    return `http://127.0.0.1:3000${cleanPath}`;
+    return `${API_URL}${cleanPath}`;
   };
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:3000/api/v1/blogs');
+        const res = await fetch('${API_URL}/api/v1/blogs');
         const data = await res.json();
         if (data.success) {
           setBlogs(data.data);

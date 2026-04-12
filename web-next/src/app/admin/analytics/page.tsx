@@ -11,9 +11,9 @@ export default function AdminAnalytics() {
   const fetchMatrix = async () => {
     try {
       const [searchRes, couponRes, bannerRes] = await Promise.all([
-        fetch('http://127.0.0.1:3000/api/v1/admin/search-analytics'),
-        fetch('http://127.0.0.1:3000/api/v1/admin/coupons'),
-        fetch('http://127.0.0.1:3000/api/v1/admin/banners')
+        fetch('${API_URL}/api/v1/admin/search-analytics'),
+        fetch('${API_URL}/api/v1/admin/coupons'),
+        fetch('${API_URL}/api/v1/admin/banners')
       ]);
 
       const [searchData, couponData, bannerData] = await Promise.all([
@@ -80,7 +80,7 @@ export default function AdminAnalytics() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                    {banners.map((b, idx) => (
                        <div key={idx} className="relative aspect-video rounded-[2rem] overflow-hidden border border-slate-800 group">
-                           <img src={`http://127.0.0.1:3000${b.image}`} alt="Banner" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                           <img src={`${API_URL}${b.image}`} alt="Banner" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                            <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-slate-950 to-transparent">
                                <p className="text-white font-black text-xs uppercase tracking-widest">{b.title || 'Untitled Campaign'}</p>
                            </div>

@@ -9,7 +9,7 @@ export default function AdminBlogs() {
 
   const fetchBlogs = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/blogs');
+      const res = await fetch('${API_URL}/api/v1/admin/blogs');
       const data = await res.json();
       if (data.success) {
         setBlogs(data.blogs);
@@ -23,7 +23,7 @@ export default function AdminBlogs() {
 
   // Ultra-resilient image resolution protocol
   const getImageUrl = (image: string) => {
-    if (!image) return 'http://127.0.0.1:3000/img/placeholder.jpg';
+    if (!image) return '${API_URL}/img/placeholder.jpg';
     if (image.startsWith('http')) return image;
     
     // Cleanse structural redundancies
@@ -36,13 +36,13 @@ export default function AdminBlogs() {
        cleanPath = `/img/blog/${image}`;
     }
 
-    return `http://127.0.0.1:3000${cleanPath}`;
+    return `${API_URL}${cleanPath}`;
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('🚨 Decommission this bulletin? This cannot be undone.')) return;
     try {
-      const res = await fetch(`http://127.0.0.1:3000/api/v1/admin/blogs/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/v1/admin/blogs/${id}`, { method: 'DELETE' });
       if (res.ok) fetchBlogs();
     } catch (err) {
       console.error('Core purge failure');

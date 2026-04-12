@@ -11,7 +11,7 @@ export default function AdminFAQs() {
 
   const fetchFAQs = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/faqs');
+      const res = await fetch('${API_URL}/api/v1/admin/faqs');
       const data = await res.json();
       if (data.success) {
         setFaqs(data.faqs);
@@ -26,7 +26,7 @@ export default function AdminFAQs() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/faqs', {
+      const res = await fetch('${API_URL}/api/v1/admin/faqs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question, answer }),
@@ -43,7 +43,7 @@ export default function AdminFAQs() {
 
   const deleteFAQ = async (id: string) => {
     try {
-      await fetch(`http://127.0.0.1:3000/api/v1/admin/faqs/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/api/v1/admin/faqs/${id}`, { method: 'DELETE' });
       fetchFAQs();
     } catch (err) {
       console.error('Purge failed');

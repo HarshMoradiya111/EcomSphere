@@ -24,7 +24,7 @@ export default function AdminDashboard() {
     setError(null);
     try {
       // Use absolute IPv4 URL to prevent DNS resolution issues (common on Windows)
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/stats');
+      const res = await fetch('${API_URL}/api/v1/admin/stats');
       if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
       const data = await res.json();
       if (data.success) {

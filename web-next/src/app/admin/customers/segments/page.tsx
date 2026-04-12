@@ -8,7 +8,7 @@ export default function CustomerSegments() {
 
   const fetchSegments = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/customers/segments');
+      const res = await fetch('${API_URL}/api/v1/admin/customers/segments');
       const data = await res.json();
       if (data.success) {
         setSegments(data.segments);

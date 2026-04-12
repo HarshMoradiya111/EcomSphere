@@ -1,20 +1,22 @@
 import React from 'react';
 import Link from 'next/link';
-import AddToCartButton from '../../../../components/AddToCartButton';
+import { API_URL } from '@/config';
+import AddToCartButton from '@/features/cart/AddToCartButton';
+
 
 // Safely parses image URL from the Decoupled Express server just like the homepage
 function getImageUrl(image: any) {
-  if (!image) return 'http://localhost:3000/img/placeholder.jpg';
+  if (!image) return `${API_URL}/img/placeholder.jpg`;
   const imgStr = Array.isArray(image) ? image[0] : image;
   if (imgStr.startsWith('http')) return imgStr;
-  if (imgStr.includes('/')) return `http://localhost:3000${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-  return `http://localhost:3000/uploads/${imgStr}`;
+  if (imgStr.includes('/')) return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
+  return `${API_URL}/uploads/${imgStr}`;
 }
 
 // Automatically securely fetch the specific product from our Express API!
 async function getSingleProduct(id: string) {
   try {
-    const res = await fetch(`http://localhost:3000/api/v1/products/${id}`, { cache: 'no-store' });
+    const res = await fetch(`${API_URL}/api/v1/products/${id}`, { cache: 'no-store' });
     if (!res.ok) return { data: null };
     return res.json();
   } catch (error) {

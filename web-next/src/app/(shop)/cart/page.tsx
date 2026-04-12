@@ -5,11 +5,11 @@ import Link from 'next/link';
 
 // Safe image parser replicating backend
 function getImageUrl(image: any) {
-  if (!image) return 'http://localhost:3000/img/placeholder.jpg';
+  if (!image) return '${API_URL}/img/placeholder.jpg';
   const imgStr = Array.isArray(image) ? image[0] : image;
   if (imgStr.startsWith('http')) return imgStr;
-  if (imgStr.includes('/')) return `http://localhost:3000${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-  return `http://localhost:3000/uploads/${imgStr}`;
+  if (imgStr.includes('/')) return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
+  return `${API_URL}/uploads/${imgStr}`;
 }
 
 export default function CartPage() {

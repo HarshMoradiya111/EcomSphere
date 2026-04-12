@@ -3,14 +3,17 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AddToCartButton from '../../features/cart/AddToCartButton';
+import { API_URL } from '../../config';
+
 
 // Safe image parser
 function getImageUrl(image: any) {
-  if (!image) return 'http://localhost:3000/img/placeholder.jpg';
+  if (!image) return `${API_URL}/img/placeholder.jpg`;
   const imgStr = Array.isArray(image) ? image[0] : image;
   if (imgStr.startsWith('http')) return imgStr;
-  return `http://localhost:3000${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
+  return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
 }
+
 
 export default function HomeHub() {
   const [groupedProducts, setGroupedProducts] = useState<any>({});
@@ -22,8 +25,8 @@ export default function HomeHub() {
     const fetchData = async () => {
       try {
         const [prodRes, markRes] = await Promise.all([
-          fetch('http://127.0.0.1:3000/api/v1/products'),
-          fetch('http://127.0.0.1:3000/api/v1/products/marketing/assets')
+          fetch(`${API_URL}/api/v1/products`),
+          fetch(`${API_URL}/api/v1/products/marketing/assets`)
         ]);
         const prodData = await prodRes.json();
         const markData = await markRes.json();
@@ -69,7 +72,7 @@ export default function HomeHub() {
           {marketing.banners.length > 0 ? (
               <div className="absolute inset-0 z-0">
                   <img 
-                    src={`http://127.0.0.1:3000/uploads/${marketing.banners[0].image}`} 
+                    src={`${API_URL}/uploads/${marketing.banners[0].image}`} 
                     className="w-full h-full object-cover opacity-50" 
                     alt="Hero"
                   />
@@ -109,7 +112,7 @@ export default function HomeHub() {
               { id: 'f6', label: '24/7 Support' }
           ].map((f) => (
               <div key={f.id} className="p-8 bg-gray-50 rounded-[2.5rem] border border-gray-100 flex flex-col items-center hover:shadow-xl transition-all group">
-                  <img src={`http://127.0.0.1:3000/img/features/${f.id}.jpg`} alt={f.label} className="w-16 h-16 object-contain mb-4 group-hover:scale-110 transition-transform" />
+                  <img src={`${API_URL}/img/features/${f.id}.jpg`} alt={f.label} className="w-16 h-16 object-contain mb-4 group-hover:scale-110 transition-transform" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-teal-800">{f.label}</span>
               </div>
           ))}
@@ -161,7 +164,7 @@ export default function HomeHub() {
       {/* 4. Flash Sale: Real-Time Synchronization */}
       {marketing.flashSale && (
           <section className="mx-12 md:mx-24 my-12 relative h-[50vh] rounded-[4rem] overflow-hidden flex flex-col items-center justify-center text-center p-12 bg-gray-950">
-              <div className="absolute inset-0 bg-[url('http://127.0.0.1:3000/img/banner/b2.jpg')] bg-cover bg-center opacity-30"></div>
+              <div className="absolute inset-0 bg-[url('${API_URL}/img/banner/b2.jpg')] bg-cover bg-center opacity-30"></div>
               <div className="relative z-10">
                   <h4 className="text-rose-400 font-black uppercase tracking-[0.4em] text-[10px] mb-6">{marketing.flashSale.title}</h4>
                   <h2 className="text-white text-5xl md:text-7xl font-black tracking-tighter mb-10 italic">{marketing.flashSale.discountText}</h2>

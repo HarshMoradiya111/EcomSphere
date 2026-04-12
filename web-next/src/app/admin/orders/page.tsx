@@ -19,7 +19,7 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/orders');
+      const res = await fetch('${API_URL}/api/v1/admin/orders');
       const data = await res.json();
       if (data.success) {
         setOrders(data.orders);
@@ -34,7 +34,7 @@ export default function AdminOrders() {
   const updateStatus = async (id: string, status: string) => {
     setUpdating(id);
     try {
-      await fetch(`http://127.0.0.1:3000/api/v1/admin/orders/${id}/status`, {
+      await fetch(`${API_URL}/api/v1/admin/orders/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/config';
+
 
 export default function PublicLogin() {
   const [email, setEmail] = useState('');
@@ -17,7 +19,8 @@ export default function PublicLogin() {
     setError('');
 
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/auth/login', {
+      const res = await fetch(`${API_URL}/api/v1/auth/login`, {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

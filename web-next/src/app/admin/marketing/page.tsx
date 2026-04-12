@@ -15,9 +15,9 @@ export default function MarketingEngine() {
   const fetchData = async () => {
     try {
       const [bRes, fRes, sRes] = await Promise.all([
-        fetch('http://127.0.0.1:3000/api/v1/admin/banners'),
-        fetch('http://127.0.0.1:3000/api/v1/admin/flash-sale'),
-        fetch('http://127.0.0.1:3000/api/v1/admin/subscribers')
+        fetch('${API_URL}/api/v1/admin/banners'),
+        fetch('${API_URL}/api/v1/admin/flash-sale'),
+        fetch('${API_URL}/api/v1/admin/subscribers')
       ]);
       const [bData, fData, sData] = await Promise.all([bRes.json(), fRes.json(), sRes.json()]);
       if (bData.success) setBanners(bData.banners);
@@ -44,7 +44,7 @@ export default function MarketingEngine() {
     if (bannerFile) formData.append('image', bannerFile);
 
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/banners', {
+      const res = await fetch('${API_URL}/api/v1/admin/banners', {
         method: 'POST',
         body: formData
       });
@@ -59,7 +59,7 @@ export default function MarketingEngine() {
 
   const deleteBanner = async (id: string) => {
     try {
-      await fetch(`http://127.0.0.1:3000/api/v1/admin/banners/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/api/v1/admin/banners/${id}`, { method: 'DELETE' });
       fetchData();
     } catch (err) {
       console.error('Purge failed');
@@ -69,7 +69,7 @@ export default function MarketingEngine() {
   const handleFlashSaleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/flash-sale', {
+      const res = await fetch('${API_URL}/api/v1/admin/flash-sale', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(flashSaleForm)
@@ -85,7 +85,7 @@ export default function MarketingEngine() {
 
   const deleteSubscriber = async (id: string) => {
     try {
-      await fetch(`http://127.0.0.1:3000/api/v1/admin/subscribers/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/api/v1/admin/subscribers/${id}`, { method: 'DELETE' });
       fetchData();
     } catch (err) {
       console.error('Purge failed');
@@ -141,7 +141,7 @@ export default function MarketingEngine() {
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4 scrollbar-hide">
             {banners.map((b, idx) => (
               <div key={idx} className="flex gap-6 p-4 rounded-3xl bg-slate-900 border border-slate-800 group transition-all hover:border-amber-500">
-                <img src={`http://127.0.0.1:3000/uploads/${b.image}`} className="w-32 h-20 object-cover rounded-2xl" />
+                <img src={`${API_URL}/uploads/${b.image}`} className="w-32 h-20 object-cover rounded-2xl" />
                 <div className="flex-1">
                   <h4 className="text-white font-black text-sm uppercase tracking-tighter">{b.title}</h4>
                   <p className="text-slate-500 text-[10px] font-bold mt-1 uppercase tracking-widest">{b.subtitle}</p>

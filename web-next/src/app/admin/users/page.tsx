@@ -8,7 +8,7 @@ export default function AdminUsers() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/users');
+      const res = await fetch('${API_URL}/api/v1/admin/users');
       const data = await res.json();
       if (data.success) {
         setUsers(data.users);
@@ -23,7 +23,7 @@ export default function AdminUsers() {
   const deleteUser = async (id: string) => {
     if (!confirm('🚨 CRITICAL: This will purge the customer profile and all associated link-data. Proceed?')) return;
     try {
-      const res = await fetch(`http://127.0.0.1:3000/api/v1/admin/users/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/v1/admin/users/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setUsers(users.filter(u => u._id !== id));
       }

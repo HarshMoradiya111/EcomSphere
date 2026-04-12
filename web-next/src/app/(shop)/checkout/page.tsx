@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '@/config';
+
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -20,7 +22,7 @@ export default function CheckoutPage() {
     setCart(savedCart);
   }, [router]);
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const total = cart.reduce((sum: number, item: any) => sum + item.price, 0);
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +30,8 @@ export default function CheckoutPage() {
 
     try {
       const orderData = {
-        items: cart.map(i => ({ productId: i.productId, quantity: 1, price: i.price })),
+        items: cart.map((i: any) => ({ productId: i.productId, quantity: 1, price: i.price })),
+
         shippingAddress: {
            street: formData.street,
            city: formData.city,
@@ -39,7 +42,8 @@ export default function CheckoutPage() {
         paymentMethod: formData.paymentMethod
       };
 
-      const res = await fetch('http://127.0.0.1:3000/api/v1/orders', {
+      const res = await fetch(`${API_URL}/api/v1/orders`, {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
@@ -131,8 +135,9 @@ export default function CheckoutPage() {
           <div className="lg:w-80 bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-xl h-fit sticky top-24">
               <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-8 pb-4 border-b border-gray-50">Cluster Summary</h2>
               <div className="space-y-6 max-h-80 overflow-y-auto pr-2 pb-6 custom-scrollbar">
-                  {cart.map((item, idx) => (
+                  {cart.map((item: any, idx: number) => (
                       <div key={idx} className="flex gap-4">
+
                           <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100">
                              <img src={item.image} className="w-full h-full object-cover" />
                           </div>

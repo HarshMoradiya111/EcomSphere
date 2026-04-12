@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '@/config';
+
 
 export default function AdminLogin() {
   const [username, setUsername] = useState('');
@@ -16,7 +18,9 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/auth/admin/login', {
+      const res = await fetch(`${API_URL}/api/v1/auth/admin/login`, {
+
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

@@ -13,14 +13,14 @@ export default function NewProduct() {
      countInStock: 0,
      description: '',
      brand: '',
-     image: 'http://localhost:3000/img/products/1.jpg' // Default link for now
+     image: '${API_URL}/img/products/1.jpg' // Default link for now
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:3000/api/v1/admin/products', {
+      const res = await fetch('${API_URL}/api/v1/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
