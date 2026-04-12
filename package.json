@@ -3,12 +3,12 @@
   "version": "3.0.0",
   "description": "EcomSphere - Monorepo (Frontend & Backend)",
   "scripts": {
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "install:all": "npm install && cd backend && npm install && cd ../web-next && npm install",
     "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
+    "dev:frontend": "cd web-next && npm run dev",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm start"
+    "start:frontend": "cd web-next && npm start"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
