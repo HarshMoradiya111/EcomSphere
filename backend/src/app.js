@@ -22,11 +22,26 @@ const routesV1 = require('./routes');
 
 const app = express();
 
+// 0. PRODUCTION SECURITY & LOAD BALANCER CONFIG
+// Trusting Render's proxy is required for secure cookies/sessions to work
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+
 // 1. GLOBAL MIDDLEWARE
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://127.0.0.1:3001'],
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:3001', 
+    'http://127.0.0.1:3001',
+    process.env.CLIENT_URL,
+    // Allow Render's own domain just in case
+    /\.onrender\.com$/ 
+  ].filter(Boolean),
   credentials: true
 }));
+
 
 app.use(helmet({
   contentSecurityPolicy: false,
@@ -123,7 +138,10 @@ app.use('/api/v1', routesV1.apiRouter);
 app.use('/', routesV1.ejsRouter);
 
 // 6. ERROR HANDLING & FALLBACKS
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 app.get('/img/placeholder.jpg', (req, res) => {
+
   res.setHeader('Content-Type', 'image/svg+xml');
   res.send('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#e2e8f0"/><text x="50%" y="50%" font-family="sans-serif" font-size="20" fill="#94a3b8" text-anchor="middle" dy=".3em">No Image</text></svg>');
 });
