@@ -1,23 +1,25 @@
 node_modules/
+backend/node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
 .env
-
-# React Next.js Frontend (Excluded from project version control)
-ecomsphere-client/
+backend/.env
 
 # Uploads
-public/uploads/*
-!public/uploads/.gitkeep
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep
 
 # Logs and OS files
 *.log
 npm-debug.log*
 .DS_Store
 tmp/
-google/
+backend/google/
 
 # Session Notes / Roadmaps
-FEATURES.md
-ENTERPRISE_SCALING_ROADMAP.md
-MISSING_FEATURES.md
-PENDING_OPERATIONS.md
-PLATFORM_REPORT.md
+backend/FEATURES.md
+backend/ENTERPRISE_SCALING_ROADMAP.md
+backend/MISSING_FEATURES.md
+backend/PENDING_OPERATIONS.md
+backend/PLATFORM_REPORT.md
