@@ -22,28 +22,26 @@ const VALID_CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses
  */
 async function analyzeProductImage(imageBuffer, mimeType) {
   try {
-    // In 2026, we use the 2.0 generation models
+    console.log(`[AI DIAGNOSTIC] Starting analysis of image (${mimeType}, size: ${imageBuffer.length} bytes)`);
+    console.log(`[AI DIAGNOSTIC] Using Model: gemini-2.0-flash`);
+    
+    // For images, the 1.5 Flash model is fast and efficient
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
-      You are an expert e-commerce catalog manager. Analyze this product image and provide details for a product listing.
-      Return the response in a STRICT JSON format with the following structure:
+      Analyze this product image and provide details for an e-commerce listing in STRICT JSON.
       {
-        "name": "Engaging Product Name",
-        "description": "A professional 2-3 sentence marketing description highlighting key features.",
-        "price": Suggested price in INR (number),
-        "category": "Best fit category from our available list",
-        "brand": "Suggested brand name or 'EcomSphere'",
-        "countInStock": 20
+        "name": "Product Name",
+        "description": "2-3 sentence description.",
+        "price": 999,
+        "category": "One of: Men Clothing, Women Clothing, Footwear, Glasses, Cosmetics",
+        "brand": "Brand",
+        "countInStock": 10
       }
-
-      CRITICAL RULES:
-      1. The "category" field MUST be exactly one of these values: ${VALID_CATEGORIES.join(', ')}.
-      2. If you are unsure, choose the closest match from the list above.
-      3. The response must be ONLY the JSON object, no other text or explanation.
-      4. Ensure the JSON is valid and can be parsed.
     `;
 
+    console.log(`[AI DIAGNOSTIC] Sending request to Google...`);
+    const startTime = Date.now();
     const result = await model.generateContent([
       prompt,
       {
@@ -56,6 +54,7 @@ async function analyzeProductImage(imageBuffer, mimeType) {
 
     const response = await result.response;
     const text = response.text();
+    console.log(`[AI DIAGNOSTIC] Received response in ${Date.now() - startTime}ms`);
     
     // Better cleaning: find the first { and last }
     let jsonString = text.trim();
