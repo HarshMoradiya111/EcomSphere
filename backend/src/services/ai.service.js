@@ -73,7 +73,11 @@ async function analyzeProductImage(imageBuffer, mimeType) {
       throw new Error(`AI returned an invalid format: ${text.substring(0, 50)}...`);
     }
   } catch (error) {
-    console.error('Gemini Vision Error:', error);
+    if (error.message.includes('429')) {
+      console.error('Gemini Rate Limit Hit (429). Please wait 1 minute.');
+      throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+    }
+    console.error('Gemini Vision Error:', error.message);
     throw new Error('Failed to analyze image. Ensure your API key is valid.');
   }
 }

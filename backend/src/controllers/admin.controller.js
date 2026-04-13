@@ -1250,7 +1250,8 @@ module.exports = {
       const validResults = results.filter(r => r !== null);
 
       if (validResults.length === 0) {
-        req.flash('error', 'AI could not recognize any of the images. Please try different images.');
+        const displayError = errors.length > 0 ? errors[0] : 'AI could not recognize any of the images. Please try different images.';
+        req.flash('error', displayError);
         return res.redirect('/admin/products/ai');
       }
 
