@@ -17,12 +17,12 @@ This plan outlines the steps to add an AI-powered product cataloging feature to 
 ---
 
 ## ⚙️ PHASE 2: Backend Infrastructure
-- [ ] **2.1: Multer Configuration**
+- [x] **2.1: Multer Configuration**
   - Ensure `multer` is configured to handle multiple files in the new route.
-- [ ] **2.2: AI Controller Logic**
+- [x] **2.2: AI Controller Logic**
   - Create `getAIUpload` (render page) and `postAIUpload` (process images) in `admin.controller.js`.
   - Implement logic to loop through uploaded images and call the AI service.
-- [ ] **2.3: Admin Routes**
+- [x] **2.3: Admin Routes**
   - Register `GET /admin/products/ai` and `POST /admin/products/ai` in `admin.routes.js`.
 
 ---

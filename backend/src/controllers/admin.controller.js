@@ -15,6 +15,7 @@ const { dbCache } = require('../utils/cacheManager');
 const path = require('path');
 const fs = require('fs');
 const csv = require('csv-parser');
+const aiService = require('../services/ai.service');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
@@ -1018,7 +1019,9 @@ module.exports = {
   postUpdateFAQ,
   deleteFAQ,
   getCustomerSegmentation,
-  getSearchAnalytics
+  getSearchAnalytics,
+  getAIUpload,
+  postAIUpload
 };
  
  // GET /admin/products/bulk
@@ -1194,3 +1197,69 @@ module.exports = {
      res.redirect('/admin/coupons');
    }
  }
+
+  // GET /admin/products/ai
+  async function getAIUpload(req, res) {
+    res.render('admin/ai_upload', {
+      title: 'AI Product Auto-Catalog - Admin',
+      adminUsername: req.session.adminUsername,
+      errors: req.flash('error'),
+      success: req.flash('success'),
+      activePage: 'products'
+    });
+  }
+
+  // POST /admin/products/ai
+  async function postAIUpload(req, res) {
+    if (!req.files || req.files.length === 0) {
+      req.flash('error', 'Please upload at least one product image.');
+      return res.redirect('/admin/products/ai');
+    }
+
+    const analyzedProducts = [];
+    const errors = [];
+
+    try {
+      // Process images (up to 20 images based on maxCount in route)
+      const processImage = async (file) => {
+        try {
+          const buffer = fs.readFileSync(file.path);
+          const aiData = await aiService.analyzeProductImage(buffer, file.mimetype);
+          
+          return {
+            ...aiData,
+            tempImage: file.filename, // Track the uploaded image
+            originalPath: file.path
+          };
+        } catch (err) {
+          console.error(`Error analyzing ${file.originalname}:`, err);
+          errors.push(`Failed to analyze ${file.originalname}`);
+          return null;
+        }
+      };
+
+      const results = await Promise.all(req.files.map(file => processImage(file)));
+      
+      const validResults = results.filter(r => r !== null);
+
+      if (validResults.length === 0) {
+        req.flash('error', 'AI could not recognize any of the images. Please try different images.');
+        return res.redirect('/admin/products/ai');
+      }
+
+      res.render('admin/ai_review', {
+        title: 'Review AI Cataloging - Admin',
+        adminUsername: req.session.adminUsername,
+        products: validResults,
+        categories: aiService.VALID_CATEGORIES,
+        errors: errors,
+        success: req.flash('success'),
+        activePage: 'products'
+      });
+
+    } catch (err) {
+      console.error('AI Bulk Upload Error:', err);
+      req.flash('error', 'A system error occurred during AI analysis');
+      res.redirect('/admin/products/ai');
+    }
+  }

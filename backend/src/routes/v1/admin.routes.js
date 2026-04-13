@@ -49,6 +49,8 @@ const {
   deleteFAQ,
   getCustomerSegmentation,
   getSearchAnalytics,
+  getAIUpload,
+  postAIUpload,
 } = require('../../controllers/admin.controller');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../../middleware/auth.middleware');
 
@@ -98,6 +100,8 @@ router.post('/products/edit/:id', isAdminAuthenticated, upload.fields([{ name: '
 router.post('/products/delete/:id', isAdminAuthenticated, deleteProduct);
 router.get('/products/bulk', isAdminAuthenticated, getBulkUpload);
 router.post('/products/bulk', isAdminAuthenticated, upload.single('csvFile'), postBulkUpload);
+router.get('/products/ai', isAdminAuthenticated, getAIUpload);
+router.post('/products/ai', isAdminAuthenticated, upload.array('productImages', 20), postAIUpload);
 
 
 // Orders
