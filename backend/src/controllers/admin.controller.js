@@ -48,7 +48,13 @@ const postAdminLogin = async (req, res) => {
     req.session.adminId = admin._id.toString();
     req.session.adminUsername = admin.username;
 
-    res.redirect('/admin/dashboard');
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.redirect('/admin/login');
+      }
+      res.redirect('/admin/dashboard');
+    });
   } catch (error) {
     console.error('Admin login error:', error);
     req.flash('error', 'Login failed. Please try again.');
