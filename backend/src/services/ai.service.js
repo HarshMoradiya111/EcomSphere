@@ -77,8 +77,11 @@ async function analyzeProductImage(imageBuffer, mimeType) {
       console.error('Gemini Rate Limit Hit (429). Please wait 1 minute.');
       throw new Error('Rate limit exceeded. Please wait a moment and try again.');
     }
-    console.error('Gemini Vision Error:', error.message);
-    throw new Error('Failed to analyze image. Ensure your API key is valid.');
+    console.error('--- Gemini Technical Error Details ---');
+    console.error('Message:', error.message);
+    if (error.status) console.error('Status:', error.status);
+    console.error('-------------------------------------');
+    throw new Error(`AI was unable to process this image: ${error.message.substring(0, 50)}...`);
   }
 }
 
