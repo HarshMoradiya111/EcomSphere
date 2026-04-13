@@ -5,12 +5,12 @@ This plan outlines the steps to add an AI-powered product cataloging feature to 
 ---
 
 ## 📅 PHASE 1: Setup & API Configuration
-- [ ] **1.1: Install Dependencies**
+- [x] **1.1: Install Dependencies**
   - Install `@google/generative-ai` in the `backend/` directory.
-- [ ] **1.2: Environment Setup**
+- [x] **1.2: Environment Setup**
   - Add `GEMINI_API_KEY` to `.env`.
   - Update `.env.example` with the new key placeholder.
-- [ ] **1.3: API Utility Service**
+- [x] **1.3: API Utility Service**
   - Create `backend/src/services/ai.service.js`.
   - Implement a function `analyzeProductImage(imageBuffer)` that returns a structured JSON object.
 
