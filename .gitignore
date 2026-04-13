@@ -30,6 +30,17 @@ Thumbs.db
 .planning/codebase/
 search-analytics.json
 
+# Project Specific
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep
+.planning/
+scratch/
+temp_*.js
+ai_handlers.js
+safe_append.js
+update_exports.js
+patch_login.js
+
 # Sensitive Files
 *.pem
 *.key

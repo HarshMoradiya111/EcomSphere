@@ -4,7 +4,10 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Initialize the Google Generative AI with your API key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+if (!process.env.GEMINI_API_KEY) {
+  console.error('CRITICAL: GEMINI_API_KEY is not defined in .env file');
+}
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'AIza_dummy_key_to_prevent_crash');
 
 /**
  * Valid categories based on the Product model enum
@@ -54,14 +57,20 @@ async function analyzeProductImage(imageBuffer, mimeType) {
     const response = await result.response;
     const text = response.text();
     
-    // Clean the response text in case the model included markdown code blocks
-    const jsonString = text.replace(/```json|```/g, '').trim();
+    // Better cleaning: find the first { and last }
+    let jsonString = text.trim();
+    const firstBrace = jsonString.indexOf('{');
+    const lastBrace = jsonString.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      jsonString = jsonString.substring(firstBrace, lastBrace + 1);
+    }
     
     try {
       return JSON.parse(jsonString);
     } catch (parseError) {
-      console.error('Failed to parse AI response as JSON:', text);
-      throw new Error('AI returned an invalid format. Please try again.');
+      console.error('Failed to parse AI response as JSON. RAW TEXT:', text);
+      throw new Error(`AI returned an invalid format: ${text.substring(0, 50)}...`);
     }
   } catch (error) {
     console.error('Gemini Vision Error:', error);
