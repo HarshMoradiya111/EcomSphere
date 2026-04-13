@@ -1230,6 +1230,7 @@ module.exports = {
       // Process images (up to 20 images based on maxCount in route)
       const processImage = async (file) => {
         try {
+          console.log(`Analyzing file at: ${file.path}`);
           const buffer = fs.readFileSync(file.path);
           const aiData = await aiService.analyzeProductImage(buffer, file.mimetype);
           

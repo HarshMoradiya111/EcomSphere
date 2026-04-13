@@ -58,7 +58,8 @@ const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../../mi
 // Multer configuration for product image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../../public/uploads'));
+    const uploadPath = path.resolve(__dirname, '../../../public/uploads');
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
