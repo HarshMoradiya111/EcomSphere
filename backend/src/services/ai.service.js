@@ -22,8 +22,8 @@ const VALID_CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses
  */
 async function analyzeProductImage(imageBuffer, mimeType) {
   try {
-    // For images, the 1.5 Flash model is fast and efficient
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // In 2026, we use the 2.0 generation models
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
       You are an expert e-commerce catalog manager. Analyze this product image and provide details for a product listing.
