@@ -51,6 +51,7 @@ const {
   getSearchAnalytics,
   getAIUpload,
   postAIUpload,
+  postSaveAIProducts,
 } = require('../../controllers/admin.controller');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../../middleware/auth.middleware');
 
