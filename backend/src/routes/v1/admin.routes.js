@@ -102,6 +102,7 @@ router.get('/products/bulk', isAdminAuthenticated, getBulkUpload);
 router.post('/products/bulk', isAdminAuthenticated, upload.single('csvFile'), postBulkUpload);
 router.get('/products/ai', isAdminAuthenticated, getAIUpload);
 router.post('/products/ai', isAdminAuthenticated, upload.array('productImages', 20), postAIUpload);
+router.post('/products/save-ai', isAdminAuthenticated, postSaveAIProducts);
 
 
 // Orders

@@ -28,12 +28,12 @@ This plan outlines the steps to add an AI-powered product cataloging feature to 
 ---
 
 ## 🖥️ PHASE 3: Admin Interface (UI)
-- [ ] **3.1: AI Upload Template**
+- [x] **3.1: AI Upload Template**
   - Create `backend/views/admin/ai_upload.ejs`.
   - Design a premium "Drag & Drop" interface with a preview section for multiple images.
-- [ ] **3.2: AI Processing UI**
+- [x] **3.2: AI Processing UI**
   - Add a "Processing" overlay to show progress while the AI "looks" at the images.
-- [ ] **3.3: AI Review Table**
+- [x] **3.3: AI Review Table**
   - After analysis, show a table where the user can:
     - Edit the generated Name, Price, and Description.
     - Confirm or change the Category.

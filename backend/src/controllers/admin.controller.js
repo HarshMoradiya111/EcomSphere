@@ -1021,7 +1021,8 @@ module.exports = {
   getCustomerSegmentation,
   getSearchAnalytics,
   getAIUpload,
-  postAIUpload
+  postAIUpload,
+  postSaveAIProducts
 };
  
  // GET /admin/products/bulk
@@ -1260,6 +1261,43 @@ module.exports = {
     } catch (err) {
       console.error('AI Bulk Upload Error:', err);
       req.flash('error', 'A system error occurred during AI analysis');
+      res.redirect('/admin/products/ai');
+    }
+  }
+
+  // POST /admin/products/save-ai
+  async function postSaveAIProducts(req, res) {
+    try {
+      const { products } = req.body;
+
+      if (!products || !Array.isArray(products) || products.length === 0) {
+        req.flash('error', 'No products to save.');
+        return res.redirect('/admin/products/ai');
+      }
+
+      // Convert objects to match Mongoose schema and save
+      const productsToSave = products.map(p => ({
+        name: p.name.trim(),
+        description: p.description.trim(),
+        price: parseFloat(p.price),
+        category: p.category,
+        brand: p.brand || 'EcomSphere',
+        countInStock: parseInt(p.countInStock) || 0,
+        image: p.image, // Still uses the filename uploaded during analysis
+        status: 'In Stock'
+      }));
+
+      await Product.insertMany(productsToSave);
+
+      // Cache invalidation
+      await dbCache.del('home_products');
+      await dbCache.del('api_v1_products');
+
+      req.flash('success', `Successfully added ${productsToSave.length} products to the catalog!`);
+      res.redirect('/admin/products');
+    } catch (error) {
+      console.error('Save AI Products Error:', error);
+      req.flash('error', 'Failed to save products. Please check for errors and try again.');
       res.redirect('/admin/products/ai');
     }
   }
