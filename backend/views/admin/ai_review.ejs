@@ -16,6 +16,7 @@
     display: flex;
     gap: 25px;
     animation: fadeIn 0.5s ease forwards;
+    animation-delay: calc(var(--index, 0) * 0.1s);
   }
 
   @keyframes fadeIn {
@@ -127,7 +128,7 @@
 
   <form action="/admin/products/save-ai" method="POST" id="final-save-form">
     <% products.forEach((product, index) => { %>
-      <div class="review-card" style="animation-delay: calc(<%= index %> * 0.1s);">
+      <div class="review-card" style="--index: <%= index %>;">
         <div class="product-image-preview">
           <img src="/uploads/<%= product.tempImage %>" alt="Product">
           <input type="hidden" name="products[<%= index %>][image]" value="<%= product.tempImage %>">
