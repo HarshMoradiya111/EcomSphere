@@ -24,6 +24,7 @@ Not just another e-commerce clone. EcomSphere combines enterprise-grade features
 - **🔐 Production Security** – OAuth 2.0, bcrypt hashing, Helmet.js protection, session management
 - **📊 Business Intelligence** – Interactive charts, low-stock automation, flash sale timers
 - **🎨 Premium UI/UX** – Glassmorphism design, toast notifications, smooth animations
+- **👁️ AI Vision Auto-Catalog** – Bulk upload product images and let AI generate names, descriptions, and categories automatically
 
 Built for developers who want to understand **real-world e-commerce architecture**, not just tutorial basics.
 
@@ -78,6 +79,7 @@ npm run dev
 | **Marketing Suite** | Campaign management system | Banners, flash sales, coupon codes |
 | **Order Pipeline** | 5-state workflow | Pending → Processing → Shipped → Delivered → Cancelled |
 | **Revenue Charts** | Chart.js integration | Visual sales trends |
+| **AI Auto-Catalog** | Google Gemini Vision | Magic multi-image recognition & auto-tagging |
 | **Help Center CMS** | FAQ CRUD interface | Customer support management |
 
 ---
