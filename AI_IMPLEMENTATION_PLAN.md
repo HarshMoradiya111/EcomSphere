@@ -42,11 +42,11 @@ This plan outlines the steps to add an AI-powered product cataloging feature to 
 ---
 
 ## 🧪 PHASE 4: Testing & Hardening
-- [ ] **4.1: Prompt Tuning**
+- [x] **4.1: Prompt Tuning**
   - Refine the AI prompt to ensure it accurately picks from existing categories: `Men Clothing`, `Women Clothing`, `Footwear`, `Glasses`, `Cosmetics`.
-- [ ] **4.2: Error Handling**
+- [x] **4.2: Error Handling**
   - Add logic to handle cases where the AI cannot recognize the product or the API is unavailable.
-- [ ] **4.3: Cache Invalidation**
+- [x] **4.3: Cache Invalidation**
   - Ensure the system clears the `home_products` cache after saving AI-generated products.
 
 ---
