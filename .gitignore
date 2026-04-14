@@ -14,6 +14,8 @@ node_modules/
 dist/
 build/
 out/
+.kiro/
+.vscode/
 
 # Debug and Logs
 npm-debug.log*
