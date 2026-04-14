@@ -25,7 +25,7 @@ async function analyzeProductImage(imageBuffer, mimeType) {
     console.log(`[AI DIAGNOSTIC] Starting analysis of image (${mimeType}, size: ${imageBuffer.length} bytes)`);
     console.log(`[AI DIAGNOSTIC] Using Model: gemini-2.0-flash`);
     
-    // For images, the 1.5 Flash model is fast and efficient
+    // For images, the 1.5/2.5 Flash model is fast and efficient
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `

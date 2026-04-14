@@ -1241,12 +1241,21 @@ module.exports = {
           };
         } catch (err) {
           console.error(`Error analyzing ${file.originalname}:`, err);
-          errors.push(`Failed to analyze ${file.originalname}`);
+          errors.push(`Failed to analyze ${file.originalname}: ${err.message}`);
           return null;
         }
       };
 
-      const results = await Promise.all(req.files.map(file => processImage(file)));
+      const results = [];
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const result = await processImage(file);
+        results.push(result);
+        if (i < req.files.length - 1) {
+          // Delay to prevent 429 Rate Limit
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
       
       const validResults = results.filter(r => r !== null);
 
