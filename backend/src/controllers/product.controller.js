@@ -372,7 +372,7 @@ const getBlogPage = async (req, res) => {
 const postAddReview = async (req, res) => {
   try {
     const { productId, rating, comment } = req.body;
-    const userId = req.session.userId;
+    const userId = req.session.userId || (req.user && req.user.id);
 
     if (!userId) {
       return res.status(401).json({ success: false, error: 'Please login to leave a review' });

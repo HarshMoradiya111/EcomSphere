@@ -50,12 +50,12 @@ router.get('/:id', async (req, res) => {
 });
 
 const { postAddReview } = require('../../controllers/product.controller');
-const bridgeAuth = require('../../middleware/auth.api.middleware');
+const { isAuthenticatedApi } = require('../../middleware/auth.api.middleware');
 
 // ... (other product routes)
 
 // @desc    Add product review
 // @route   POST /api/v1/products/review
-router.post('/review', bridgeAuth, postAddReview);
+router.post('/review', isAuthenticatedApi, postAddReview);
 
 module.exports = router;
