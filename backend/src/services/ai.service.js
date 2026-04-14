@@ -42,15 +42,29 @@ async function analyzeProductImage(imageBuffer, mimeType) {
 
     console.log(`[AI DIAGNOSTIC] Sending request to Google...`);
     const startTime = Date.now();
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: imageBuffer.toString('base64'),
-          mimeType
+    let result;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        result = await model.generateContent([
+          prompt,
+          {
+            inlineData: {
+              data: imageBuffer.toString('base64'),
+              mimeType
+            }
+          }
+        ]);
+        break; // Success!
+      } catch (e) {
+        if (e.message && (e.message.includes('429') || e.message.includes('503'))) {
+          if (attempt === 3) throw e;
+          console.log(`[AI DIAGNOSTIC] Rate limit hit on attempt ${attempt}. Waiting 10 seconds before retry...`);
+          await new Promise(resolve => setTimeout(resolve, 10000));
+        } else {
+          throw e; // throw immediately for other non-rate-limit errors
         }
       }
-    ]);
+    }
 
     const response = await result.response;
     const text = response.text();

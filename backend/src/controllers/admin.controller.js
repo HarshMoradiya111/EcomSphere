@@ -1253,7 +1253,8 @@ module.exports = {
         results.push(result);
         if (i < req.files.length - 1) {
           // Delay to prevent 429 Rate Limit
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // 15 RPM free tier limit = 1 request every 4 seconds. 
+          await new Promise(resolve => setTimeout(resolve, 4500));
         }
       }
       
