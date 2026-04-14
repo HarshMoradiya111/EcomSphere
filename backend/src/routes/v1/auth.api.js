@@ -25,6 +25,27 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// POST /api/v1/auth/register - User Registration
+router.post('/register', async (req, res) => {
+  const { username, email, password } = req.body;
+  try {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ success: false, error: 'User already exists' });
+    }
+
+    const user = await User.create({ username, email, password });
+    
+    const payload = { id: user._id.toString(), role: 'user' };
+    const secret = process.env.JWT_SECRET || 'ecomsphere_super_secret_jwt';
+    const token = jwt.sign(payload, secret, { expiresIn: '7d' });
+
+    res.status(201).json({ success: true, token, user: { id: user._id, username: user.username } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Registration failed' });
+  }
+});
+
 // POST /api/v1/auth/admin/login - Stateless JWT Authentication (Admin)
 router.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;

@@ -124,7 +124,7 @@ const getShop = async (req, res) => {
     const allPrices = await Product.find({}, { price: 1 });
     const minPossible = allPrices.length > 0 ? Math.min(...allPrices.map(p => p.price)) : 0;
     const maxPossible = allPrices.length > 0 ? Math.max(...allPrices.map(p => p.price)) : 10000;
- 
+
     // Mark items in wishlist if logged in
     if (req.session.userId) {
       const user = await User.findById(req.session.userId);
@@ -252,7 +252,7 @@ const postProfilePhoto = async (req, res) => {
     // Delete old profile photo if it exists and is custom
     if (user.profilePhoto && !user.profilePhoto.startsWith('/img/rprofile/')) {
       const p = path.join(__dirname, '../public', user.profilePhoto);
-      if (fs.existsSync(p)) fs.unlink(p, () => {});
+      if (fs.existsSync(p)) fs.unlink(p, () => { });
     }
 
     user.profilePhoto = '/uploads/' + req.file.filename;
@@ -266,22 +266,22 @@ const postProfilePhoto = async (req, res) => {
     res.redirect('/profile');
   }
 };
- 
+
 // POST /profile/update - Update personal info
 const postUpdateProfile = async (req, res) => {
   try {
     const { username, email, phone } = req.body;
     const user = await User.findById(req.session.userId);
- 
+
     if (username) user.username = username.trim();
     if (email) user.email = email.trim();
     if (phone) user.phone = phone.trim();
- 
+
     await user.save();
-    
+
     // Update session if username changed
     req.session.username = user.username;
- 
+
     req.flash('success', 'Profile updated successfully!');
     res.redirect('/profile');
   } catch (error) {
@@ -290,13 +290,13 @@ const postUpdateProfile = async (req, res) => {
     res.redirect('/profile');
   }
 };
- 
+
 // POST /profile/address/add - Add new address
 const postAddAddress = async (req, res) => {
   try {
     const { street, city, state, zip, country, isDefault } = req.body;
     const user = await User.findById(req.session.userId);
- 
+
     const newAddress = {
       street: street.trim(),
       city: city.trim(),
@@ -305,17 +305,17 @@ const postAddAddress = async (req, res) => {
       country: country ? country.trim() : 'India',
       isDefault: isDefault === 'on' || isDefault === true,
     };
- 
+
     // If making this default, unset other defaults
     if (newAddress.isDefault) {
       user.addresses.forEach(addr => addr.isDefault = false);
     } else if (user.addresses.length === 0) {
       newAddress.isDefault = true; // First address is default
     }
- 
+
     user.addresses.push(newAddress);
     await user.save();
- 
+
     req.flash('success', 'Address added successfully!');
     res.redirect('/profile');
   } catch (error) {
@@ -324,25 +324,25 @@ const postAddAddress = async (req, res) => {
     res.redirect('/profile');
   }
 };
- 
+
 // POST /profile/address/delete/:index - Delete an address
 const postDeleteAddress = async (req, res) => {
   try {
     const index = parseInt(req.params.index);
     const user = await User.findById(req.session.userId);
- 
+
     if (index >= 0 && index < user.addresses.length) {
       const removed = user.addresses.splice(index, 1)[0];
-      
+
       // If we removed the default, set a new one if possible
       if (removed.isDefault && user.addresses.length > 0) {
         user.addresses[0].isDefault = true;
       }
-      
+
       await user.save();
       req.flash('success', 'Address deleted successfully!');
     }
- 
+
     res.redirect('/profile');
   } catch (error) {
     console.error('Delete address error:', error);
@@ -350,7 +350,7 @@ const postDeleteAddress = async (req, res) => {
     res.redirect('/profile');
   }
 };
- 
+
 // GET /blog
 const getBlogPage = async (req, res) => {
   try {
@@ -363,8 +363,8 @@ const getBlogPage = async (req, res) => {
       success: req.flash('success'),
       breadcrumbs: [{ name: 'Blog', url: '/blog' }]
     });
-  } catch(e) {
-    res.render('blog', { title: 'Blog', blogs:[], user: null, errors: [], success: [] });
+  } catch (e) {
+    res.render('blog', { title: 'Blog', blogs: [], user: null, errors: [], success: [] });
   }
 };
 
@@ -373,27 +373,27 @@ const postAddReview = async (req, res) => {
   try {
     const { productId, rating, comment } = req.body;
     const userId = req.session.userId;
- 
+
     if (!userId) {
       return res.status(401).json({ success: false, error: 'Please login to leave a review' });
     }
- 
+
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
- 
+
     // Check if user already reviewed
     const alreadyReviewed = product.reviews.find(
       (r) => r.userId.toString() === userId.toString()
     );
- 
+
     if (alreadyReviewed) {
       return res.status(400).json({ success: false, error: 'You have already reviewed this product' });
     }
- 
+
     const user = await User.findById(userId);
- 
+
     const newReview = {
       userId,
       username: user.username,
@@ -401,14 +401,14 @@ const postAddReview = async (req, res) => {
       rating: Number(rating),
       comment: comment.trim(),
     };
- 
+
     product.reviews.push(newReview);
     await product.save();
- 
-    res.json({ 
-      success: true, 
-      message: 'Review added successfully!', 
-      averageRating: product.averageRating, 
+
+    res.json({
+      success: true,
+      message: 'Review added successfully!',
+      averageRating: product.averageRating,
       numReviews: product.numReviews,
       review: {
         ...newReview,
@@ -420,7 +420,7 @@ const postAddReview = async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to submit review' });
   }
 };
- 
+
 // GET /api/products/search - Live search API
 const getSearchApi = async (req, res) => {
   try {
@@ -428,7 +428,7 @@ const getSearchApi = async (req, res) => {
     if (qVal.length < 2) {
       return res.json({ success: true, products: [] });
     }
- 
+
     // Use exact same query logic as getShop
     const products = await Product.find({
       $or: [
@@ -436,7 +436,7 @@ const getSearchApi = async (req, res) => {
         { description: { $regex: qVal, $options: 'i' } }
       ]
     }).limit(10);
- 
+
     // ANALYTICS: Log search event asynchronously
     SearchAnalytics.create({
       query: qVal,
@@ -451,7 +451,7 @@ const getSearchApi = async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to search' });
   }
 };
- 
+
 // POST /subscribe-newsletter
 const subscribeNewsletter = async (req, res) => {
   try {

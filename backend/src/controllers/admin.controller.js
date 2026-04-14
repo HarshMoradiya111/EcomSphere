@@ -340,7 +340,7 @@ const postEditProduct = async (req, res) => {
 
     // If new image uploaded, delete old one
     if (req.files && req.files.image && req.files.image.length > 0) {
-      const oldImagePath = path.join(__dirname, '../public/uploads', product.image);
+      const oldImagePath = path.resolve(__dirname, '../../public/uploads', product.image);
       if (fs.existsSync(oldImagePath)) {
         fs.unlink(oldImagePath, () => {});
       }
@@ -388,7 +388,7 @@ const deleteProduct = async (req, res) => {
     }
 
     // Delete image file
-    const imagePath = path.join(__dirname, '../public/uploads', product.image);
+    const imagePath = path.resolve(__dirname, '../../public/uploads', product.image);
     if (fs.existsSync(imagePath)) {
       fs.unlink(imagePath, () => {});
     }
@@ -396,7 +396,7 @@ const deleteProduct = async (req, res) => {
     // Delete additional images
     if (product.additionalImages && product.additionalImages.length > 0) {
       product.additionalImages.forEach(img => {
-        const imgPath = path.join(__dirname, '../public/uploads', img);
+        const imgPath = path.resolve(__dirname, '../../public/uploads', img);
         if (fs.existsSync(imgPath)) {
           fs.unlink(imgPath, () => {});
         }
@@ -406,8 +406,10 @@ const deleteProduct = async (req, res) => {
     await Product.findByIdAndDelete(req.params.id);
 
     // 🏆 CACHE INVALIDATION
-    await dbCache.del('home_products');
-    await dbCache.del('api_v1_products');
+    try {
+      await dbCache.del('home_products');
+      await dbCache.del('api_v1_products');
+    } catch (e) {}
 
     req.flash('success', 'Product deleted successfully!');
     res.redirect('/admin/products');
@@ -1359,31 +1361,41 @@ module.exports = {
   // POST /admin/products/save-ai
   async function postSaveAIProducts(req, res) {
     try {
-      const { products } = req.body;
-
-      if (!products || !Array.isArray(products) || products.length === 0) {
+      let { products } = req.body;
+ 
+      if (!products) {
         req.flash('error', 'No products to save.');
         return res.redirect('/admin/products/ai');
       }
-
+ 
+      // Handle cases where body-parser might parse indexed inputs as an object instead of array
+      const productList = Array.isArray(products) ? products : Object.values(products);
+ 
+      if (productList.length === 0) {
+        req.flash('error', 'No valid products to save.');
+        return res.redirect('/admin/products/ai');
+      }
+ 
       // Convert objects to match Mongoose schema and save
-      const productsToSave = products.map(p => ({
+      const productsToSave = productList.map(p => ({
         name: p.name.trim(),
         description: p.description.trim(),
         price: parseFloat(p.price),
         category: p.category,
         brand: p.brand || 'EcomSphere',
         countInStock: parseInt(p.countInStock) || 0,
-        image: p.image, // Still uses the filename uploaded during analysis
+        image: p.image || 'placeholder.jpg', // Ensure image filename is captured
         status: 'In Stock'
       }));
-
+ 
       await Product.insertMany(productsToSave);
-
-      // Cache invalidation
-      await dbCache.del('home_products');
-      await dbCache.del('api_v1_products');
-
+ 
+      // Cache invalidation (Defensive)
+      try {
+        await dbCache.del('home_products');
+        await dbCache.del('api_v1_products');
+      } catch (e) {}
+ 
       req.flash('success', `Successfully added ${productsToSave.length} products to the catalog!`);
       res.redirect('/admin/products');
     } catch (error) {

@@ -30,16 +30,27 @@ Thumbs.db
 .planning/codebase/
 search-analytics.json
 
+EcomSphere/
+AI_IMPLEMENTATION_PLAN.md
+bulk_products.csv
+
 # Project Specific
 backend/public/uploads/*
 !backend/public/uploads/.gitkeep
 .planning/
 scratch/
-temp_*.js
-ai_handlers.js
-safe_append.js
-update_exports.js
-patch_login.js
+# AI Testing Scripts
+**/debug_ai.js
+**/list_models.js
+**/test_ai_final.js
+**/test_text.js
+**/compare_keys.js
+**/AI_CATALOGING_README.md
+**/ai_handlers.js
+**/safe_append.js
+**/update_exports.js
+**/patch_login.js
+**/temp_*.js
 
 # Sensitive Files
 *.pem

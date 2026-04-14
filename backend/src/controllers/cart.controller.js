@@ -6,10 +6,13 @@ const User = require('../models/User');
 // ... (other functions remain the same)
 // I will use replace_file_content carefully.
 
+// Helper to get User ID from either session (EJS) or JWT (API)
+const getUserId = (req) => req.session?.userId || req.user?.id;
+
 // GET /api/cart - Fetch user's cart
 const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ userId: req.session.userId });
+    const cart = await Cart.findOne({ userId: getUserId(req) });
 
     if (!cart || cart.items.length === 0) {
       return res.json({ success: true, cart: [], total: 0 });
@@ -65,10 +68,10 @@ const addToCart = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
  
-    let cart = await Cart.findOne({ userId: req.session.userId });
+    let cart = await Cart.findOne({ userId: getUserId(req) });
  
     if (!cart) {
-      cart = new Cart({ userId: req.session.userId, items: [] });
+      cart = new Cart({ userId: getUserId(req), items: [] });
     }
  
     // Stock Validation
@@ -122,7 +125,7 @@ const updateCart = async (req, res) => {
   try {
     const { itemId, action } = req.body;
 
-    const cart = await Cart.findOne({ userId: req.session.userId });
+    const cart = await Cart.findOne({ userId: getUserId(req) });
     if (!cart) {
       return res.status(404).json({ success: false, error: 'Cart not found' });
     }
@@ -165,7 +168,7 @@ const removeFromCart = async (req, res) => {
   try {
     const { itemId } = req.body;
 
-    const cart = await Cart.findOne({ userId: req.session.userId });
+    const cart = await Cart.findOne({ userId: getUserId(req) });
     if (!cart) {
       return res.status(404).json({ success: false, error: 'Cart not found' });
     }
@@ -203,8 +206,8 @@ module.exports = {
 async function applyPoints(req, res) {
   try {
     const { points } = req.body;
-    const cart = await Cart.findOne({ userId: req.session.userId });
-    const user = await User.findById(req.session.userId);
+    const cart = await Cart.findOne({ userId: getUserId(req) });
+    const user = await User.findById(getUserId(req));
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ success: false, error: 'Your cart is empty' });
@@ -242,7 +245,7 @@ async function applyPoints(req, res) {
 
 async function removePoints(req, res) {
   try {
-    const cart = await Cart.findOne({ userId: req.session.userId });
+    const cart = await Cart.findOne({ userId: getUserId(req) });
     if (!cart) return res.status(404).json({ success: false, error: 'Cart not found' });
 
     cart.pointsUsed = 0;
@@ -264,7 +267,7 @@ async function removePoints(req, res) {
  async function applyCoupon(req, res) {
    try {
      const { couponCode } = req.body;
-     const cart = await Cart.findOne({ userId: req.session.userId });
+     const cart = await Cart.findOne({ userId: getUserId(req) });
  
      if (!cart || cart.items.length === 0) {
        return res.status(400).json({ success: false, error: 'Your cart is empty' });
@@ -300,7 +303,7 @@ async function removePoints(req, res) {
  
  async function removeCoupon(req, res) {
    try {
-     const cart = await Cart.findOne({ userId: req.session.userId });
+     const cart = await Cart.findOne({ userId: getUserId(req) });
      if (!cart) return res.status(404).json({ success: false, error: 'Cart not found' });
  
      cart.appliedCoupon = null;
