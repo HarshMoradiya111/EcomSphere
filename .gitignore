@@ -16,6 +16,7 @@ build/
 out/
 .kiro/
 .vscode/
+docs/
 
 # Debug and Logs
 npm-debug.log*
