@@ -1217,6 +1217,7 @@ module.exports = {
   }
 
   // POST /admin/products/ai
+  // ✅ FIXED VERSION with better rate limiting and error handling
   async function postAIUpload(req, res) {
     if (!req.files || req.files.length === 0) {
       req.flash('error', 'Please upload at least one product image.');
@@ -1226,44 +1227,106 @@ module.exports = {
     const analyzedProducts = [];
     const errors = [];
 
+    // ✅ CONFIGURATION: Safer delay calculation
+    // Gemini Free Tier: 15 RPM = 60 seconds / 15 requests = 4 seconds minimum
+    // Adding 2 second buffer for safety = 6 seconds between requests
+    const DELAY_BETWEEN_REQUESTS_MS = 6000; // 6 seconds (safe for 15 RPM)
+    const MAX_BATCH_SIZE = 15; // Don't process more than 15 images at once
+
     try {
-      // Process images (up to 20 images based on maxCount in route)
-      const processImage = async (file) => {
+      // ✅ ADDED: Limit batch size to prevent overwhelming the API
+      const filesToProcess = req.files.slice(0, MAX_BATCH_SIZE);
+      
+      if (req.files.length > MAX_BATCH_SIZE) {
+        console.log(`[AI UPLOAD] Limiting batch to ${MAX_BATCH_SIZE} images (${req.files.length} uploaded)`);
+        req.flash('error', `Processing first ${MAX_BATCH_SIZE} images only. Please upload remaining images in another batch.`);
+      }
+
+      // ✅ IMPROVED: Better image processing with progress tracking
+      const processImage = async (file, index, total) => {
         try {
-          console.log(`Analyzing file at: ${file.path}`);
+          console.log(`[AI UPLOAD] Processing image ${index + 1}/${total}: ${file.originalname}`);
+          
+          // Verify file exists
+          if (!fs.existsSync(file.path)) {
+            throw new Error('Uploaded file not found on server');
+          }
+
           const buffer = fs.readFileSync(file.path);
+          
+          // ✅ ADDED: Validate file size (max 20MB for Gemini)
+          const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+          if (buffer.length > MAX_FILE_SIZE) {
+            throw new Error('Image file too large (max 20MB)');
+          }
+
+          console.log(`[AI UPLOAD] Calling AI service for ${file.originalname}...`);
           const aiData = await aiService.analyzeProductImage(buffer, file.mimetype);
+          
+          console.log(`[AI UPLOAD] ✓ Successfully analyzed ${file.originalname}`);
           
           return {
             ...aiData,
             tempImage: file.filename, // Track the uploaded image
-            originalPath: file.path
+            originalPath: file.path,
+            originalName: file.originalname
           };
         } catch (err) {
-          console.error(`Error analyzing ${file.originalname}:`, err);
-          errors.push(`Failed to analyze ${file.originalname}: ${err.message}`);
+          const errorMsg = err.message || 'Unknown error';
+          console.error(`[AI UPLOAD] ✗ Error analyzing ${file.originalname}:`, errorMsg);
+          errors.push(`Failed to analyze ${file.originalname}: ${errorMsg}`);
           return null;
         }
       };
 
+      // ✅ IMPROVED: Sequential processing with precise timing
       const results = [];
-      for (let i = 0; i < req.files.length; i++) {
-        const file = req.files[i];
-        const result = await processImage(file);
+      const startTime = Date.now();
+      
+      for (let i = 0; i < filesToProcess.length; i++) {
+        const file = filesToProcess[i];
+        
+        // Process the image
+        const result = await processImage(file, i, filesToProcess.length);
         results.push(result);
-        if (i < req.files.length - 1) {
-          // Delay to prevent 429 Rate Limit
-          // 15 RPM free tier limit = 1 request every 4 seconds. 
-          await new Promise(resolve => setTimeout(resolve, 4500));
+        
+        // ✅ CRITICAL: Only delay BETWEEN images, not after the last one
+        if (i < filesToProcess.length - 1) {
+          console.log(`[AI UPLOAD] Waiting ${DELAY_BETWEEN_REQUESTS_MS/1000}s before next image...`);
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS_MS));
         }
       }
       
+      const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`[AI UPLOAD] Batch complete in ${totalTime}s`);
+
+      // ✅ IMPROVED: Better result handling
       const validResults = results.filter(r => r !== null);
 
       if (validResults.length === 0) {
-        const displayError = errors.length > 0 ? errors[0] : 'AI could not recognize any of the images. Please try different images.';
+        // All images failed - show most relevant error
+        let displayError = 'AI could not analyze any images.';
+        
+        if (errors.length > 0) {
+          // Check for common error patterns
+          if (errors.some(e => e.includes('API key') || e.includes('401') || e.includes('403'))) {
+            displayError = 'Invalid API key. Please check your GEMINI_API_KEY configuration.';
+          } else if (errors.some(e => e.includes('Rate limit') || e.includes('429'))) {
+            displayError = 'Rate limit exceeded. Please wait 1-2 minutes before trying again.';
+          } else if (errors.some(e => e.includes('503') || e.includes('500'))) {
+            displayError = 'Google AI service temporarily unavailable. Please try again in a few minutes.';
+          } else {
+            displayError = errors[0]; // Show first error
+          }
+        }
+        
         req.flash('error', displayError);
         return res.redirect('/admin/products/ai');
+      }
+
+      // ✅ ADDED: Show partial success message if some failed
+      if (errors.length > 0 && validResults.length > 0) {
+        req.flash('error', `${errors.length} image(s) failed to process. Review the ${validResults.length} successful results below.`);
       }
 
       res.render('admin/ai_review', {
@@ -1277,8 +1340,18 @@ module.exports = {
       });
 
     } catch (err) {
-      console.error('AI Bulk Upload Error:', err);
-      req.flash('error', 'A system error occurred during AI analysis');
+      console.error('[AI UPLOAD] Critical Error:', err);
+      
+      // ✅ IMPROVED: Better error messages for users
+      let userMessage = 'A system error occurred during AI analysis.';
+      
+      if (err.message.includes('ENOENT')) {
+        userMessage = 'Image file upload failed. Please try again.';
+      } else if (err.message.includes('Rate limit')) {
+        userMessage = 'Too many requests. Please wait 1-2 minutes before trying again.';
+      }
+      
+      req.flash('error', userMessage);
       res.redirect('/admin/products/ai');
     }
   }
