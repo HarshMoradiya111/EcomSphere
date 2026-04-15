@@ -3,8 +3,22 @@
 import { useState } from 'react';
 import type { FooterPartialProps } from './types';
 
+function resolveLogoSrc(logo?: string | null): string {
+  if (!logo || !logo.trim()) {
+    return '/img/logo1.png';
+  }
+
+  const value = logo.trim();
+  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/')) {
+    return value;
+  }
+
+  return `/uploads/${value}`;
+}
+
 export default function FooterPartial({ settings, sessionUser = null }: FooterPartialProps) {
   const [helpPanelOpen, setHelpPanelOpen] = useState(false);
+  const logoSrc = resolveLogoSrc(settings?.logo);
 
   return (
     <>
@@ -76,7 +90,7 @@ export default function FooterPartial({ settings, sessionUser = null }: FooterPa
         <div id="help-panel" className={helpPanelOpen ? '' : 'hidden'}>
           <div className="help-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src="/img/logo1.png" height={30} onError={(e) => {
+              <img src={logoSrc} height={30} onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = '/img/logo1.png';
               }} alt="EcomSphere" />
               <div>

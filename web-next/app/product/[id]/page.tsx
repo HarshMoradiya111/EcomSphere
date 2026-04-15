@@ -1,6 +1,8 @@
 import StorefrontShell from '@/src/components/ejs-partials/StorefrontShell';
 import SafeImage from '@/src/components/SafeImage';
 import { API_URL } from '@/src/config';
+import { getSiteSettings } from '@/src/server/siteSettings';
+import { getProductImageSrc, getProductImageFallbackSrc } from '@/src/utils/imagePaths';
 
 type Product = {
   _id: string;
@@ -28,11 +30,13 @@ async function fetchProduct(id: string): Promise<Product | null> {
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
   const product = await fetchProduct(params.id);
+  const settings = await getSiteSettings();
 
   if (!product) {
     return (
       <StorefrontShell
         header={{ activePage: 'shop' }}
+        settings={settings}
         breadcrumbs={[{ name: 'Shop', url: '/shop' }, { name: 'Product', url: `/product/${params.id}` }]}
         errors={['Product not found']}
       >
@@ -50,6 +54,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
   return (
     <StorefrontShell
       header={{ activePage: 'shop' }}
+      settings={settings}
       breadcrumbs={[
         { name: 'Shop', url: '/shop' },
         { name: product.category, url: `/shop?category=${encodeURIComponent(product.category)}` },
@@ -59,7 +64,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
       <section id="prodetails" className="section-p1">
         <div className="single-pro-image" style={{ position: 'relative' }}>
           <SafeImage
-            src={`/uploads/${product.image}`}
+            src={getProductImageSrc(product.image)}
+            fallbackSrc={getProductImageFallbackSrc(product.image)}
             alt={product.name}
             width="100%"
             id="main-product-image"
@@ -67,7 +73,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
           <div className="small-img-group">
             <div className="small-img-col">
               <SafeImage
-                src={`/uploads/${product.image}`}
+                src={getProductImageSrc(product.image)}
+                fallbackSrc={getProductImageFallbackSrc(product.image)}
                 alt="Main Image"
                 className="small-img active-thumb"
               />

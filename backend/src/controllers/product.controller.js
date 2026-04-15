@@ -10,6 +10,7 @@ const Newsletter = require('../models/Newsletter');
 const FAQ = require('../models/FAQ');
 const SearchAnalytics = require('../models/SearchAnalytics');
 const { dbCache } = require('../utils/cacheManager');
+const { Types } = require('mongoose');
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
@@ -506,7 +507,12 @@ const getComparePage = async (req, res) => {
     const { ids } = req.query;
     let products = [];
     if (ids) {
-      const productIdsArray = ids.split(',').filter(id => id.length > 0);
+      const decodedIds = decodeURIComponent(String(ids));
+      const productIdsArray = decodedIds
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0 && Types.ObjectId.isValid(id));
+
       products = await Product.find({ _id: { $in: productIdsArray } });
     }
 

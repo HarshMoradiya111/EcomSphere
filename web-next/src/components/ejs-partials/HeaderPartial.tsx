@@ -8,6 +8,19 @@ function toCurrency(price: number) {
   return Number(price || 0).toLocaleString('en-IN');
 }
 
+function resolveLogoSrc(logo?: string | null): string {
+  if (!logo || !logo.trim()) {
+    return '/img/logo1.png';
+  }
+
+  const value = logo.trim();
+  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/')) {
+    return value;
+  }
+
+  return `/uploads/${value}`;
+}
+
 export default function HeaderPartial({
   settings,
   search = '',
@@ -25,7 +38,7 @@ export default function HeaderPartial({
   const [showDesktopResults, setShowDesktopResults] = useState(false);
   const [showMobileResults, setShowMobileResults] = useState(false);
 
-  const logoSrc = settings?.logo || '/img/logo1.png';
+  const logoSrc = resolveLogoSrc(settings?.logo);
 
   useEffect(() => {
     let cancelled = false;

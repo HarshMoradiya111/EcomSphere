@@ -2,6 +2,8 @@ import StorefrontShell from '@/src/components/ejs-partials/StorefrontShell';
 import SafeImage from '@/src/components/SafeImage';
 import { API_URL } from '@/src/config';
 import { getSessionUsername } from '@/src/server/sessionUser';
+import { getSiteSettings } from '@/src/server/siteSettings';
+import { getProductImageSrc, getProductImageFallbackSrc } from '@/src/utils/imagePaths';
 
 type Product = {
   _id: string;
@@ -44,12 +46,14 @@ async function fetchHomeData() {
 export default async function HomePage() {
   const { grouped, marketing } = await fetchHomeData();
   const sessionUser = await getSessionUsername();
+  const settings = await getSiteSettings();
   const banner = marketing?.banners?.[0];
   const categoryEntries = Object.entries(grouped || {});
 
   return (
     <StorefrontShell
       header={{ activePage: 'home', sessionUser }}
+      settings={settings}
       sessionUser={sessionUser}
       success={[]}
       errors={[]}
@@ -127,7 +131,11 @@ export default async function HomePage() {
                 return (
                   <div className="pro" key={product._id}>
                     <a href={`/product/${product._id}`}>
-                      <SafeImage src={`/uploads/${product.image}`} alt={product.name} />
+                      <SafeImage
+                        src={getProductImageSrc(product.image)}
+                        fallbackSrc={getProductImageFallbackSrc(product.image)}
+                        alt={product.name}
+                      />
                     </a>
                     <div className="des">
                       <span>{product.category}</span>

@@ -42,11 +42,95 @@ function updateCartBadge(count: number) {
   }
 }
 
+function getCompareList(): string[] {
+  try {
+    const raw = window.localStorage.getItem('compareItems');
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    const normalized = parsed
+      .flatMap((item) => (typeof item === 'string' ? decodeURIComponent(item).split(',') : []))
+      .map((item) => item.trim())
+      .filter((item, index, all) => /^[a-fA-F0-9]{24}$/.test(item) && all.indexOf(item) === index)
+      .slice(0, 4);
+
+    if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+      setCompareList(normalized);
+    }
+
+    return normalized;
+  } catch {
+    return [];
+  }
+}
+
+function setCompareList(compareList: string[]) {
+  window.localStorage.setItem('compareItems', JSON.stringify(compareList));
+}
+
+function updateCompareFloatingButton(count: number) {
+  let button = document.getElementById('floating-compare') as HTMLAnchorElement | null;
+  if (!button) {
+    button = document.createElement('a');
+    button.id = 'floating-compare';
+    button.className = 'floating-btn';
+    button.style.cssText = 'position:fixed; bottom:110px; right:30px; background:#088178; color:#fff; padding:12px 20px; border-radius:30px; text-decoration:none; z-index:9999; box-shadow:0 10px 20px rgba(0,0,0,0.1); font-weight:600; display:none; transition:0.3s;';
+    button.innerHTML = '<i class="fa-solid fa-scale-unbalanced-flip"></i> Compare (<span id="compare-count">0</span>)';
+    document.body.appendChild(button);
+  }
+
+  const countSpan = document.getElementById('compare-count');
+  if (countSpan) {
+    countSpan.textContent = String(count);
+  }
+
+  if (count > 0) {
+    const compareList = getCompareList();
+    button.href = `/compare?ids=${compareList.join(',')}`;
+    button.style.display = 'block';
+  } else {
+    button.style.display = 'none';
+  }
+}
+
+function addToCompare(productId: string) {
+  const compareList = getCompareList();
+
+  if (compareList.includes(productId)) {
+    showToast('Already in comparison list', 'info');
+    return;
+  }
+
+  if (compareList.length >= 4) {
+    showToast('Max 4 products allowed for comparison', 'error');
+    return;
+  }
+
+  compareList.push(productId);
+  setCompareList(compareList);
+  updateCompareFloatingButton(compareList.length);
+  showToast('Added to comparison!', 'success');
+}
+
 export default function StorefrontBridge() {
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    const compareList = getCompareList();
+    updateCompareFloatingButton(compareList.length);
+
+    if (pathname === '/compare') {
+      const params = new URLSearchParams(window.location.search);
+      const hasIdsInQuery = Boolean((params.get('ids') || '').trim());
+
+      if (!hasIdsInQuery && compareList.length > 0) {
+        router.replace(`/compare?ids=${compareList.join(',')}`);
+      }
+    }
+
     const bindCheckoutAddressAutofill = (): (() => void) | undefined => {
       const selector = document.getElementById('saved-address-selector') as HTMLSelectElement | null;
       const userDataNode = document.getElementById('user-data');
@@ -272,6 +356,15 @@ export default function StorefrontBridge() {
         } catch (error) {
           console.error('Wishlist toggle error:', error);
           showToast('Failed to update wishlist', 'error');
+        }
+      }
+
+      const compareButton = target.closest('.compare-btn[data-product-id]') as HTMLElement | null;
+      if (compareButton) {
+        event.preventDefault();
+        const productId = compareButton.getAttribute('data-product-id');
+        if (productId) {
+          addToCompare(productId);
         }
       }
     };

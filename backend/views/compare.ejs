@@ -105,7 +105,7 @@
 <%- include('./partials/footer') %>
 
 <script>
-  function removeFromCompare(productId) {
+  window.removeFromCompare = function removeFromCompare(productId) {
     let compareList = JSON.parse(localStorage.getItem('compareItems') || '[]');
     compareList = compareList.filter(id => id !== productId);
     localStorage.setItem('compareItems', JSON.stringify(compareList));
@@ -116,7 +116,7 @@
     } else {
       window.location.href = '/compare';
     }
-  }
+  };
 </script>
 
 <script src="/js/script.js"></script>
