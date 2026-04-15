@@ -47,10 +47,10 @@ export default function SafeImage({
         ]
       : [source, fallbackSrc, getProductImageFallbackSrc(source), placeholderImage].filter(Boolean);
 
-    return uniqueSources(alternateSources);
+    return uniqueSources(alternateSources).filter(Boolean);
   }, [fallbackSrc, source, placeholderImage]);
 
-  const [displaySrc, setDisplaySrc] = useState(placeholderImage);
+  const [displaySrc, setDisplaySrc] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,11 +80,10 @@ export default function SafeImage({
       }
 
       if (!cancelled) {
-        setDisplaySrc(placeholderImage);
+        setDisplaySrc(null);
       }
     }
 
-    setDisplaySrc(placeholderImage);
     void resolveImage();
 
     return () => {
@@ -95,7 +94,7 @@ export default function SafeImage({
   return (
     <img
       {...props}
-      src={displaySrc}
+      src={displaySrc || undefined}
       alt={alt}
       loading="eager"
       style={{ backgroundColor: '#f7f7f7', ...props.style }}
