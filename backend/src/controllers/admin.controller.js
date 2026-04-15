@@ -1362,40 +1362,49 @@ module.exports = {
   async function postSaveAIProducts(req, res) {
     try {
       let { products } = req.body;
- 
+
       if (!products) {
         req.flash('error', 'No products to save.');
         return res.redirect('/admin/products/ai');
       }
- 
+
       // Handle cases where body-parser might parse indexed inputs as an object instead of array
       const productList = Array.isArray(products) ? products : Object.values(products);
- 
+
       if (productList.length === 0) {
         req.flash('error', 'No valid products to save.');
         return res.redirect('/admin/products/ai');
       }
- 
+
       // Convert objects to match Mongoose schema and save
-      const productsToSave = productList.map(p => ({
-        name: p.name.trim(),
-        description: p.description.trim(),
-        price: parseFloat(p.price),
-        category: p.category,
-        brand: p.brand || 'EcomSphere',
-        countInStock: parseInt(p.countInStock) || 0,
-        image: p.image || 'placeholder.jpg', // Ensure image filename is captured
-        status: 'In Stock'
-      }));
- 
+      const productsToSave = productList.map((p, index) => {
+        // Ensure image filename is properly extracted and not empty
+        const imageValue = (p.image && typeof p.image === 'string') ? p.image.trim() : '';
+        
+        if (!imageValue) {
+          console.warn(`[AI Products] Product ${index} missing or empty image filename, this will cause image display issues`);
+        }
+
+        return {
+          name: p.name.trim(),
+          description: p.description.trim(),
+          price: parseFloat(p.price),
+          category: p.category,
+          brand: p.brand || 'EcomSphere',
+          countInStock: parseInt(p.countInStock) || 0,
+          image: imageValue || '', // Do NOT fallback to placeholder.jpg for AI products - use empty string if missing
+          status: 'In Stock'
+        };
+      });
+
       await Product.insertMany(productsToSave);
- 
+
       // Cache invalidation (Defensive)
       try {
         await dbCache.del('home_products');
         await dbCache.del('api_v1_products');
       } catch (e) {}
- 
+
       req.flash('success', `Successfully added ${productsToSave.length} products to the catalog!`);
       res.redirect('/admin/products');
     } catch (error) {
