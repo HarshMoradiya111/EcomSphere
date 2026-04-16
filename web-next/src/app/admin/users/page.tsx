@@ -1,14 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { API_URL } from '@/config';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchUsers = async () => {
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/users');
+      const res = await fetch(`${API_URL}/api/v1/admin/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (data.success) {
         setUsers(data.users);
@@ -22,8 +26,12 @@ export default function AdminUsers() {
 
   const deleteUser = async (id: string) => {
     if (!confirm('🚨 CRITICAL: This will purge the customer profile and all associated link-data. Proceed?')) return;
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/users/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/v1/admin/users/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) {
         setUsers(users.filter(u => u._id !== id));
       }
