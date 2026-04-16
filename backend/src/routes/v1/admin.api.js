@@ -4,6 +4,15 @@ const Product = require('../../models/Product');
 const User = require('../../models/User');
 const Order = require('../../models/Order');
 const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 const path = require('path');
 const fs = require('fs');
 const csv = require('csv-parser');
@@ -20,16 +29,27 @@ const bulkStorage = multer.diskStorage({
 });
 const uploadBulk = multer({ storage: bulkStorage });
 
-// Standard upload storage for images (Settings, Banners, etc.)
-const standardStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../../public/uploads'));
+// Cloudinary storage for general admin images (Settings, Banners, Blogs)
+const cloudStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'ecomsphere/general',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif'],
   },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
 });
-const upload = multer({ storage: standardStorage });
+
+// Specific storage for AI Cataloging (temp folder)
+const aiStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'ecomsphere/ai_temp',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+  },
+});
+
+const upload = multer({ storage: cloudStorage });
+const uploadAI = multer({ storage: aiStorage });
+const uploadStandard = multer({ storage: cloudStorage }); // Generic fallback
 
 // @desc    Mass Ingestion (Bulk CSV Import)
 // @route   POST /api/v1/admin/products/bulk
@@ -440,6 +460,70 @@ router.get('/blogs', async (req, res) => {
     res.status(200).json({ success: true, blogs });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Blog fetch failed' });
+  }
+});
+
+// AI CATALOGING API ENDPOINTS
+const { analyzeProductImage } = require('../../services/ai.service');
+
+// @desc    AI Bulk Image Upload & Analysis
+// @route   POST /api/v1/admin/products/ai
+router.post('/products/ai', uploadAI.array('productImages', 20), async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, error: 'No vision assets detected' });
+    }
+
+    const CATEGORIES = ['Footwear', 'Apparel', 'Accessories', 'Electronics', 'Kitchen', 'Fitness', 'Personal Care'];
+    const results = [];
+    const errors = [];
+
+    for (const file of req.files) {
+      try {
+        // AI Vision Analysis
+        const aiData = await analyzeProductImage(file.path);
+        results.push({
+          ...aiData,
+          tempImage: file.path // This is the Cloudinary URL
+        });
+      } catch (err) {
+        console.error('AI Processing error for:', file.path, err);
+        errors.push(`Failed to analyze: ${file.originalname}`);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      products: results,
+      errors: errors.length > 0 ? errors : null,
+      categories: CATEGORIES
+    });
+  } catch (error) {
+    console.error('AI Catalog Error:', error);
+    res.status(500).json({ success: false, error: 'AI Neural Link Failure' });
+  }
+});
+
+// @desc    Confirm & Save AI Products
+// @route   POST /api/v1/admin/products/save-ai
+router.post('/products/save-ai', async (req, res) => {
+  try {
+    const { products } = req.body;
+    if (!products || !Array.isArray(products)) {
+        return res.status(400).json({ success: false, error: 'No data payload' });
+    }
+
+    const savedProducts = await Product.insertMany(products);
+    await dbCache.del('home_products');
+
+    res.status(201).json({ 
+        success: true, 
+        count: savedProducts.length,
+        message: 'Intelligence successfully integrated into catalog' 
+    });
+  } catch (error) {
+    console.error('AI Save Error:', error);
+    res.status(500).json({ success: false, error: 'Database commitment failed' });
   }
 });
 
