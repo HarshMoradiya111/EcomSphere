@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { API_URL } from '@/config';
 
 interface DashboardStats {
   productCount: number;
@@ -20,11 +21,15 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchStats = async () => {
+    const token = localStorage.getItem('adminToken');
     setLoading(true);
     setError(null);
     try {
-      // Use absolute IPv4 URL to prevent DNS resolution issues (common on Windows)
-      const res = await fetch('${API_URL}/api/v1/admin/stats');
+      const res = await fetch(`${API_URL}/api/v1/admin/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
       const data = await res.json();
       if (data.success) {

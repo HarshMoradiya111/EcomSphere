@@ -156,7 +156,10 @@ export default function HomeHub() {
       {/* 4. Flash Sale: Real-Time Synchronization */}
       {marketing.flashSale && (
           <section className="mx-12 md:mx-24 my-12 relative h-[50vh] rounded-[4rem] overflow-hidden flex flex-col items-center justify-center text-center p-12 bg-gray-950">
-              <div className="absolute inset-0 bg-[url('${API_URL}/img/banner/b2.jpg')] bg-cover bg-center opacity-30"></div>
+              <div 
+                className="absolute inset-0 bg-cover bg-center opacity-30" 
+                style={{ backgroundImage: `url('${API_URL}/img/banner/b2.jpg')` }}
+              ></div>
               <div className="relative z-10">
                   <h4 className="text-rose-400 font-black uppercase tracking-[0.4em] text-[10px] mb-6">{marketing.flashSale.title}</h4>
                   <h2 className="text-white text-5xl md:text-7xl font-black tracking-tighter mb-10 italic">{marketing.flashSale.discountText}</h2>
