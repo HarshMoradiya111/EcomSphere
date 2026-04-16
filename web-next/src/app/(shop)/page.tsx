@@ -2,17 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import AddToCartButton from '../../features/cart/AddToCartButton';
-import { API_URL } from '../../config';
-
-
-// Safe image parser
-function getImageUrl(image: any) {
-  if (!image) return `${API_URL}/img/placeholder.jpg`;
-  const imgStr = Array.isArray(image) ? image[0] : image;
-  if (imgStr.startsWith('http')) return imgStr;
-  return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-}
+import AddToCartButton from '@/features/cart/AddToCartButton';
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 
 export default function HomeHub() {
