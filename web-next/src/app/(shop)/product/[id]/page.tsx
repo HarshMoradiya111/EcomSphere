@@ -2,16 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { API_URL } from '@/config';
 import AddToCartButton from '@/features/cart/AddToCartButton';
-
-
-// Safely parses image URL from the Decoupled Express server just like the homepage
-function getImageUrl(image: any) {
-  if (!image) return `${API_URL}/img/placeholder.jpg`;
-  const imgStr = Array.isArray(image) ? image[0] : image;
-  if (imgStr.startsWith('http')) return imgStr;
-  if (imgStr.includes('/')) return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-  return `${API_URL}/uploads/${imgStr}`;
-}
+import { getImageUrl } from '@/utils/imagePaths';
 
 // Automatically securely fetch the specific product from our Express API!
 async function getSingleProduct(id: string) {

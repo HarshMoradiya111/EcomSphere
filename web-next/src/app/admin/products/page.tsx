@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 interface Product {
   _id: string;
@@ -19,7 +21,7 @@ export default function AdminProducts() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/products');
+      const res = await fetch(`${API_URL}/api/v1/admin/products`);
       const data = await res.json();
       if (data.success) {
         setProducts(data.products);
@@ -29,27 +31,6 @@ export default function AdminProducts() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Ultra-resilient SKU resolution node
-  const getImageUrl = (image: any) => {
-    if (!image) return '${API_URL}/img/placeholder.jpg';
-    
-    // Support both single string and array structures
-    const imgStr = Array.isArray(image) ? image[0] : image;
-    
-    if (imgStr.startsWith('http')) return imgStr;
-    
-    // Defensively handle prefixes
-    if (imgStr.startsWith('/uploads') || imgStr.startsWith('uploads/')) {
-       return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-    }
-    
-    // Seeded assets like n1.jpg are in the root / or /img/
-    if (imgStr.includes('/')) return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-    
-    // Default fallback to /uploads/ if it's a raw filename from a recent upload
-    return `${API_URL}/uploads/${imgStr}`;
   };
 
   const updateStock = async (id: string, newStock: number) => {
