@@ -1,14 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { API_URL } from '@/config';
 
 export default function CustomerSegments() {
   const [segments, setSegments] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchSegments = async () => {
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/customers/segments');
+      const res = await fetch(`${API_URL}/api/v1/admin/customers/segments`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (data.success) {
         setSegments(data.segments);

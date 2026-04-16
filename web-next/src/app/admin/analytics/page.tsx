@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { API_URL } from '@/config';
 
 export default function AdminAnalytics() {
   const [topSearches, setTopSearches] = useState<{ _id: string; count: number }[]>([]);
@@ -9,11 +10,12 @@ export default function AdminAnalytics() {
   const [loading, setLoading] = useState(true);
 
   const fetchMatrix = async () => {
+    const token = localStorage.getItem('adminToken');
     try {
       const [searchRes, couponRes, bannerRes] = await Promise.all([
-        fetch('${API_URL}/api/v1/admin/search-analytics'),
-        fetch('${API_URL}/api/v1/admin/coupons'),
-        fetch('${API_URL}/api/v1/admin/banners')
+        fetch(`${API_URL}/api/v1/admin/search-analytics`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/api/v1/admin/coupons`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/api/v1/admin/banners`, { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
 
       const [searchData, couponData, bannerData] = await Promise.all([

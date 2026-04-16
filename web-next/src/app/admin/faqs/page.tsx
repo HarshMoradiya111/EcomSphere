@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { API_URL } from '@/config';
 
 export default function AdminFAQs() {
   const [faqs, setFaqs] = useState<any[]>([]);
@@ -10,8 +11,11 @@ export default function AdminFAQs() {
   const [answer, setAnswer] = useState('');
 
   const fetchFAQs = async () => {
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/faqs');
+      const res = await fetch(`${API_URL}/api/v1/admin/faqs`, {
+         headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (data.success) {
         setFaqs(data.faqs);
@@ -25,10 +29,14 @@ export default function AdminFAQs() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/faqs', {
+      const res = await fetch(`${API_URL}/api/v1/admin/faqs`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ question, answer }),
       });
       if (res.ok) {
@@ -42,9 +50,13 @@ export default function AdminFAQs() {
   };
 
   const deleteFAQ = async (id: string) => {
+    const token = localStorage.getItem('adminToken');
     try {
-      await fetch(`${API_URL}/api/v1/admin/faqs/${id}`, { method: 'DELETE' });
-      fetchFAQs();
+      const res = await fetch(`${API_URL}/api/v1/admin/faqs/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) fetchFAQs();
     } catch (err) {
       console.error('Purge failed');
     }
