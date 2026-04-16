@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './hooks/**/*.{js,ts,jsx,tsx}',
     './lib/**/*.{js,ts,jsx,tsx}',
@@ -18,9 +19,10 @@ module.exports = {
           bg: '#f5fffe',
           muted: '#cce7de',
         },
-        // Admin panel tokens from admin.css
+        // Original Legacy Admin Tokens
         admin: {
           bg: '#0f172a',
+          secondary: '#1e293b',
           card: '#1e293b',
           border: '#334155',
           text: '#f1f5f9',
