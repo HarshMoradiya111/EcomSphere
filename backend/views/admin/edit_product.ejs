@@ -16,7 +16,8 @@
   <!-- Current Images -->
   <div style="text-align:center; margin:20px 0;">
     <div>
-      <img src="/uploads/<%= product.image %>" alt="<%= product.name %>"
+      <img src="<%= (product.image && product.image.startsWith('http')) ? product.image : '/uploads/' + product.image %>" 
+        alt="<%= product.name %>"
         style="width:150px; height:150px; object-fit:cover; border-radius:10px; border:2px solid #334155;"
         onerror="this.src='/img/placeholder.jpg'">
       <p style="color:#94a3b8; font-size:13px; margin-top:8px;">Current main image</p>
@@ -24,7 +25,8 @@
     <% if (product.additionalImages && product.additionalImages.length > 0) { %>
     <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
       <% product.additionalImages.forEach(img => { %>
-        <img src="/uploads/<%= img %>" alt="<%= product.name %>" style="width:80px; height:80px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;" onerror="this.style.display='none'">
+        <img src="<%= (img && img.startsWith('http')) ? img : '/uploads/' + img %>" 
+          alt="<%= product.name %>" style="width:80px; height:80px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;" onerror="this.style.display='none'">
       <% }) %>
     </div>
     <p style="color:#94a3b8; font-size:13px; margin-top:8px;">Current additional images</p>
