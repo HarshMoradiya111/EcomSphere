@@ -2,6 +2,15 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 const {
   getAdminLogin,
   postAdminLogin,
@@ -55,10 +64,21 @@ const {
 } = require('../../controllers/admin.controller');
 const { isAdminAuthenticated, redirectIfAdminAuthenticated } = require('../../middleware/auth.middleware');
 
-// Multer configuration for product image uploads
-const storage = multer.diskStorage({
+// Cloudinary storage for images
+const cloudStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'ecomsphere/products',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif'],
+    transformation: [{ width: 1000, height: 1000, crop: 'limit' }]
+  },
+});
+
+// Disk storage for CSV and system files
+const diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.resolve(__dirname, '../../../public/uploads');
+    const isCSV = path.extname(file.originalname).toLowerCase() === '.csv';
+    const uploadPath = path.resolve(__dirname, '../../../public/uploads' + (isCSV ? '' : ''));
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
@@ -80,9 +100,14 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  storage,
+  storage: cloudStorage,
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
+
+const csvUpload = multer({
+  storage: diskStorage,
+  fileFilter,
 });
 
 // Auth routes

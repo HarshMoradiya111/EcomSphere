@@ -266,9 +266,15 @@ const postAddProduct = async (req, res) => {
     const sizes = sizesStr ? sizesStr.split(',').map(s => s.trim()).filter(s => s !== '') : [];
     const colors = colorsStr ? colorsStr.split(',').map(c => c.trim()).filter(c => c !== '') : [];
  
-    const mainImage = req.files.image[0].filename;
-    const additionalImages = req.files.additionalImages ? req.files.additionalImages.map(f => f.filename) : [];
- 
+    // For Cloudinary, path is a URL (starts with http). For Local Disk, save only the filename.
+    const mainImage = (req.files.image[0].path && req.files.image[0].path.startsWith('http')) 
+      ? req.files.image[0].path 
+      : req.files.image[0].filename;
+
+    const additionalImages = req.files.additionalImages 
+      ? req.files.additionalImages.map(f => (f.path && f.path.startsWith('http')) ? f.path : f.filename) 
+      : [];
+
     const product = new Product({
       name: name.trim(),
       description: description.trim(),
@@ -292,10 +298,12 @@ const postAddProduct = async (req, res) => {
     res.redirect('/admin/products');
   } catch (error) {
     console.error('Add product error:', error);
-    // Remove uploaded file if product save fails
+    // Remove uploaded file if product save fails (Only if local)
     if (req.files) {
-      if (req.files.image) fs.unlink(req.files.image[0].path, () => {});
-      if (req.files.additionalImages) req.files.additionalImages.forEach(f => fs.unlink(f.path, () => {}));
+      if (req.files.image && !req.files.image[0].path.startsWith('http')) fs.unlink(req.files.image[0].path, () => {});
+      if (req.files.additionalImages) req.files.additionalImages.forEach(f => {
+         if (!f.path.startsWith('http')) fs.unlink(f.path, () => {});
+      });
     }
     req.flash('error', 'Failed to add product. Please try again.');
     res.redirect('/admin/products/add');
@@ -338,19 +346,25 @@ const postEditProduct = async (req, res) => {
       return res.redirect('/admin/products');
     }
 
-    // If new image uploaded, delete old one
+    // If new image uploaded
     if (req.files && req.files.image && req.files.image.length > 0) {
-      const oldImagePath = path.resolve(__dirname, '../../public/uploads', product.image);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlink(oldImagePath, () => {});
+      const newImg = req.files.image[0];
+      const newPath = (newImg.path && newImg.path.startsWith('http')) ? newImg.path : newImg.filename;
+
+      // Delete old image only if it was local
+      if (product.image && !product.image.startsWith('http')) {
+        const oldImagePath = path.join(__dirname, '../../public/uploads', product.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlink(oldImagePath, () => {});
+        }
       }
-      product.image = req.files.image[0].filename;
+      product.image = newPath;
     }
 
     // Add new additional images
     if (req.files && req.files.additionalImages && req.files.additionalImages.length > 0) {
-      const newAdditionalImages = req.files.additionalImages.map(f => f.filename);
-      product.additionalImages = product.additionalImages.concat(newAdditionalImages);
+      const newAdditionalLinks = req.files.additionalImages.map(f => (f.path && f.path.startsWith('http')) ? f.path : f.filename);
+      product.additionalImages = product.additionalImages.concat(newAdditionalLinks);
     }
 
     product.name = name ? name.trim() : product.name;
@@ -387,18 +401,22 @@ const deleteProduct = async (req, res) => {
       return res.redirect('/admin/products');
     }
 
-    // Delete image file
-    const imagePath = path.resolve(__dirname, '../../public/uploads', product.image);
-    if (fs.existsSync(imagePath)) {
-      fs.unlink(imagePath, () => {});
+    // Delete image file (only if local)
+    if (product.image && !product.image.startsWith('http')) {
+      const imagePath = path.resolve(__dirname, '../../public/uploads', product.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlink(imagePath, () => {});
+      }
     }
 
-    // Delete additional images
+    // Delete additional images (only if local)
     if (product.additionalImages && product.additionalImages.length > 0) {
       product.additionalImages.forEach(img => {
-        const imgPath = path.resolve(__dirname, '../../public/uploads', img);
-        if (fs.existsSync(imgPath)) {
-          fs.unlink(imgPath, () => {});
+        if (img && !img.startsWith('http')) {
+          const imgPath = path.resolve(__dirname, '../../public/uploads', img);
+          if (fs.existsSync(imgPath)) {
+            fs.unlink(imgPath, () => {});
+          }
         }
       });
     }
@@ -580,7 +598,9 @@ const updateSettings = async (req, res) => {
   settings.phone = phone;
   settings.hours = hours;
   settings.email = email;
-  if (req.file) settings.logo = '/uploads/' + req.file.filename;
+  if (req.file) {
+    settings.logo = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename;
+  }
   await settings.save();
   res.redirect('/admin/settings');
 };
@@ -593,7 +613,8 @@ const getBlogs = async (req, res) => {
 const addBlogForm = (req, res) => res.render('admin/add_blog', { title: 'Add Blog', activePage: 'blogs' });
 
 const addBlog = async (req, res) => {
-  await Blog.create({ title: req.body.title, content: req.body.content, image: '/uploads/' + req.file.filename });
+  const image = req.file ? ((req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename) : '';
+  await Blog.create({ title: req.body.title, content: req.body.content, image });
   res.redirect('/admin/blogs');
 };
 
@@ -604,7 +625,9 @@ const editBlogForm = async (req, res) => {
 
 const updateBlog = async (req, res) => {
   const updateQuery = { title: req.body.title, content: req.body.content };
-  if (req.file) updateQuery.image = '/uploads/' + req.file.filename;
+  if (req.file) {
+    updateQuery.image = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename;
+  }
   await Blog.findByIdAndUpdate(req.params.id, updateQuery);
   res.redirect('/admin/blogs');
 };
@@ -645,7 +668,9 @@ const getMarketing = async (req, res) => {
 const postAddBanner = async (req, res) => {
   try {
     const { title, subtitle, buttonText, buttonLink } = req.body;
-    const image = req.file ? req.file.filename : null;
+    const image = req.file 
+      ? ((req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename) 
+      : null;
 
     if (!image) {
       req.flash('error', 'Banner image is required');
@@ -1249,12 +1274,21 @@ module.exports = {
         try {
           console.log(`[AI UPLOAD] Processing image ${index + 1}/${total}: ${file.originalname}`);
           
-          // Verify file exists
-          if (!fs.existsSync(file.path)) {
-            throw new Error('Uploaded file not found on server');
+          let buffer;
+          if (file.path.startsWith('http')) {
+            // Cloudinary URL - Download into buffer
+            console.log(`[AI UPLOAD] Downloading image from Cloudinary: ${file.path}`);
+            const response = await fetch(file.path);
+            if (!response.ok) throw new Error(`Failed to download image from cloud: ${response.statusText}`);
+            const arrayBuffer = await response.arrayBuffer();
+            buffer = Buffer.from(arrayBuffer);
+          } else {
+            // Local file
+            if (!fs.existsSync(file.path)) {
+              throw new Error('Uploaded file not found on server');
+            }
+            buffer = fs.readFileSync(file.path);
           }
-
-          const buffer = fs.readFileSync(file.path);
           
           // ✅ ADDED: Validate file size (max 20MB for Gemini)
           const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
@@ -1269,7 +1303,7 @@ module.exports = {
           
           return {
             ...aiData,
-            tempImage: file.filename, // Track the uploaded image
+            tempImage: file.path, // Store the full path (URL or local)
             originalPath: file.path,
             originalName: file.originalname
           };
