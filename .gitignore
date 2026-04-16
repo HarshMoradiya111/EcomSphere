@@ -8,6 +8,8 @@ node_modules/
 .env.test.local
 .env.production.local
 
+.agent/
+
 .github/
 # Build artifacts
 .next/
