@@ -2,15 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-// Safe image parser replicating backend
-function getImageUrl(image: any) {
-  if (!image) return '${API_URL}/img/placeholder.jpg';
-  const imgStr = Array.isArray(image) ? image[0] : image;
-  if (imgStr.startsWith('http')) return imgStr;
-  if (imgStr.includes('/')) return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-  return `${API_URL}/uploads/${imgStr}`;
-}
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<any[]>([]);

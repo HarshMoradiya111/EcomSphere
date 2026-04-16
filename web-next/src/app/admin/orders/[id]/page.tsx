@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -13,7 +15,7 @@ export default function OrderDetails() {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:3000/api/v1/admin/orders/${id}`);
+        const res = await fetch(`${API_URL}/api/v1/admin/orders/${id}`);
         const data = await res.json();
         if (data.success) {
           setOrder(data.order);
@@ -26,27 +28,6 @@ export default function OrderDetails() {
     };
     fetchOrder();
   }, [id]);
-
-  // Protocol-aware SKU image resolution node
-  const getImageUrl = (product: any) => {
-    if (!product || !product.image) return 'http://127.0.0.1:3000/img/placeholder.jpg';
-    
-    // In our schema, image is a String (Legacy/Seeded) or could be an Array in some contexts
-    const imgStr = Array.isArray(product.image) ? product.image[0] : product.image;
-    
-    if (imgStr.startsWith('http')) return imgStr;
-    
-    // Defensively handle prefixes
-    if (imgStr.startsWith('/uploads') || imgStr.startsWith('uploads/')) {
-       return `http://127.0.0.1:3000${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-    }
-    
-    // Seeded assets like n1.jpg are in the root / or /img/
-    if (imgStr.includes('/')) return `http://127.0.0.1:3000${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
-    
-    // Default fallback to /uploads/ if it's a raw filename from a recent upload
-    return `http://127.0.0.1:3000/uploads/${imgStr}`;
-  };
 
   if (loading) return <div className="p-20 text-center animate-pulse text-rose-400 font-black uppercase tracking-widest text-xs">Accessing Logistics Vault...</div>;
   if (!order) return <div className="p-20 text-center text-slate-500 font-black uppercase tracking-widest text-xs">Node Not Found</div>;
