@@ -20,8 +20,11 @@ export default function AdminProducts() {
   const [syncing, setSyncing] = useState<string | null>(null);
 
   const fetchProducts = async () => {
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/products`);
+      const res = await fetch(`${API_URL}/api/v1/admin/products`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (data.success) {
         setProducts(data.products);
@@ -34,11 +37,15 @@ export default function AdminProducts() {
   };
 
   const updateStock = async (id: string, newStock: number) => {
+    const token = localStorage.getItem('adminToken');
     setSyncing(id);
     try {
       const res = await fetch(`${API_URL}/api/v1/admin/products/${id}/stock`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({ countInStock: newStock }),
       });
       if (res.ok) {
@@ -53,8 +60,12 @@ export default function AdminProducts() {
 
   const deleteProduct = async (id: string) => {
     if (!confirm('🚨 Are you absolutely sure? This will wipe the product from the global database.')) return;
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/products/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/v1/admin/products/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) {
         setProducts(products.filter(p => p._id !== id));
       }

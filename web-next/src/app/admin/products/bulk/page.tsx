@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '@/config';
 
 export default function BulkUpload() {
   const router = useRouter();
@@ -22,9 +23,11 @@ export default function BulkUpload() {
     const formData = new FormData();
     formData.append('csvFile', file);
 
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/products/bulk', {
+      const res = await fetch(`${API_URL}/api/v1/admin/products/bulk`, {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
       });
 
