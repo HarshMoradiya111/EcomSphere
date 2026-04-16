@@ -57,7 +57,7 @@
         <% if (banners && banners.length > 0) { %>
           <% banners.forEach(banner => { %>
             <div style="display:flex; gap:15px; background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px; align-items:center;">
-              <img src="/uploads/<%= banner.image %>" style="width:100px; height:60px; object-fit:cover; border-radius:4px;">
+              <img src="<%= (banner.image && banner.image.startsWith('http')) ? banner.image : '/uploads/' + banner.image %>" style="width:100px; height:60px; object-fit:cover; border-radius:4px;">
               <div style="flex:1;">
                 <h5 style="margin:0;"><%= banner.title %></h5>
                 <p style="margin:0; font-size:12px; color:#666;"><%= banner.subtitle %></p>

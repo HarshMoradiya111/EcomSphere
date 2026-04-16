@@ -141,7 +141,7 @@
           <% products.forEach((product, index)=> { %>
             <div class="review-card" style="--index: <%= index %>;">
               <div class="product-image-preview">
-                <img src="/uploads/<%= product.tempImage %>" alt="Product">
+                <img src="<%= product.tempImage.startsWith('http') ? product.tempImage : '/uploads/' + product.tempImage %>" alt="Product">
                 <input type="hidden" name="products[<%= index %>][image]" value="<%= product.tempImage %>">
               </div>
 
