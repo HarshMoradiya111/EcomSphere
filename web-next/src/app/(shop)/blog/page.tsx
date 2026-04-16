@@ -2,39 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 export default function BlogHub() {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Protocol-aware image resolution node
-  // Ultra-resilient image resolution protocol
-  const getImageUrl = (image: string) => {
-    if (!image) return '${API_URL}/img/placeholder.jpg';
-    if (image.startsWith('http')) return image;
-    
-    // Cleanse structural redundancies
-    let cleanPath = image;
-    if (image.includes('img/blog')) {
-       // if it already has the path, just ensure a leading slash
-       cleanPath = image.startsWith('/') ? image : `/${image}`;
-    } else {
-       // if it's a raw filename, prepend the blog path
-       cleanPath = `/img/blog/${image}`;
-    }
-
-    // Handle user-uploaded assets via admin terminal
-    if (image.startsWith('/uploads')) {
-        cleanPath = image;
-    }
-
-    return `${API_URL}${cleanPath}`;
-  };
-
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await fetch('${API_URL}/api/v1/blogs');
+        const res = await fetch(`${API_URL}/api/v1/blogs`);
         const data = await res.json();
         if (data.success) {
           setBlogs(data.data);

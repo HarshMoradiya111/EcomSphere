@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 export default function AdminBlogs() {
   const [blogs, setBlogs] = useState<any[]>([]);
@@ -9,7 +11,7 @@ export default function AdminBlogs() {
 
   const fetchBlogs = async () => {
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/blogs');
+      const res = await fetch(`${API_URL}/api/v1/admin/blogs`);
       const data = await res.json();
       if (data.success) {
         setBlogs(data.blogs);
@@ -19,24 +21,6 @@ export default function AdminBlogs() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Ultra-resilient image resolution protocol
-  const getImageUrl = (image: string) => {
-    if (!image) return '${API_URL}/img/placeholder.jpg';
-    if (image.startsWith('http')) return image;
-    
-    // Cleanse structural redundancies
-    let cleanPath = image;
-    if (image.includes('img/blog')) {
-       cleanPath = image.startsWith('/') ? image : `/${image}`;
-    } else if (image.startsWith('/uploads')) {
-        cleanPath = image;
-    } else {
-       cleanPath = `/img/blog/${image}`;
-    }
-
-    return `${API_URL}${cleanPath}`;
   };
 
   const handleDelete = async (id: string) => {
