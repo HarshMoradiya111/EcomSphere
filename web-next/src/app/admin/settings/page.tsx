@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 export default function AdminSettings() {
   const [formData, setFormData] = useState({
@@ -16,7 +18,7 @@ export default function AdminSettings() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch('${API_URL}/api/v1/admin/settings');
+        const res = await fetch(`${API_URL}/api/v1/admin/settings`);
         const data = await res.json();
         if (data.success) {
           setFormData(data.settings);
@@ -43,7 +45,7 @@ export default function AdminSettings() {
     if (logoFile) formDataPayload.append('logo', logoFile);
 
     try {
-      await fetch('${API_URL}/api/v1/admin/settings', {
+      await fetch(`${API_URL}/api/v1/admin/settings`, {
         method: 'PUT',
         body: formDataPayload,
       });
@@ -121,7 +123,7 @@ export default function AdminSettings() {
                       {formData.logo && (
                           <div className="flex items-center gap-4">
                               <span className="text-[10px] font-black text-slate-600 uppercase">Current Profile:</span>
-                              <img src={`${API_URL}/uploads/${formData.logo}`} className="h-10 w-auto rounded border border-slate-700" alt="Current Logo" />
+                              <img src={getImageUrl(formData.logo)} className="h-10 w-auto rounded border border-slate-700" alt="Current Logo" />
                           </div>
                       )}
                   </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { API_URL } from '@/config';
 
 interface Order {
   _id: string;
@@ -19,7 +20,7 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/orders');
+      const res = await fetch(`${API_URL}/api/v1/admin/orders`);
       const data = await res.json();
       if (data.success) {
         setOrders(data.orders);
