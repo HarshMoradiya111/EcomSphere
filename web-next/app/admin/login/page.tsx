@@ -27,7 +27,7 @@ export default function AdminLogin() {
 
       if (data.success) {
         localStorage.setItem('adminToken', data.token);
-        localStorage.setItem('adminUser', data.admin.username);
+        localStorage.setItem('adminUser', JSON.stringify(data.admin));
         router.push('/admin/dashboard');
       } else {
         setError(data.error || 'Identity Verification Failed');

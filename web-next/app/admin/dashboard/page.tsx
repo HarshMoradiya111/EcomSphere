@@ -41,97 +41,112 @@ export default function AdminDashboard() {
   if (loading) return <div className="p-8 text-[#94a3b8]">Loading statistics...</div>;
 
   return (
-    <div className="admin-content">
-      {/* Stats Grid - Exactly like legacy stats-grid */}
-      <div className="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[20px] p-[25px_30px]">
-        
-        <div className="stat-card bg-[#1e293b] border border-[#334155] rounded-[12px] p-[20px] flex items-center gap-[16px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(0,0,0,0.2)]">
-          <div className="stat-icon w-[52px] h-[52px] rounded-[12px] flex items-center justify-center text-[22px] text-white shrink-0 bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8]">
+    <div>
+      {/* 1. Global Metrics Strip */}
+      <div className="stat-grid">
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
             <i className="fa-solid fa-box"></i>
           </div>
           <div className="stat-info">
-            <h3 className="text-[26px] font-[800] text-[#f1f5f9]">{stats?.productCount || 0}</h3>
-            <p className="text-[13px] text-[#94a3b8] mt-[2px]">Total Products</p>
+            <h3 className="text-[28px] font-[900] text-white tracking-tighter">{stats?.productCount || 0}</h3>
+            <p className="text-[11px] font-[800] text-[#64748b] uppercase tracking-[1px] mt-1">Inventory Items</p>
           </div>
         </div>
 
-        <div className="stat-card bg-[#1e293b] border border-[#334155] rounded-[12px] p-[20px] flex items-center gap-[16px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(0,0,0,0.2)]">
-          <div className="stat-icon w-[52px] h-[52px] rounded-[12px] flex items-center justify-center text-[22px] text-white shrink-0 bg-gradient-to-br from-[#22c55e] to-[#15803d]">
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981, #047857)' }}>
             <i className="fa-solid fa-users"></i>
           </div>
           <div className="stat-info">
-            <h3 className="text-[26px] font-[800] text-[#f1f5f9]">{stats?.userCount || 0}</h3>
-            <p className="text-[13px] text-[#94a3b8] mt-[2px]">Total Users</p>
+            <h3 className="text-[28px] font-[900] text-white tracking-tighter">{stats?.userCount || 0}</h3>
+            <p className="text-[11px] font-[800] text-[#64748b] uppercase tracking-[1px] mt-1">Verified Nodes</p>
           </div>
         </div>
 
-        <div className="stat-card bg-[#1e293b] border border-[#334155] rounded-[12px] p-[20px] flex items-center gap-[16px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(0,0,0,0.2)]">
-          <div className="stat-icon w-[52px] h-[52px] rounded-[12px] flex items-center justify-center text-[22px] text-white shrink-0 bg-gradient-to-br from-[#f59e0b] to-[#b45309]">
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
             <i className="fa-solid fa-shopping-bag"></i>
           </div>
           <div className="stat-info">
-            <h3 className="text-[26px] font-[800] text-[#f1f5f9]">{stats?.orderCount || 0}</h3>
-            <p className="text-[13px] text-[#94a3b8] mt-[2px]">Total Orders</p>
+            <h3 className="text-[28px] font-[900] text-white tracking-tighter">{stats?.orderCount || 0}</h3>
+            <p className="text-[11px] font-[800] text-[#64748b] uppercase tracking-[1px] mt-1">Active Protocols</p>
           </div>
         </div>
 
-        <div className="stat-card bg-[#1e293b] border border-[#334155] rounded-[12px] p-[20px] flex items-center gap-[16px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(0,0,0,0.2)]">
-          <div className="stat-icon w-[52px] h-[52px] rounded-[12px] flex items-center justify-center text-[22px] text-white shrink-0 bg-gradient-to-br from-[#ef4444] to-[#b91c1c]">
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f43f5e, #be123c)' }}>
             <i className="fa-solid fa-triangle-exclamation"></i>
           </div>
           <div className="stat-info">
-            <h3 className="text-[26px] font-[800] text-[#f1f5f9]">{stats?.zeroStockCount || 0}</h3>
-            <p className="text-[13px] text-[#94a3b8] mt-[2px]">Out of Stock</p>
+            <h3 className="text-[28px] font-[900] text-white tracking-tighter">{stats?.zeroStockCount || 0}</h3>
+            <p className="text-[11px] font-[800] text-[#64748b] uppercase tracking-[1px] mt-1">Critical Low Stock</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Rapid Actions Cluster */}
+      <div className="flex gap-3 mb-10 overflow-x-auto pb-4">
+        <a href="/admin/products/new" className="btn-core btn-primary">
+          <i className="fa-solid fa-plus"></i> Deploy Product
+        </a>
+        <a href="/admin/marketing" className="btn-core btn-secondary">
+          <i className="fa-solid fa-bullhorn"></i> Pulse Dashboard
+        </a>
+        <a href="/admin/orders" className="btn-core btn-secondary">
+          <i className="fa-solid fa-truck-fast"></i> Ship Protocols
+        </a>
+      </div>
+
+      {/* 3. Deep Analysis Reports */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="admin-card">
+          <div className="card-header">
+            <h3 className="text-[14px] font-[800] text-white uppercase tracking-widest flex items-center gap-3">
+              <i className="fa-solid fa-chart-line text-[var(--accent)]"></i> Financial Matrix
+            </h3>
+          </div>
+          <div className="p-10 flex flex-col items-center justify-center min-vh-[260px]">
+             <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-xl font-bold text-[var(--accent)] opacity-40">₹</span>
+                <h2 className="text-[64px] font-[900] text-white tracking-tighter leading-none">
+                  {Number((stats?.pipelineRevenue || 0).toFixed(2).split('.')[0]).toLocaleString()}
+                </h2>
+                <span className="text-xl font-bold text-[var(--text-muted)]">.{((stats?.pipelineRevenue || 0).toFixed(2).split('.')[1]) || '00'}</span>
+             </div>
+             <p className="text-[10px] text-[var(--accent)] font-black uppercase tracking-[0.4em] mb-10 opacity-60">Total Pipeline Valuation</p>
+             
+            <div className="flex items-center gap-3 px-6 py-3 bg-[var(--accent-muted)] border border-[var(--accent)]/20 rounded-full">
+              <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse shadow-[0_0_10px_var(--accent)]"></div>
+              <p className="text-[10px] text-[var(--accent)] font-black uppercase tracking-[0.25em]">
+                Verified Matrix Sync
+              </p>
+            </div>
           </div>
         </div>
 
-      </div>
-
-      <div className="quick-actions flex gap-[12px] p-[0_30px_20px] flex-wrap">
-        <a href="/admin/products/add" className="admin-btn bg-[#ffd700] text-[#0f172a] inline-flex items-center gap-[6px] p-[9px_16px] rounded-[7px] text-[13px] font-[600] active:scale-95 transition-all">
-          <i className="fa-solid fa-plus"></i> Add Product
-        </a>
-        <a href="/admin/marketing" className="admin-btn bg-[#334155] text-[#f1f5f9] inline-flex items-center gap-[6px] p-[9px_16px] rounded-[7px] text-[13px] font-[600] border border-[#334155] hover:bg-[#334155]/80 active:scale-95 transition-all">
-          <i className="fa-solid fa-bullhorn"></i> Marketing
-        </a>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px] px-[30px] mb-8">
-        {/* Revenue Card */}
-        <div className="admin-card bg-[#1e293b] border border-[#334155] rounded-[12px] overflow-hidden">
-          <div className="card-header flex items-center justify-between p-[18px_22px] border-b border-[#334155]">
-            <h3 className="text-[16px] font-[700] text-[#f1f5f9]">Revenue Overview</h3>
+        <div className="admin-card">
+          <div className="card-header flex items-center justify-between">
+            <h3 className="text-[14px] font-[800] text-white uppercase tracking-widest">High Velocity Assets</h3>
+            <a href="/admin/products" className="text-[var(--accent)] text-[11px] font-[900] uppercase tracking-widest hover:underline">Monitor All</a>
           </div>
-          <div className="p-8 flex flex-col items-center">
-            <h4 className="text-[#94a3b8] uppercase text-[12px] font-[800] tracking-widest mb-2">Total Revenue</h4>
-            <span className="text-5xl font-black text-[#f1f5f9]">₹{stats?.pipelineRevenue.toLocaleString() || '0'}</span>
-            <p className="text-[12px] text-[#94a3b8] mt-4 max-w-sm text-center">
-              Lifetime sales data synchronized across all fulfillment nodes.
-            </p>
-          </div>
-        </div>
-
-        {/* Top Products Table */}
-        <div className="admin-card bg-[#1e293b] border border-[#334155] rounded-[12px] overflow-hidden">
-          <div className="card-header flex items-center justify-between p-[18px_22px] border-b border-[#334155]">
-            <h3 className="text-[16px] font-[700] text-[#f1f5f9]">Top Selling Products</h3>
-            <a href="/admin/products" className="text-[#ffd700] text-[13px] font-[600]">See All</a>
-          </div>
-          <div className="table-responsive w-full overflow-x-auto">
-            <table className="admin-table w-full border-collapse">
+          <div className="overflow-x-auto">
+            <table className="admin-table">
               <thead>
-                <tr className="bg-[#0f172a]">
-                  <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Product Name</th>
-                  <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Sales</th>
-                  <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Revenue</th>
+                <tr>
+                  <th>Identity</th>
+                  <th>Velocity</th>
+                  <th>Valuation</th>
                 </tr>
               </thead>
               <tbody>
-                {stats?.topSellers.map((prod, idx) => (
-                  <tr key={idx} className="hover:bg-white/2 border-b border-[#334155]">
-                    <td className="p-[14px_16px] text-[14px] text-[#f1f5f9]">{prod.name}</td>
-                    <td className="p-[14px_16px] text-[14px] font-[700] text-[#22c55e]">{prod.totalQuantity} Units</td>
-                    <td className="p-[14px_16px] text-[14px] text-[#f1f5f9]">₹{prod.revenue.toLocaleString()}</td>
+                {(stats?.topSellers || []).map((prod, idx) => (
+                  <tr key={idx}>
+                    <td className="font-semibold text-white">{prod.name}</td>
+                    <td>
+                      <span className="text-[var(--success)] font-bold">{prod.totalQuantity} <span className="text-[10px] opacity-50 uppercase tracking-tighter">Units Flowed</span></span>
+                    </td>
+                    <td className="font-mono text-[14px] font-bold">₹{prod.revenue.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
