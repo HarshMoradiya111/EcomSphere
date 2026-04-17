@@ -41,48 +41,50 @@ export default function AdminUsers() {
   if (loading) return <div className="p-8 text-[#94a3b8]">Loading users...</div>;
 
   return (
-    <div className="admin-content">
-      <div className="admin-card bg-[#1e293b] border border-[#334155] rounded-[12px] m-[25px_30px] overflow-hidden">
-        <div className="card-header flex items-center justify-between p-[18px_22px] border-b border-[#334155]">
-          <h3 className="text-[16px] font-[700] text-[#f1f5f9]">Manage Users ({users.length})</h3>
-          <button onClick={fetchUsers} className="text-[#ffd700] text-[13px] font-[600]">
-            <i className="fa-solid fa-sync"></i> Refresh
-          </button>
+    <div>
+      <div className="flex justify-between items-end mb-8 pb-4 border-b border-[var(--border)]">
+        <div>
+          <h2 className="text-xl font-bold text-white uppercase tracking-tight">Identity Register</h2>
+          <p className="text-[11px] text-[var(--text-muted)] mt-1 font-black tracking-widest uppercase">{users.length} Active Nodes Identified</p>
         </div>
+        <button onClick={fetchUsers} className="btn-core btn-secondary">
+          <i className="fa-solid fa-sync"></i> Refresh Grid
+        </button>
+      </div>
+
+      <div className="admin-card">
         <div className="table-responsive w-full overflow-x-auto">
-          <table className="admin-table w-full border-collapse">
+          <table className="admin-table">
             <thead>
-              <tr className="bg-[#0f172a]">
-                <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">User Details</th>
-                <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Role</th>
-                <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Actions</th>
+              <tr>
+                <th>Neural Identity</th>
+                <th>Privilege Level</th>
+                <th className="text-right">Management</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u._id} className="hover:bg-white/2 border-b border-[#334155]">
-                  <td className="p-[14px_16px]">
-                    <div className="flex items-center gap-[12px]">
-                      <div className="w-[40px] h-[40px] rounded-full bg-[#0f172a] border border-[#334155] flex items-center justify-center font-[700] text-[#ffd700]">
+                <tr key={u._id}>
+                  <td className="py-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)] flex items-center justify-center font-black text-[var(--accent)]">
                         {u.username?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <strong className="block text-[#f1f5f9] text-[14px]">{u.username}</strong>
-                        <small className="text-[#94a3b8]">{u.email}</small>
+                        <p className="text-white font-bold text-[14px] leading-tight mb-0.5">{u.username}</p>
+                        <p className="text-[11px] text-[var(--text-muted)] font-mono">{u.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="p-[14px_16px]">
-                    <span className={`p-[4px_10px] rounded-[20px] text-[11px] font-[800] uppercase tracking-wider ${u.role === 'admin' ? 'bg-[rgba(168,85,247,0.15)] text-[#a855f7]' : 'bg-[rgba(34,197,94,0.15)] text-[#22c55e]'}`}>
+                  <td>
+                    <span className="badge-pill">
                       {u.role || 'customer'}
                     </span>
                   </td>
-                  <td className="p-[14px_16px]">
-                    <div className="action-btns">
-                      <button onClick={() => deleteUser(u._id)} className="p-[6px_10px] bg-[#ef4444] text-white rounded-[6px] text-[12px] font-[600] hover:bg-[#dc2626]">
-                        <i className="fa-solid fa-trash"></i> Delete
-                      </button>
-                    </div>
+                  <td className="text-right">
+                    <button onClick={() => deleteUser(u._id)} className="btn-core btn-secondary !p-[4px_12px] !h-8 !text-[11px] hover:!border-[var(--danger)] hover:!text-[var(--danger)]">
+                      <i className="fa-solid fa-user-slash mr-2"></i> Terminate
+                    </button>
                   </td>
                 </tr>
               ))}

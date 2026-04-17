@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { API_URL } from '@/config';
-import { useAICatalogStore } from '@/store/aiCatalogStore';
-import { getImageUrl } from '@/utils/imagePaths';
+import Link from 'next/link';
+import { API_URL } from '@/src/config';
+import { useAICatalogStore } from '@/src/store/aiCatalogStore';
+import { getImageUrl } from '@/src/utils/imagePaths';
 
 export default function AIReviewPage() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function AIReviewPage() {
   useEffect(() => {
     if (pendingProducts.length === 0) {
       router.push('/admin/products/ai');
+    } else {
+      setProducts(pendingProducts);
     }
   }, [pendingProducts, router]);
 
@@ -53,90 +56,94 @@ export default function AIReviewPage() {
 
   if (success) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-center p-10 animate-in zoom-in duration-500">
-        <div className="w-24 h-24 bg-cyan-500 rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-cyan-500/50">
-          <span className="text-4xl text-slate-950 font-black">✓</span>
+      <div className="flex flex-col items-center justify-center min-h-screen text-center p-10 animate-in zoom-in duration-500 bg-[#0f172a]">
+        <div className="w-24 h-24 bg-[#ffd700] rounded-full flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(255,215,0,0.5)]">
+          <i className="fa-solid fa-check text-4xl text-[#0f172a]"></i>
         </div>
-        <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter">Mission <span className="text-cyan-400 not-italic">Accomplished</span></h1>
-        <p className="text-slate-500 font-bold uppercase tracking-[0.4em] text-xs mt-4">Intelligence successfully integrated into core catalog</p>
+        <h1 className="text-6xl font-[900] text-[#f1f5f9] italic uppercase tracking-tighter">Mission <span className="text-[#ffd700] not-italic">Accomplished</span></h1>
+        <p className="text-[#64748b] font-bold uppercase tracking-[0.4em] text-[12px] mt-4 italic">Neural intelligence integrated into core catalog</p>
       </div>
     );
   }
 
   return (
-    <div className="p-12 max-w-[1400px] mx-auto min-h-screen pb-40">
+    <div className="admin-content p-[30px] max-w-[1400px] mx-auto min-h-screen pb-40">
       <header className="mb-12 flex justify-between items-end">
         <div>
-          <span className="text-cyan-400 font-black uppercase tracking-widest text-[10px] mb-2 block">Step 02: Verification</span>
-          <h1 className="text-6xl font-black text-white tracking-tighter uppercase italic">
-            Review <span className="text-cyan-400 not-italic">Catalog</span>
+          <span className="text-[#ffd700] font-[900] uppercase tracking-[2px] text-[11px] mb-2 block">Step 02: Neural Verification</span>
+          <h1 className="text-6xl font-[900] text-[#f1f5f9] tracking-tighter uppercase italic">
+            Review <span className="text-[#ffd700] not-italic">Synthesis</span>
           </h1>
-          <p className="text-slate-500 font-medium text-lg mt-2 uppercase tracking-widest text-xs">
-             Verifying {products.length} Neural Identifications
+          <p className="text-[#64748b] font-bold text-[14px] mt-2 uppercase tracking-[2px]">
+             Auditing {products.length} Neural Spectral Identifications
           </p>
         </div>
         <button 
            onClick={() => { clear(); router.push('/admin/products/ai'); }}
-           className="px-8 py-3 rounded-full border border-slate-800 text-slate-400 font-black uppercase tracking-widest text-[10px] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/50 transition-all"
+           className="px-8 py-3 rounded-[16px] border border-[#334155] text-[#64748b] font-bold uppercase tracking-widest text-[11px] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/50 transition-all"
         >
           Discard Batch
         </button>
       </header>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {products.map((product, idx) => (
           <div 
             key={idx} 
-            className="group relative bg-[#1a2235]/40 backdrop-blur-3xl border border-slate-800/50 rounded-[3rem] p-8 flex flex-col md:flex-row gap-10 hover:border-cyan-500/30 transition-all duration-500"
+            className="group relative bg-[#1e293b]/50 backdrop-blur-3xl border border-[#334155] rounded-[40px] p-10 flex flex-col md:flex-row gap-12 hover:border-[#ffd700]/30 transition-all duration-500 shadow-xl"
             style={{ animationDelay: `${idx * 0.1}s` }}
           >
-            <div className="w-full md:w-64 h-64 rounded-[2rem] overflow-hidden border-2 border-slate-800 shrink-0 shadow-2xl">
+            <div className="w-full md:w-72 h-72 rounded-[32px] overflow-hidden border-2 border-[#334155] shrink-0 shadow-2xl relative">
               <img 
                 src={getImageUrl(product.tempImage)} 
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
                 alt="Product" 
               />
+              <div className="absolute top-4 right-4 bg-[#ffd700] text-[#0f172a] font-[900] text-[10px] px-3 py-1 rounded-full uppercase tracking-widest italic">Asset Verified</div>
             </div>
 
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                <div className="md:col-span-2">
-                  <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3 px-1">Identity Label</label>
+                  <label className="block text-[11px] font-[900] text-[#64748b] uppercase tracking-[2px] mb-3 px-1">Identity Label</label>
                   <input 
                     type="text" 
                     value={product.name}
                     onChange={(e) => handleUpdate(idx, 'name', e.target.value)}
-                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-cyan-500 focus:bg-slate-900 transition-all shadow-inner"
+                    className="w-full bg-[#0f172a] border border-[#334155] rounded-[20px] px-8 py-5 text-[#f1f5f9] font-bold text-[16px] outline-none focus:border-[#ffd700] focus:shadow-[0_0_20px_rgba(255,215,0,0.1)] transition-all"
                   />
                </div>
 
                <div>
-                  <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3 px-1">Category Classification</label>
-                  <select 
-                    value={product.category}
-                    onChange={(e) => handleUpdate(idx, 'category', e.target.value)}
-                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-cyan-500 focus:bg-slate-900 transition-all appearance-none"
-                  >
-                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                  </select>
+                  <label className="block text-[11px] font-[900] text-[#64748b] uppercase tracking-[2px] mb-3 px-1">Category Classification</label>
+                  <div className="relative">
+                    <select 
+                      value={product.category}
+                      onChange={(e) => handleUpdate(idx, 'category', e.target.value)}
+                      className="w-full bg-[#0f172a] border border-[#334155] rounded-[20px] px-8 py-5 text-[#f1f5f9] font-bold text-[14px] outline-none focus:border-[#ffd700] transition-all appearance-none"
+                    >
+                      {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+                    <i className="fa-solid fa-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-[#64748b] pointer-events-none"></i>
+                  </div>
                </div>
 
                <div>
-                  <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3 px-1">Market Valuation (INR)</label>
+                  <label className="block text-[11px] font-[900] text-[#64748b] uppercase tracking-[2px] mb-3 px-1">Valuation Threshold (INR)</label>
                   <input 
                     type="number" 
                     value={product.price}
                     onChange={(e) => handleUpdate(idx, 'price', e.target.value)}
-                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-cyan-500 focus:bg-slate-900 transition-all"
+                    className="w-full bg-[#0f172a] border border-[#334155] rounded-[20px] px-8 py-5 text-[#f1f5f9] font-black text-[18px] font-mono outline-none focus:border-[#ffd700] transition-all"
                   />
                </div>
 
                <div className="md:col-span-2">
-                  <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3 px-1">Marketing Synthesis (Description)</label>
+                  <label className="block text-[11px] font-[900] text-[#64748b] uppercase tracking-[2px] mb-3 px-1">Neural Synthesis (Description)</label>
                   <textarea 
                     value={product.description}
                     onChange={(e) => handleUpdate(idx, 'description', e.target.value)}
-                    rows={3}
-                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-6 py-4 text-slate-400 text-sm leading-relaxed outline-none focus:border-cyan-500 focus:bg-slate-900 transition-all resize-none"
+                    rows={4}
+                    className="w-full bg-[#0f172a] border border-[#334155] rounded-[24px] px-8 py-6 text-[#94a3b8] text-[14px] leading-relaxed font-medium outline-none focus:border-[#ffd700] transition-all resize-none shadow-inner"
                   />
                </div>
             </div>
@@ -146,17 +153,17 @@ export default function AIReviewPage() {
 
       {/* Floating Action Bar */}
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl px-6 z-40">
-        <div className="bg-white/10 backdrop-blur-2xl border border-white/10 rounded-full px-10 py-6 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        <div className="bg-[#1e293b]/80 backdrop-blur-3xl border border-[#334155] rounded-[32px] px-12 py-8 flex items-center justify-between shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
            <div className="hidden md:block">
-              <p className="text-white font-black uppercase text-xs tracking-tighter">Ready for deployment?</p>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest leading-none mt-1">Direct bridge to shop database active</p>
+              <p className="text-[#f1f5f9] font-[900] uppercase text-[14px] tracking-tight">Final verification required.</p>
+              <p className="text-[#64748b] text-[11px] font-bold uppercase tracking-[2.5px] leading-none mt-1">Direct bridge to inventory cluster active</p>
            </div>
            <button 
              onClick={handleSave}
              disabled={isSaving}
-             className="bg-cyan-500 text-slate-950 px-12 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-xl shadow-cyan-500/20 disabled:bg-slate-800 disabled:text-slate-600"
+             className="bg-[#ffd700] text-[#0f172a] px-14 py-5 rounded-[20px] font-[900] uppercase tracking-[3px] text-[14px] hover:scale-[1.05] active:scale-95 transition-all shadow-[0_15px_35px_-5px_rgba(255,215,0,0.4)] disabled:bg-[#1e293b] disabled:text-[#334155] disabled:shadow-none"
            >
-             {isSaving ? 'INTEGRATING...' : `Commit ${products.length} Units to Catalog`}
+             {isSaving ? 'INTEGRATING...' : `Deploy ${products.length} Units`}
            </button>
         </div>
       </div>
