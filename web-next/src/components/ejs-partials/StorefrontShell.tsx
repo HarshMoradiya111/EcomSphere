@@ -4,6 +4,7 @@ import FlashPartial from './FlashPartial';
 import FooterPartial from './FooterPartial';
 import HeaderPartial from './HeaderPartial';
 import HelpWidgetStyles from './HelpWidgetStyles';
+import LegacySizingStyles from './LegacySizingStyles';
 import type { BreadcrumbItem, HeaderPartialProps, SettingsLike } from './types';
 
 type StorefrontShellProps = {
@@ -29,12 +30,15 @@ export default function StorefrontShell({
 
   return (
     <>
+      <link rel="stylesheet" href="/css/style.css" />
+      <link href="https://fonts.googleapis.com/css2?family=Spartan:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       <HeaderPartial {...header} settings={settings || header.settings} sessionUser={resolvedSessionUser} />
       <FlashPartial success={success} errors={errors} />
       <BreadcrumbsPartial breadcrumbs={breadcrumbs} />
       {children}
       <FooterPartial settings={settings} sessionUser={resolvedSessionUser} />
       <HelpWidgetStyles />
+      <LegacySizingStyles />
     </>
   );
 }

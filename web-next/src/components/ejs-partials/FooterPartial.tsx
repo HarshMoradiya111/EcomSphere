@@ -30,9 +30,9 @@ export default function FooterPartial({ settings, sessionUser = null }: FooterPa
           <p><strong>Hours:</strong> {settings?.hours || '10:00 - 18:00, Mon - Sat'}</p>
           <div className="follow">
             <h4>Follow Us</h4>
-            <div className="icon">
-              <i id="insta"><a href="#"><img src="/img/facebook.svg" className="ins" height={20} alt="Facebook" /></a></i>
-              <i id="insta"><a href="#"><img src="/img/insta.svg" className="ins" height={20} alt="Instagram" /></a></i>
+            <div className="icon" style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+              <a href="#" className="social-icon"><img src="/img/facebook.svg" style={{ height: '24px', width: '24px' }} alt="Facebook" /></a>
+              <a href="#" className="social-icon"><img src="/img/insta.svg" style={{ height: '24px', width: '24px' }} alt="Instagram" /></a>
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function FooterPartial({ settings, sessionUser = null }: FooterPa
             <img src="/img/pay/play.jpg" alt="Google Play" />
           </div>
           <p>Secure Payment Gateway</p>
-          <img src="/img/pay/pay.png" alt="Payment Methods" />
+          <img src="/img/pay/pay.png" style={{ maxWidth: '100%', height: 'auto', display: 'block', marginTop: '10px' }} alt="Payment Methods" />
         </div>
 
         <div className="copyright">

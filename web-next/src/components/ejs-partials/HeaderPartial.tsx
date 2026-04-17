@@ -195,7 +195,7 @@ export default function HeaderPartial({
     <>
       <section id="header">
         <a href="/">
-          <img src={logoSrc} className="logo" alt="EcomSphere" height={60} />
+          <img src={logoSrc} className="logo" alt="EcomSphere" height={45} />
         </a>
 
         <form action="/shop" method="GET" id="search-bar-desktop" style={{ position: 'relative' }}>

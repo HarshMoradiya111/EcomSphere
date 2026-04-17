@@ -149,7 +149,7 @@ export default function ShopPageClient({
 
   return (
     <>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .filter-btn {
           padding: 10px 22px;
           border-radius: 25px;
@@ -196,7 +196,7 @@ export default function ShopPageClient({
           transform: scale(1.1);
           background: #fff;
         }
-      `}</style>
+      ` }} />
 
       <section className="section-p1" style={{ paddingBottom: '10px' }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
