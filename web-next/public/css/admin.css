@@ -1,0 +1,965 @@
+/* 
+  ==============================================================
+  ENTERPRISE MASTER DESIGN SYSTEM — REDESIGNED
+  Drop-in replacement. Same class names. Pro animations added.
+  ==============================================================
+*/
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Core Palette */
+  --bg: #04040a;
+  --surface: #0c0c16;
+  --surface-raised: #12121f;
+  --surface-header: #0f0f1a;
+  --surface-muted: #1a1a2e;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-active: rgba(255, 255, 255, 0.16);
+
+  /* Brand */
+  --accent: #ffd700;
+  --accent-muted: rgba(255, 215, 0, 0.1);
+  --accent-glow: rgba(255, 215, 0, 0.18);
+  --accent-text: #000000;
+
+  /* Status */
+  --success: #00e5a0;
+  --danger: #ff4757;
+  --warning: #ffb300;
+  --info: #4fc3f7;
+
+  /* Typography */
+  --text-primary: #f0f0ff;
+  --text-secondary: #8888aa;
+  --text-muted: #4a4a6a;
+
+  /* Metrics */
+  --sidebar-w: 260px;
+  --header-h: 64px;
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 4px;
+
+  /* Transitions */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 380ms;
+}
+
+/* === BASE RESET === */
+.admin-layout * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.admin-layout i.fa-solid,
+.admin-layout i.fas,
+.admin-layout i.far,
+.admin-layout i.fab,
+.admin-layout i.fa {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+  font-weight: 900 !important;
+}
+
+/* === SCROLLBAR === */
+.admin-layout ::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.admin-layout ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-layout ::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 99px;
+  transition: background var(--duration-base) var(--ease);
+}
+
+.admin-layout ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* === ROOT LAYOUT === */
+.admin-layout {
+  display: flex !important;
+  height: 100vh !important;
+  background: var(--bg) !important;
+  color: var(--text-primary) !important;
+  overflow: hidden !important;
+  font-family: 'Space Grotesk', -apple-system, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* ================================================================
+   SIDEBAR
+================================================================ */
+.admin-sidebar {
+  width: var(--sidebar-w) !important;
+  background: var(--surface) !important;
+  border-right: 1px solid var(--border) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: width var(--duration-slow) var(--ease) !important;
+}
+
+/* Ambient glow behind sidebar top */
+.admin-sidebar::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -80px !important;
+  left: -80px !important;
+  width: 240px !important;
+  height: 240px !important;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.05) 0%, transparent 70%) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+/* ── Brand ── */
+.sidebar-brand {
+  height: var(--header-h) !important;
+  padding: 0 22px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  border-bottom: 1px solid var(--border) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.sidebar-brand h2 {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: var(--accent) !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  line-height: 1.2 !important;
+}
+
+.sidebar-brand p {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: var(--text-muted) !important;
+  letter-spacing: 0.22em !important;
+  text-transform: uppercase !important;
+  margin-top: 2px !important;
+}
+
+/* ── Nav ── */
+.sidebar-nav {
+  padding: 20px 12px !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.nav-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  padding: 10px 14px !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-secondary) !important;
+  text-decoration: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  margin-bottom: 2px !important;
+  cursor: pointer !important;
+  position: relative !important;
+  overflow: hidden !important;
+
+  /* Transition everything smoothly */
+  transition:
+    color var(--duration-base) var(--ease),
+    background var(--duration-base) var(--ease),
+    border-color var(--duration-base) var(--ease),
+    transform var(--duration-fast) var(--ease) !important;
+
+  border: 1px solid transparent !important;
+}
+
+/* Hover ripple layer */
+.nav-item::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  opacity: 0 !important;
+  transition: opacity var(--duration-base) var(--ease) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+/* Active accent bar */
+.nav-item::after {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 25% !important;
+  height: 50% !important;
+  width: 3px !important;
+  background: var(--accent) !important;
+  border-radius: 0 3px 3px 0 !important;
+  opacity: 0 !important;
+  transform: scaleY(0) !important;
+  transition: opacity var(--duration-base) var(--ease), transform var(--duration-base) var(--spring) !important;
+}
+
+.nav-item i {
+  width: 17px !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  opacity: 0.6 !important;
+  transition: opacity var(--duration-base) var(--ease), color var(--duration-base) var(--ease), transform var(--duration-base) var(--spring) !important;
+  flex-shrink: 0 !important;
+}
+
+.nav-item:hover {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  transform: translateX(2px) !important;
+}
+
+.nav-item:hover::before {
+  opacity: 1 !important;
+}
+
+.nav-item:hover i {
+  opacity: 0.9 !important;
+  transform: scale(1.1) !important;
+}
+
+.nav-item:active {
+  transform: translateX(2px) scale(0.98) !important;
+}
+
+.nav-item.active {
+  background: var(--accent-muted) !important;
+  color: var(--accent) !important;
+  border-color: rgba(255, 215, 0, 0.15) !important;
+  transform: translateX(2px) !important;
+}
+
+.nav-item.active::after {
+  opacity: 1 !important;
+  transform: scaleY(1) !important;
+}
+
+.nav-item.active i {
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  transform: scale(1.05) !important;
+}
+
+.nav-logout {
+  color: var(--danger) !important;
+}
+
+.nav-logout:hover {
+  background: rgba(255, 71, 87, 0.08) !important;
+  color: var(--danger) !important;
+  border-color: rgba(255, 71, 87, 0.15) !important;
+}
+
+/* ── Footer ── */
+.sidebar-footer {
+  padding: 18px 22px !important;
+  border-top: 1px solid var(--border) !important;
+  font-size: 11px !important;
+  color: var(--text-muted) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.sidebar-footer strong {
+  color: var(--text-primary) !important;
+}
+
+/* ================================================================
+   MAIN AREA
+================================================================ */
+.admin-main {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: var(--bg) !important;
+  min-width: 0 !important;
+}
+
+.admin-topbar {
+  height: var(--header-h) !important;
+  background: var(--surface-header) !important;
+  border-bottom: 1px solid var(--border) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 32px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  z-index: 10 !important;
+
+  /* Subtle backdrop blur for depth */
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.admin-viewport {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 48px 60px !important;
+
+  /* Page-in animation for content area */
+  animation: viewportFadeIn var(--duration-slow) var(--ease) both !important;
+}
+
+@keyframes viewportFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================================================
+   CARDS
+================================================================ */
+.admin-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  transition:
+    border-color var(--duration-base) var(--ease),
+    box-shadow var(--duration-base) var(--ease),
+    transform var(--duration-base) var(--ease) !important;
+}
+
+.admin-card:hover {
+  border-color: var(--border-active) !important;
+  box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.card-header {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid var(--border) !important;
+  background: var(--surface-header) !important;
+}
+
+/* ================================================================
+   STAT GRID
+================================================================ */
+.stat-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 20px !important;
+  margin-bottom: 28px !important;
+}
+
+.stat-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 18px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  cursor: default !important;
+
+  transition:
+    transform var(--duration-base) var(--spring),
+    border-color var(--duration-base) var(--ease),
+    box-shadow var(--duration-base) var(--ease) !important;
+
+  /* Staggered entrance */
+  animation: statCardIn var(--duration-slow) var(--spring) both !important;
+}
+
+@keyframes statCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Each card gets a unique delay via nth-child */
+.stat-card:nth-child(1) {
+  animation-delay: 0ms !important;
+}
+
+.stat-card:nth-child(2) {
+  animation-delay: 60ms !important;
+}
+
+.stat-card:nth-child(3) {
+  animation-delay: 120ms !important;
+}
+
+.stat-card:nth-child(4) {
+  animation-delay: 180ms !important;
+}
+
+/* Shimmer sweep on hover */
+.stat-card::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 215, 0, 0.04) 50%, transparent 60%) !important;
+  transform: translateX(-100%) !important;
+  transition: transform 0.5s var(--ease) !important;
+}
+
+/* Bottom accent line */
+.stat-card::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background: var(--accent) !important;
+  transform: scaleX(0) !important;
+  transform-origin: left !important;
+  transition: transform var(--duration-slow) var(--spring) !important;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg) !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: var(--border-active) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 215, 0, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.stat-card:hover::before {
+  transform: translateX(100%) !important;
+}
+
+.stat-card:hover::after {
+  transform: scaleX(1) !important;
+}
+
+.stat-icon {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: var(--radius-md) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 19px !important;
+  color: #fff !important;
+  flex-shrink: 0 !important;
+  transition: transform var(--duration-base) var(--spring) !important;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(-4deg) !important;
+}
+
+/* ================================================================
+   BUTTONS
+================================================================ */
+.btn-core {
+  height: 40px !important;
+  padding: 0 20px !important;
+  border-radius: var(--radius-md) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  border: 1px solid transparent !important;
+  text-decoration: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+  letter-spacing: 0.02em !important;
+
+  transition:
+    transform var(--duration-fast) var(--ease),
+    box-shadow var(--duration-base) var(--ease),
+    background var(--duration-base) var(--ease),
+    border-color var(--duration-base) var(--ease) !important;
+}
+
+/* Ripple layer */
+.btn-core::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  opacity: 0 !important;
+  transition: opacity var(--duration-fast) var(--ease) !important;
+}
+
+.btn-core:hover::before {
+  opacity: 1 !important;
+}
+
+.btn-core:active {
+  transform: scale(0.97) !important;
+}
+
+.btn-primary {
+  background: var(--accent) !important;
+  color: var(--accent-text) !important;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 20px var(--accent-glow), 0 0 0 1px rgba(255, 215, 0, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+.btn-secondary {
+  background: var(--surface-muted) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+.btn-secondary:hover {
+  background: var(--surface-raised) !important;
+  border-color: var(--border-active) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Blog table action buttons */
+.table-actions {
+  display: flex !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+.table-actions .btn-core {
+  height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 12px !important;
+}
+
+/* Specific colors */
+.btn-edit {
+  background: var(--info) !important;
+  color: #000 !important;
+}
+
+.btn-delete {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+
+/* Hover improvement */
+.btn-edit:hover {
+  box-shadow: 0 0 12px rgba(79, 195, 247, 0.4) !important;
+}
+
+.btn-delete:hover {
+  box-shadow: 0 0 12px rgba(255, 71, 87, 0.4) !important;
+}
+
+/* Coupon page layout */
+.coupon-page {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 48px !important;
+}
+
+/* Individual sections */
+.coupon-section {
+  padding: 32px !important;
+  margin-bottom: 20px !important;
+}
+
+/* Form spacing */
+.coupon-form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 24px !important;
+}
+
+/* Inputs spacing */
+.coupon-form .form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+/* Settings page main layout */
+.settings-page {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 56px !important;
+}
+
+/* Each settings block */
+.settings-card {
+  padding: 40px !important;
+}
+
+/* Form layout */
+.settings-form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 40px !important;
+}
+
+/* Universal Input Styling */
+.settings-form input,
+.settings-form select,
+.settings-form textarea,
+.marketing-form input,
+.marketing-form select,
+.marketing-form textarea {
+  width: 100% !important;
+  padding: 18px 22px !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surface-muted) !important;
+  color: #ffffff !important;
+  font-family: var(--font-proto) !important;
+  /* Space Grotesk */
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+  transition: all var(--duration-base) var(--ease) !important;
+  outline: none !important;
+}
+
+.settings-form input:focus,
+.marketing-form input:focus,
+.admin-input:focus {
+  border-color: var(--accent) !important;
+  background: var(--surface-raised) !important;
+  box-shadow: 0 0 0 5px rgba(255, 215, 0, 0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Universal Input Class for dynamic contexts */
+.admin-input {
+  width: 100% !important;
+  padding: 16px 20px !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  transition: all var(--duration-base) var(--ease) !important;
+  outline: none !important;
+}
+
+.admin-input::placeholder {
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+}
+
+/* Form Group Spacing */
+.form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  margin-bottom: 24px !important;
+}
+
+.form-group label {
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  color: var(--text-muted) !important;
+  letter-spacing: 0.18em !important;
+  margin-left: 2px !important;
+  opacity: 0.8 !important;
+}
+
+/* Section title spacing */
+.settings-card h3 {
+  margin-bottom: 24px !important;
+  font-size: 16px !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Marketing page layout */
+.marketing-page {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 56px !important;
+}
+
+/* Sections */
+.marketing-section {
+  padding: 40px !important;
+}
+
+/* Grid layout */
+.marketing-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 56px !important;
+}
+
+/* Marketing forms */
+.marketing-form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 36px !important;
+  padding: 10px 0 !important;
+}
+
+/* Universal page spacing fix */
+.page-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 48px !important;
+}
+
+/* Card inner spacing consistency */
+.admin-card .card-body {
+  padding: 40px !important;
+}
+
+/* ================================================================
+   CONTROL STRIP
+================================================================ */
+.control-strip {
+  background: var(--surface-header) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 8px 16px !important;
+  gap: 14px !important;
+  margin-bottom: 22px !important;
+  transition: border-color var(--duration-base) var(--ease) !important;
+}
+
+.control-strip:focus-within {
+  border-color: var(--border-active) !important;
+}
+
+/* ================================================================
+   TABLES
+================================================================ */
+.admin-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.admin-table th {
+  padding: 13px 22px !important;
+  text-align: left !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: var(--text-muted) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.12em !important;
+  border-bottom: 1px solid var(--border) !important;
+  white-space: nowrap !important;
+}
+
+.admin-table td {
+  padding: 14px 22px !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-size: 13.5px !important;
+  color: var(--text-primary) !important;
+  transition: background var(--duration-fast) var(--ease) !important;
+}
+
+.admin-table tbody tr {
+  transition: background var(--duration-fast) var(--ease) !important;
+}
+
+.admin-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.025) !important;
+}
+
+/* Row entrance animation */
+.admin-table tbody tr {
+  animation: rowIn var(--duration-base) var(--ease) both !important;
+}
+
+.admin-table tbody tr:nth-child(1) {
+  animation-delay: 0ms !important;
+}
+
+.admin-table tbody tr:nth-child(2) {
+  animation-delay: 40ms !important;
+}
+
+.admin-table tbody tr:nth-child(3) {
+  animation-delay: 80ms !important;
+}
+
+.admin-table tbody tr:nth-child(4) {
+  animation-delay: 120ms !important;
+}
+
+.admin-table tbody tr:nth-child(5) {
+  animation-delay: 160ms !important;
+}
+
+@keyframes rowIn {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ================================================================
+   BADGE / PILL
+================================================================ */
+.badge-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 11px !important;
+  border-radius: 99px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  background: var(--surface-muted) !important;
+  border: 1px solid var(--border) !important;
+  letter-spacing: 0.04em !important;
+  transition: all var(--duration-fast) var(--ease) !important;
+}
+
+/* Status variants — add these alongside badge-pill */
+.badge-success {
+  background: rgba(0, 229, 160, 0.1) !important;
+  color: var(--success) !important;
+  border-color: rgba(0, 229, 160, 0.2) !important;
+}
+
+.badge-danger {
+  background: rgba(255, 71, 87, 0.1) !important;
+  color: var(--danger) !important;
+  border-color: rgba(255, 71, 87, 0.2) !important;
+}
+
+.badge-warning {
+  background: rgba(255, 179, 0, 0.1) !important;
+  color: var(--warning) !important;
+  border-color: rgba(255, 179, 0, 0.2) !important;
+}
+
+.badge-info {
+  background: rgba(79, 195, 247, 0.1) !important;
+  color: var(--info) !important;
+  border-color: rgba(79, 195, 247, 0.2) !important;
+}
+
+/* ================================================================
+   UTILITY ANIMATIONS (reusable)
+================================================================ */
+
+/* Fade up — add class to any block */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp var(--duration-slow) var(--ease) both !important;
+}
+
+/* Pulse dot — good for live indicators */
+@keyframes pulseDot {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 229, 160, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px rgba(0, 229, 160, 0);
+  }
+}
+
+.live-dot {
+  display: inline-block !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: var(--success) !important;
+  animation: pulseDot 2s infinite !important;
+}
+
+/* Skeleton loading shimmer */
+@keyframes shimmer {
+  from {
+    background-position: -400px 0;
+  }
+
+  to {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-raised) 50%, var(--surface) 75%) !important;
+  background-size: 800px 100% !important;
+  animation: shimmer 1.4s ease infinite !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Number counter pop */
+@keyframes counterPop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.06);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-counter {
+  animation: counterPop 0.4s var(--spring) both !important;
+}
+
+/* ================================================================
+   FOCUS / ACCESSIBILITY
+================================================================ */
+.admin-layout *:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+  border-radius: var(--radius-sm) !important;
+}
