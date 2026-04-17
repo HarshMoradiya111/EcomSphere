@@ -2,130 +2,168 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { API_URL } from '@/src/config';
 
 export default function NewProduct() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const [formData, setFormData] = useState({
-     name: '',
-     price: 0,
-     category: 'Men Clothing',
-     countInStock: 0,
-     description: '',
-     brand: '',
-     image: '${API_URL}/img/products/1.jpg' // Default link for now
+    name: '',
+    price: 0,
+    category: 'Men Clothing',
+    countInStock: 0,
+    description: '',
+    brand: 'EcomSphere',
+    image: null as File | null
   });
+
+  const categories = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics', 'Accessories'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    const token = localStorage.getItem('adminToken');
+    
     try {
-      const res = await fetch('${API_URL}/api/v1/admin/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        router.push('/admin/products');
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('price', formData.price.toString());
+      data.append('category', formData.category);
+      data.append('countInStock', formData.countInStock.toString());
+      data.append('description', formData.description);
+      data.append('brand', formData.brand);
+      if (formData.image) {
+        data.append('image', formData.image);
       }
-    } catch (err) {
-      console.error('Failed to create SKU');
+
+      const res = await fetch(`${API_URL}/api/v1/admin/products`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`
+        },
+        body: data,
+      });
+      
+      const resData = await res.json();
+      
+      if (res.ok && resData.success) {
+        router.push('/admin/products');
+      } else {
+        setError(resData.error || 'Identity conflict detected.');
+      }
+    } catch (err: any) {
+      setError('Connection failure to central node.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-12 max-w-4xl mx-auto animate-in fade-in zoom-in duration-500">
-      <header className="mb-12">
-          <div className="flex items-center gap-3 mb-2 uppercase tracking-widest text-[10px] font-black text-cyan-400">
-             <span className="w-2 h-2 rounded-full bg-cyan-400"></span> Deployment Terminal
-          </div>
-          <h1 className="text-5xl font-black text-white tracking-tighter italic">Provision <span className="text-cyan-400 not-italic">New SKU</span></h1>
-          <p className="text-slate-500 font-medium text-lg mt-2">Initialize a new product across the global EcomSphere network</p>
-      </header>
+    <div className="admin-content" style={{ padding: '25px 30px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>Initialize New Asset</h2>
+        <Link href="/admin/products" className="admin-btn btn-secondary">
+          <i className="fa-solid fa-arrow-left"></i> Back to Inventory
+        </Link>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Identity: Name</label>
-                  <input 
-                      required
-                      type="text" 
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="w-full bg-slate-900/50 border border-slate-800 rounded-3xl px-8 py-5 text-white font-black text-xl focus:border-cyan-500 outline-none transition-all placeholder:text-slate-700"
-                      placeholder="Product Name..."
-                  />
-              </div>
+      <div className="admin-card" style={{ maxWidth: '800px' }}>
+        <div className="card-header">
+           <h3 style={{ fontSize: '16px' }}>Asset Specifications</h3>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="admin-form">
+          {error && <div className="alert alert-error">{error}</div>}
 
-              <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Market Vertical</label>
-                  <select 
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      className="w-full h-[70px] bg-slate-900/50 border border-slate-800 rounded-3xl px-8 text-white font-black uppercase text-xs tracking-widest focus:border-cyan-500 outline-none appearance-none transition-all"
-                  >
-                     <option>Men Clothing</option>
-                     <option>Women Clothing</option>
-                     <option>Footwear</option>
-                     <option>Glasses</option>
-                     <option>Cosmetics</option>
-                  </select>
-              </div>
-
-              <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Financial: Price Point (₹)</label>
-                  <input 
-                      required
-                      type="number" 
-                      value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: parseInt(e.target.value)})}
-                      className="w-full bg-slate-900/50 border border-slate-800 rounded-3xl px-8 py-5 text-white font-black text-xl focus:border-cyan-500 outline-none transition-all placeholder:text-slate-700 font-mono"
-                  />
-              </div>
-
-              <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Stock Reservoir: Count</label>
-                  <input 
-                      required
-                      type="number" 
-                      value={formData.countInStock}
-                      onChange={(e) => setFormData({...formData, countInStock: parseInt(e.target.value)})}
-                      className="w-full bg-slate-900/50 border border-slate-800 rounded-3xl px-8 py-5 text-white font-black text-xl focus:border-cyan-500 outline-none transition-all placeholder:text-slate-700 font-mono"
-                  />
-              </div>
+          <div className="form-group">
+            <label>Asset Identity (Name) <span className="required">*</span></label>
+            <input 
+              required
+              type="text" 
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              placeholder="e.g. Spectral Cotton T-Shirt"
+            />
           </div>
 
-          <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Technical: Description Payload</label>
-              <textarea 
-                  required
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-slate-900/50 border border-slate-800 rounded-3xl px-8 py-6 text-slate-300 font-medium focus:border-cyan-500 outline-none transition-all"
-                  placeholder="Summarize product features and specifications..."
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="form-group">
+              <label>Market Vertical <span className="required">*</span></label>
+              <select 
+                value={formData.category}
+                onChange={(e) => setFormData({...formData, category: e.target.value})}
+              >
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Spectral Brand</label>
+              <input 
+                type="text" 
+                value={formData.brand}
+                onChange={(e) => setFormData({...formData, brand: e.target.value})}
               />
+            </div>
           </div>
 
-          <div className="flex gap-4 pt-12">
-              <button 
-                  type="button"
-                  onClick={() => router.back()}
-                  className="px-10 py-5 rounded-[2rem] border border-slate-800 bg-slate-900/30 text-white font-black uppercase text-xs tracking-widest hover:bg-slate-800 transition-all"
-              >
-                  Abort
-              </button>
-              <button 
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 py-5 rounded-[2rem] bg-cyan-500 text-white font-black uppercase text-xs tracking-widest hover:bg-cyan-400 shadow-xl shadow-cyan-500/20 transition-all disabled:opacity-50"
-              >
-                  {loading ? 'Committing to Global Cluster...' : 'Initialize Deployment'}
-              </button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="form-group">
+              <label>Valuation (₹) <span className="required">*</span></label>
+              <input 
+                required
+                type="number" 
+                value={formData.price}
+                onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
+              />
+            </div>
+            <div className="form-group">
+              <label>Cluster Capacity (Stock) <span className="required">*</span></label>
+              <input 
+                required
+                type="number" 
+                value={formData.countInStock}
+                onChange={(e) => setFormData({...formData, countInStock: parseInt(e.target.value)})}
+              />
+            </div>
           </div>
-      </form>
+
+          <div className="form-group">
+            <label>Visual Asset (Image) <span className="required">*</span></label>
+            <input 
+              required={!formData.image}
+              type="file" 
+              accept="image/*"
+              onChange={(e) => setFormData({...formData, image: e.target.files ? e.target.files[0] : null})}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Deconstruction (Description) <span className="required">*</span></label>
+            <textarea 
+              required
+              rows={5}
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              placeholder="Detailed asset metadata..."
+            />
+          </div>
+
+          <div style={{ marginTop: '20px' }}>
+            <button 
+              type="submit"
+              disabled={loading}
+              className="admin-btn btn-primary"
+              style={{ padding: '12px 40px' }}
+            >
+              {loading ? 'Initializing...' : 'Initialize Asset'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

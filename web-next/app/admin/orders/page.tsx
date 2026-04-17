@@ -63,35 +63,44 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="admin-content">
-      <div className="admin-card bg-[#1e293b] border border-[#334155] rounded-[12px] m-[25px_30px] overflow-hidden">
-        <div className="card-header flex items-center justify-between p-[18px_22px] border-b border-[#334155]">
-          <h3 className="text-[16px] font-[700] text-[#f1f5f9]">All Orders</h3>
-          <button onClick={fetchOrders} className="text-[#ffd700] text-[13px] font-[600]">
-            <i className="fa-solid fa-sync"></i> Refresh
-          </button>
+    <div>
+      <div className="flex justify-between items-center mb-8 pb-4 border-b border-[var(--border)]">
+        <h2 className="text-xl font-bold text-white uppercase tracking-tight">Order Management</h2>
+        <button onClick={fetchOrders} className="btn-core btn-secondary">
+          <i className="fa-solid fa-sync"></i> Refresh Registry
+        </button>
+      </div>
+
+      <div className="admin-card">
+        <div className="card-header">
+           <p className="text-[11px] text-[var(--text-muted)] font-black uppercase tracking-[0.2em]">Transaction Ledger</p>
         </div>
-        <div className="table-responsive w-full overflow-x-auto">
-          <table className="admin-table w-full border-collapse">
+        <div className="overflow-x-auto">
+          <table className="admin-table">
             <thead>
-              <tr className="bg-[#0f172a]">
-                <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Order ID</th>
-                <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Total</th>
-                <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Status</th>
-                <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Date</th>
-                <th className="text-[#ffd700] p-[14px_16px] text-left font-[600] text-[12px] uppercase tracking-[0.5px]">Actions</th>
+              <tr>
+                <th>Order ID</th>
+                <th>Identity</th>
+                <th>Status Protocol</th>
+                <th>Valuation</th>
+                <th>Deployed At</th>
+                <th className="text-right">Ops</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((o) => (
-                <tr key={o._id} className="hover:bg-white/2 border-b border-[#334155]">
-                  <td className="p-[14px_16px] text-[13px] text-[#94a3b8] font-mono">{o._id}</td>
-                  <td className="p-[14px_16px] text-[14px] text-[#f1f5f9] font-[700]">₹{o.totalAmount.toLocaleString()}</td>
-                  <td className="p-[14px_16px]">
+                <tr key={o._id}>
+                  <td className="font-mono text-xs text-[var(--text-muted)] tracking-wider">
+                    ORD-{o._id?.slice(-8).toUpperCase() || 'UNKNOWN'}
+                  </td>
+                  <td className="text-white font-medium">
+                    {o.user ? `User://${o.user.slice(-6)}` : 'Guest Node'}
+                  </td>
+                  <td>
                     <select 
                       value={o.status}
                       onChange={(e) => updateStatus(o._id, e.target.value)}
-                      className={`p-[4px_10px] rounded-[20px] text-[12px] font-[700] bg-[#0f172a] border border-[#334155] outline-none ${getStatusBadgeClass(o.status)}`}
+                      className="bg-[var(--surface-raised)] border border-[var(--border)] text-white text-[12px] font-bold rounded p-1 outline-none"
                     >
                       <option value="Pending">Pending</option>
                       <option value="Processing">Processing</option>
@@ -100,12 +109,15 @@ export default function AdminOrders() {
                       <option value="Cancelled">Cancelled</option>
                     </select>
                   </td>
-                  <td className="p-[14px_16px] text-[13px] text-[#94a3b8]">
+                  <td>
+                    <span className="font-bold text-white">₹{o.totalAmount.toLocaleString()}</span>
+                  </td>
+                  <td className="text-[12px] text-[var(--text-muted)]">
                     {new Date(o.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="p-[14px_16px]">
-                    <Link href={`/admin/orders/${o._id}`} className="p-[6px_12px] bg-[#334155] text-white rounded-[6px] text-[12px] hover:bg-[#475569] font-[600]">
-                      Details
+                  <td className="text-right">
+                    <Link href={`/admin/orders/${o._id}`} className="btn-core btn-secondary !p-[4px_12px] !h-8 !text-[11px]">
+                      Detail
                     </Link>
                   </td>
                 </tr>
