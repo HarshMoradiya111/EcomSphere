@@ -19,6 +19,7 @@ out/
 .kiro/
 .vscode/
 docs/
+csv/
 
 # Debug and Logs
 npm-debug.log*
@@ -62,3 +63,11 @@ scratch/
 *.key
 google/*.json
 Google_CLIENT_ID.json
+
+# Session Metadata
+PROGRESS.md
+.planning/
+scratch/
+**/*.log
+**/*.tmp
+**/.DS_Store

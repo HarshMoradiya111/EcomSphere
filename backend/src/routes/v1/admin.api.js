@@ -252,6 +252,47 @@ router.delete('/products/:id', async (req, res) => {
   }
 });
 
+// @desc    Get inventory specialized view
+// @route   GET /api/v1/admin/inventory
+router.get('/inventory', async (req, res) => {
+  try {
+    const products = await Product.find().select('name category price countInStock image status').sort({ countInStock: 1 });
+    res.status(200).json({ success: true, products: products.map(p => ({
+      ...p._doc,
+      status: p.countInStock === 0 ? 'Out of Stock' : (p.countInStock <= 5 ? 'Low Stock' : 'In Stock')
+    })) });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Inventory fetch failed' });
+  }
+});
+
+// @desc    Update stock from Inventory Hub
+// @route   POST /api/v1/admin/inventory/update-stock/:id
+router.post('/inventory/update-stock/:id', async (req, res) => {
+  try {
+    const { countInStock } = req.body;
+    const status = countInStock === 0 ? 'Out of Stock' : (countInStock <= 5 ? 'Low Stock' : 'In Stock');
+    
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { countInStock, status },
+      { new: true }
+    );
+    
+    if (!product) return res.status(404).json({ success: false, error: 'Node not found' });
+    
+    await dbCache.del('home_products');
+
+    res.status(200).json({ 
+      success: true, 
+      newStock: product.countInStock,
+      newStatus: status
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Sync failed' });
+  }
+});
+
 // @desc    Get all orders for the React Admin table
 // @route   GET /api/v1/admin/orders
 // @access  Private (Admin)
@@ -651,6 +692,18 @@ router.post('/faqs', async (req, res) => {
     res.status(201).json({ success: true, faq });
   } catch (error) {
     res.status(500).json({ success: false, error: 'FAQ deployment failed' });
+  }
+});
+
+// @desc    Update FAQ
+// @route   PUT /api/v1/admin/faqs/:id
+router.put('/faqs/:id', async (req, res) => {
+  try {
+    const faq = await FAQ.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!faq) return res.status(404).json({ success: false, error: 'FAQ not found' });
+    res.status(200).json({ success: true, faq });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Update failed' });
   }
 });
 

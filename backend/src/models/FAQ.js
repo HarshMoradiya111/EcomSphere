@@ -5,6 +5,7 @@ const faqSchema = new mongoose.Schema({
   answer: { type: String, required: true },
   category: { type: String, default: 'General' },
   order: { type: Number, default: 0 },
+  isVisible: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
 

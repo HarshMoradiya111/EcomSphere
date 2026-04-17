@@ -33,10 +33,10 @@ if (process.env.NODE_ENV === 'production') {
 app.use(cors({
   origin: [
     'http://localhost:3000', 
+    'http://127.0.0.1:3000',
     'http://localhost:3001', 
     'http://127.0.0.1:3001',
     process.env.CLIENT_URL,
-    // Allow Render's own domain just in case
     /\.onrender\.com$/ 
   ].filter(Boolean),
   credentials: true
@@ -49,11 +49,14 @@ app.use(helmet({
   crossOriginResourcePolicy: false,
 }));
 
-// Rate limiting
+// Rate limiting - Relaxed for development
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: '🛑 Security lockdown engaged. Please try again after 15 minutes.',
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // Higher limit in dev
+  message: {
+    success: false,
+    error: 'Too many requests. Please try again after 15 minutes.'
+  },
   standardHeaders: true,
   legacyHeaders: false,
 });
