@@ -1,6 +1,5 @@
 export default function HelpWidgetStyles() {
-  return (
-    <style>{`
+  const css = `
       #help-widget { position: fixed; bottom: 30px; right: 30px; z-index: 10000; font-family: 'Poppins', sans-serif; }
       #help-bubble {
         background: linear-gradient(135deg, #088178 0%, #066b64 100%);
@@ -29,6 +28,6 @@ export default function HelpWidgetStyles() {
       .help-btn.email, .help-btn.faq { background: #f8f9fa; color: #333; border: 1px solid #ddd; }
       .help-btn:hover { transform: translateX(5px); }
       @media (max-width: 480px) { .help-label { display: none; } #help-bubble { width: 60px; padding: 0; } }
-    `}</style>
-  );
+    `;
+  return <style dangerouslySetInnerHTML={{ __html: css }} />;
 }

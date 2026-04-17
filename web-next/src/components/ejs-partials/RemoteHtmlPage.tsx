@@ -178,7 +178,7 @@ export default function RemoteHtmlPage({ path, credentials = 'include', initialP
   return (
     <>
       {styles.map((style, index) => (
-        <style key={`${path}-style-${index}`}>{style}</style>
+        <style key={`${path}-style-${index}`} dangerouslySetInnerHTML={{ __html: style }} />
       ))}
       <div suppressHydrationWarning dangerouslySetInnerHTML={{ __html: html }} />
     </>
