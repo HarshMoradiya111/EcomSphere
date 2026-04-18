@@ -38,119 +38,147 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  if (loading) return <div className="p-8 text-[#94a3b8]">Loading statistics...</div>;
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Loading statistics...</div>;
 
   return (
-    <div>
+    <div className="container-fluid p-0">
       {/* 1. Global Metrics Strip */}
-      <div className="stat-grid">
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
-            <i className="fa-solid fa-box"></i>
-          </div>
-          <div className="stat-info">
-            <h3 className="text-[28px] font-[900] text-white tracking-tighter">{stats?.productCount || 0}</h3>
-            <p className="text-[11px] font-[800] text-[#64748b] uppercase tracking-[1px] mt-1">Inventory Items</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981, #047857)' }}>
-            <i className="fa-solid fa-users"></i>
-          </div>
-          <div className="stat-info">
-            <h3 className="text-[28px] font-[900] text-white tracking-tighter">{stats?.userCount || 0}</h3>
-            <p className="text-[11px] font-[800] text-[#64748b] uppercase tracking-[1px] mt-1">Verified Nodes</p>
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center">
+              <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', fontSize: '24px' }}>
+                <i className="fa-solid fa-box"></i>
+              </div>
+              <div>
+                <h3 className="mb-0 fw-bold">{stats?.productCount || 0}</h3>
+                <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Inventory Items</small>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-            <i className="fa-solid fa-shopping-bag"></i>
-          </div>
-          <div className="stat-info">
-            <h3 className="text-[28px] font-[900] text-white tracking-tighter">{stats?.orderCount || 0}</h3>
-            <p className="text-[11px] font-[800] text-[#64748b] uppercase tracking-[1px] mt-1">Active Protocols</p>
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center">
+              <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #10b981, #047857)', fontSize: '24px' }}>
+                <i className="fa-solid fa-users"></i>
+              </div>
+              <div>
+                <h3 className="mb-0 fw-bold">{stats?.userCount || 0}</h3>
+                <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Verified Nodes</small>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f43f5e, #be123c)' }}>
-            <i className="fa-solid fa-triangle-exclamation"></i>
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center">
+              <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', fontSize: '24px' }}>
+                <i className="fa-solid fa-shopping-bag"></i>
+              </div>
+              <div>
+                <h3 className="mb-0 fw-bold">{stats?.orderCount || 0}</h3>
+                <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Active Protocols</small>
+              </div>
+            </div>
           </div>
-          <div className="stat-info">
-            <h3 className="text-[28px] font-[900] text-white tracking-tighter">{stats?.zeroStockCount || 0}</h3>
-            <p className="text-[11px] font-[800] text-[#64748b] uppercase tracking-[1px] mt-1">Critical Low Stock</p>
+        </div>
+
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center">
+              <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #f43f5e, #be123c)', fontSize: '24px' }}>
+                <i className="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div>
+                <h3 className="mb-0 fw-bold">{stats?.zeroStockCount || 0}</h3>
+                <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Critical Low Stock</small>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* 2. Rapid Actions Cluster */}
-      <div className="flex gap-3 mb-10 overflow-x-auto pb-4">
-        <a href="/admin/products/new" className="btn-core btn-primary">
+      <div className="d-flex flex-wrap gap-2 mb-4">
+        <a href="/admin/products/new" className="btn btn-primary d-flex align-items-center gap-2 shadow-sm rounded-pill px-4">
           <i className="fa-solid fa-plus"></i> Deploy Product
         </a>
-        <a href="/admin/marketing" className="btn-core btn-secondary">
-          <i className="fa-solid fa-bullhorn"></i> Pulse Dashboard
+        <a href="/admin/marketing" className="btn btn-light border d-flex align-items-center gap-2 shadow-sm rounded-pill px-4 text-dark">
+          <i className="fa-solid fa-bullhorn text-secondary"></i> Pulse Dashboard
         </a>
-        <a href="/admin/orders" className="btn-core btn-secondary">
-          <i className="fa-solid fa-truck-fast"></i> Ship Protocols
+        <a href="/admin/orders" className="btn btn-light border d-flex align-items-center gap-2 shadow-sm rounded-pill px-4 text-dark">
+          <i className="fa-solid fa-truck-fast text-secondary"></i> Ship Protocols
         </a>
       </div>
 
       {/* 3. Deep Analysis Reports */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="admin-card">
-          <div className="card-header">
-            <h3 className="text-[14px] font-[800] text-white uppercase tracking-widest flex items-center gap-3">
-              <i className="fa-solid fa-chart-line text-[var(--accent)]"></i> Financial Matrix
-            </h3>
-          </div>
-          <div className="p-10 flex flex-col items-center justify-center min-vh-[260px]">
-             <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-xl font-bold text-[var(--accent)] opacity-40">₹</span>
-                <h2 className="text-[64px] font-[900] text-white tracking-tighter leading-none">
+      <div className="row g-4">
+        <div className="col-lg-6">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-header bg-white border-bottom-0 pt-4 pb-0">
+              <h5 className="text-uppercase fw-bold text-muted mb-0 flex items-center gap-2" style={{ letterSpacing: '2px', fontSize: '13px' }}>
+                <i className="fa-solid fa-chart-line text-primary"></i> Financial Matrix
+              </h5>
+            </div>
+            <div className="card-body d-flex flex-column align-items-center justify-content-center py-5">
+              <div className="d-flex align-items-baseline mb-2">
+                <span className="fs-3 fw-bold text-primary opacity-75 me-1">₹</span>
+                <h2 className="display-4 fw-bold text-dark mb-0 leading-none">
                   {Number((stats?.pipelineRevenue || 0).toFixed(2).split('.')[0]).toLocaleString()}
                 </h2>
-                <span className="text-xl font-bold text-[var(--text-muted)]">.{((stats?.pipelineRevenue || 0).toFixed(2).split('.')[1]) || '00'}</span>
-             </div>
-             <p className="text-[10px] text-[var(--accent)] font-black uppercase tracking-[0.4em] mb-10 opacity-60">Total Pipeline Valuation</p>
-             
-            <div className="flex items-center gap-3 px-6 py-3 bg-[var(--accent-muted)] border border-[var(--accent)]/20 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse shadow-[0_0_10px_var(--accent)]"></div>
-              <p className="text-[10px] text-[var(--accent)] font-black uppercase tracking-[0.25em]">
-                Verified Matrix Sync
-              </p>
+                <span className="fs-4 fw-bold text-muted">.{((stats?.pipelineRevenue || 0).toFixed(2).split('.')[1]) || '00'}</span>
+              </div>
+              <p className="text-primary fw-bold text-uppercase opacity-75 mb-4" style={{ fontSize: '11px', letterSpacing: '0.2em' }}>Total Pipeline Valuation</p>
+              
+              <div className="badge bg-light text-primary border border-primary border-opacity-25 rounded-pill px-4 py-2 d-flex align-items-center gap-2">
+                <div className="spinner-grow spinner-grow-sm text-primary" role="status" style={{ width: '0.5rem', height: '0.5rem' }}></div>
+                <span className="text-uppercase fw-bold" style={{ letterSpacing: '1px', fontSize: '10px' }}>Verified Matrix Sync</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="admin-card">
-          <div className="card-header flex items-center justify-between">
-            <h3 className="text-[14px] font-[800] text-white uppercase tracking-widest">High Velocity Assets</h3>
-            <a href="/admin/products" className="text-[var(--accent)] text-[11px] font-[900] uppercase tracking-widest hover:underline">Monitor All</a>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Identity</th>
-                  <th>Velocity</th>
-                  <th>Valuation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(stats?.topSellers || []).map((prod, idx) => (
-                  <tr key={idx}>
-                    <td className="font-semibold text-white">{prod.name}</td>
-                    <td>
-                      <span className="text-[var(--success)] font-bold">{prod.totalQuantity} <span className="text-[10px] opacity-50 uppercase tracking-tighter">Units Flowed</span></span>
-                    </td>
-                    <td className="font-mono text-[14px] font-bold">₹{prod.revenue.toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="col-lg-6">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-header bg-white border-bottom-0 pt-4 pb-3 d-flex align-items-center justify-content-between">
+              <h5 className="text-uppercase fw-bold text-muted mb-0" style={{ letterSpacing: '2px', fontSize: '13px' }}>High Velocity Assets</h5>
+              <a href="/admin/products" className="text-primary text-decoration-none text-uppercase fw-bold" style={{ fontSize: '11px', letterSpacing: '1px' }}>Monitor All</a>
+            </div>
+            <div className="card-body p-0">
+              <div className="table-responsive">
+                <table className="table table-hover align-middle mb-0">
+                  <thead className="table-light text-muted" style={{ fontSize: '12px' }}>
+                    <tr>
+                      <th className="ps-4">Identity</th>
+                      <th>Velocity</th>
+                      <th className="pe-4 text-end">Valuation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(stats?.topSellers || []).map((prod, idx) => (
+                      <tr key={idx}>
+                        <td className="ps-4 fw-semibold text-dark">{prod.name}</td>
+                        <td>
+                          <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                            <span className="fw-bold me-1">{prod.totalQuantity}</span>
+                            <span className="text-uppercase opacity-75" style={{ fontSize: '9px', letterSpacing: '0.5px' }}>Units Flowed</span>
+                          </span>
+                        </td>
+                        <td className="pe-4 font-monospace text-end fw-bold">₹{prod.revenue.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                    {(!stats?.topSellers || stats.topSellers.length === 0) && (
+                      <tr>
+                        <td colSpan={3} className="text-center py-4 text-muted">No high velocity assets recorded.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
