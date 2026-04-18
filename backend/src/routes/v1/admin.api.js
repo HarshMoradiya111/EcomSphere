@@ -97,6 +97,12 @@ router.post('/products/bulk', uploadBulk.single('csvFile'), async (req, res) => 
 // @access  Private (Admin Role Required)
 router.get('/stats', async (req, res) => {
   try {
+    const cacheKey = 'admin_dashboard_stats';
+    const cachedStats = await dbCache.get(cacheKey);
+    if (cachedStats) {
+      return res.json({ success: true, stats: cachedStats });
+    }
+
     const [productCount, userCount, orderCount, zeroStockCount] = await Promise.all([
       Product.countDocuments(),
       User.countDocuments(),
@@ -163,22 +169,35 @@ router.get('/stats', async (req, res) => {
       }
     ]);
 
-    res.status(200).json({
-      success: true,
-      stats: {
-        productCount,
-        userCount,
-        orderCount,
-        zeroStockCount,
-        pipelineRevenue,
-        topSellers,
-        categorySales
-      }
-    });
+    const stats = {
+      productCount,
+      userCount,
+      orderCount,
+      zeroStockCount,
+      pipelineRevenue,
+      topSellers,
+      categorySales
+    };
+
+    // Cache for 2 minutes to keep it "fast like hell"
+    await dbCache.set(cacheKey, stats, 120);
+
+    res.status(200).json({ success: true, stats });
   } catch (error) {
     console.error('Admin API Stats Error:', error);
     res.status(500).json({ success: false, error: 'Server Error' });
   }
+});
+
+// @desc    Get low stock count (Lightweight for Sidebar)
+// @route   GET /api/v1/admin/low-stock
+router.get('/low-stock', async (req, res) => {
+    try {
+        const count = await Product.countDocuments({ countInStock: { $lte: 5 } });
+        res.json({ success: true, count });
+    } catch (e) {
+        res.status(500).json({ success: false });
+    }
 });
 
 
@@ -249,6 +268,51 @@ router.delete('/products/:id', async (req, res) => {
     res.status(200).json({ success: true, message: 'Terminal deletion successful' });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Deletion failed' });
+  }
+});
+
+// @desc    Bulk Delete products
+// @route   POST /api/v1/admin/products/bulk-delete
+// @access  Private (Admin)
+router.post('/products/bulk-delete', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, error: 'No IDs provided' });
+    }
+
+    const result = await Product.deleteMany({ _id: { $in: ids } });
+    
+    // 🔥 Invalidate Cache
+    await dbCache.del('home_products');
+    
+    res.status(200).json({ 
+      success: true, 
+      message: `${result.deletedCount} products purged successfully`,
+      count: result.deletedCount 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Bulk deletion failed' });
+  }
+});
+
+// @desc    Wipe entire product catalog
+// @route   DELETE /api/v1/admin/products/wipe
+// @access  Private (Admin)
+router.delete('/products/wipe', async (req, res) => {
+  try {
+    const result = await Product.deleteMany({});
+    
+    // 🔥 Invalidate Cache
+    await dbCache.del('home_products');
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Catalog completely wiped',
+      count: result.deletedCount 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Catalog wipe failed' });
   }
 });
 
@@ -515,21 +579,32 @@ router.post('/products/ai', uploadAI.array('productImages', 20), async (req, res
       return res.status(400).json({ success: false, error: 'No vision assets detected' });
     }
 
-    const CATEGORIES = ['Footwear', 'Apparel', 'Accessories', 'Electronics', 'Kitchen', 'Fitness', 'Personal Care'];
+    const CATEGORIES = Product.CATEGORIES || ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
     const results = [];
     const errors = [];
 
     for (const file of req.files) {
       try {
+        console.log('[AI DEBUG] Processing file:', {
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          path: file.path,
+          size: file.size
+        });
         // AI Vision Analysis
-        const aiData = await analyzeProductImage(file.path);
+        const aiData = await analyzeProductImage(file.path, file.mimetype);
         results.push({
           ...aiData,
           tempImage: file.path // This is the Cloudinary URL
         });
+        
+        // Anti-Rate-Limit Gap
+        if (req.files.length > 1) {
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
       } catch (err) {
         console.error('AI Processing error for:', file.path, err);
-        errors.push(`Failed to analyze: ${file.originalname}`);
+        errors.push(`${file.originalname}: ${err.message || 'Unknown error'}`);
       }
     }
 

@@ -19,6 +19,8 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchProducts = async () => {
     const token = localStorage.getItem('adminToken');
@@ -43,9 +45,80 @@ export default function AdminProducts() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) setProducts(products.filter(p => p._id !== id));
+      if (res.ok) {
+        setProducts(products.filter(p => p._id !== id));
+        setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+      }
     } catch (err) {
       console.warn('Deletion failed');
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} products?`)) return;
+    
+    setDeleting(true);
+    const token = localStorage.getItem('adminToken');
+    try {
+      const res = await fetch(`${API_URL}/api/v1/admin/products/bulk-delete`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ids: selectedIds })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProducts(products.filter(p => !selectedIds.includes(p._id)));
+        setSelectedIds([]);
+        alert(data.message);
+      }
+    } catch (err) {
+      alert('Bulk deletion failed');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const wipeCatalog = async () => {
+    const confirmation = prompt('DANGER: This will delete ALL products. Type "WIPE" to confirm:');
+    if (confirmation !== 'WIPE') return;
+
+    setDeleting(true);
+    const token = localStorage.getItem('adminToken');
+    try {
+      const res = await fetch(`${API_URL}/api/v1/admin/products/wipe`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProducts([]);
+        setSelectedIds([]);
+        alert('Catalog completely wiped.');
+      }
+    } catch (err) {
+      alert('Catalog wipe failed');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredProducts.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredProducts.map(p => p._id));
+    }
+  };
+
+  const toggleSelectProduct = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
     }
   };
 
@@ -62,8 +135,6 @@ export default function AdminProducts() {
 
   useEffect(() => { fetchProducts(); }, []);
 
-  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Initializing Inventory...</div>;
-
   return (
     <div className="container-fluid p-0">
       {/* 1. Universal Page Header */}
@@ -73,6 +144,13 @@ export default function AdminProducts() {
           <p className="text-muted small text-uppercase fw-bold mb-0" style={{ letterSpacing: '0.1em' }}>Global Asset Registry & Node Sync</p>
         </div>
         <div className="d-flex gap-2">
+          <button 
+            onClick={wipeCatalog} 
+            disabled={deleting}
+            className="btn btn-sm btn-outline-danger d-flex align-items-center gap-2 shadow-sm"
+          >
+            <i className="fa-solid fa-fire"></i> Wipe Catalog
+          </button>
           <Link href="/admin/products/ai" className="btn btn-sm text-white d-flex align-items-center gap-2 shadow-sm" style={{ background: '#6366f1' }}>
             <i className="fa-solid fa-brain"></i> Neural Assist
           </Link>
@@ -123,7 +201,15 @@ export default function AdminProducts() {
             <table className="table table-hover align-middle mb-0">
               <thead className="table-light text-muted text-uppercase" style={{ fontSize: '12px' }}>
                 <tr>
-                  <th className="ps-4" style={{ width: '80px' }}>Asset</th>
+                  <th className="ps-4" style={{ width: '40px' }}>
+                    <input 
+                      type="checkbox" 
+                      className="form-check-input shadow-none" 
+                      checked={filteredProducts.length > 0 && selectedIds.length === filteredProducts.length}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
+                  <th style={{ width: '80px' }}>Asset</th>
                   <th>Identity</th>
                   <th>Sector</th>
                   <th>Valuation</th>
@@ -132,9 +218,32 @@ export default function AdminProducts() {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.length > 0 ? filteredProducts.map((p) => (
-                  <tr key={p._id}>
-                    <td className="ps-4 py-3">
+                {loading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="placeholder-glow">
+                      <td className="ps-4 py-3"><div className="placeholder rounded" style={{ width: '20px', height: '20px' }}></div></td>
+                      <td><div className="placeholder rounded" style={{ width: '48px', height: '48px' }}></div></td>
+                      <td>
+                        <div className="placeholder col-8 mb-1"></div>
+                        <div className="placeholder col-4"></div>
+                      </td>
+                      <td><div className="placeholder col-6"></div></td>
+                      <td><div className="placeholder col-5"></div></td>
+                      <td><div className="placeholder col-10"></div></td>
+                      <td className="pe-4"><div className="placeholder col-6 float-end"></div></td>
+                    </tr>
+                  ))
+                ) : filteredProducts.length > 0 ? filteredProducts.map((p) => (
+                  <tr key={p._id} className={selectedIds.includes(p._id) ? 'table-primary shadow-sm' : ''} style={{ transition: 'all 0.2s ease' }}>
+                    <td className="ps-4">
+                      <input 
+                        type="checkbox" 
+                        className="form-check-input shadow-none" 
+                        checked={selectedIds.includes(p._id)}
+                        onChange={() => toggleSelectProduct(p._id)}
+                      />
+                    </td>
+                    <td className="py-3">
                       <img src={getImageUrl(p.image)} alt="" className="img-thumbnail rounded" style={{ width: '48px', height: '48px', objectFit: 'cover' }} />
                     </td>
                     <td>
@@ -186,6 +295,43 @@ export default function AdminProducts() {
           </div>
         </div>
       </div>
+      {/* 4. Floating Action Bar for Bulk Ops */}
+      {selectedIds.length > 0 && (
+        <div 
+          className="position-fixed bottom-0 start-50 translate-middle-x mb-4 z-3 shadow-lg p-3 rounded-pill d-flex align-items-center gap-3 bg-dark text-white border border-secondary"
+          style={{ minWidth: '300px', animation: 'slideUp 0.3s ease-out' }}
+        >
+          <span className="ps-2 fw-bold small text-uppercase" style={{ letterSpacing: '1px' }}>
+            {selectedIds.length} Nodes Selected
+          </span>
+          <div className="vr opacity-25"></div>
+          <button 
+            onClick={bulkDelete}
+            disabled={deleting}
+            className="btn btn-danger rounded-pill btn-sm px-4 fw-bold text-uppercase d-flex align-items-center gap-2"
+          >
+            {deleting ? (
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            ) : (
+              <i className="fa-solid fa-trash-can"></i>
+            )}
+            Purge Selected
+          </button>
+          <button 
+            onClick={() => setSelectedIds([])}
+            className="btn btn-outline-light rounded-pill btn-sm px-3 fw-bold text-uppercase"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slideUp {
+          from { transform: translate(-50%, 100%); opacity: 0; }
+          to { transform: translate(-50%, 0); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
