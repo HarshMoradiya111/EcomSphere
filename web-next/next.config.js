@@ -14,14 +14,12 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      {
-        source: '/auth/:path*',
-        destination: `${backendUrl}/auth/:path*`,
-      },
+      // API routes should still be rewritten
       {
         source: '/api/:path*',
         destination: `${backendUrl}/api/:path*`,
       },
+      // Static assets from backend
       {
         source: '/uploads/:path*',
         destination: `${backendUrl}/uploads/:path*`,
