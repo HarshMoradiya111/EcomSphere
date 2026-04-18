@@ -3,8 +3,8 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { API_URL } from '@/src/config';
-import { useAICatalogStore } from '@/src/store/aiCatalogStore';
+import { API_URL } from '@/config';
+import { useAICatalogStore } from '@/store/aiCatalogStore';
 
 export default function AIUploadPage() {
   const router = useRouter();

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import SafeImage from '@/src/components/SafeImage';
-import { getProductImageFallbackSrc, getProductImageSrc } from '@/src/utils/imagePaths';
+import SafeImage from '@/components/SafeImage';
+import { getProductImageFallbackSrc, getProductImageSrc } from '@/utils/imagePaths';
 
 const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'] as const;
 

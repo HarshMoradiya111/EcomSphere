@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 export default function FAQsPage() {
   const [faqs, setFaqs] = useState<any[]>([]);

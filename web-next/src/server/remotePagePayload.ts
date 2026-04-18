@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
-import { API_URL } from '@/src/config';
-import type { RemoteHtmlPayload } from '@/src/components/ejs-partials/types';
+import { API_URL } from '@/config';
+import type { RemoteHtmlPayload } from '@/components/ejs-partials/types';
 
 function isExecutableScriptType(typeValue: string): boolean {
   const scriptType = typeValue.trim().toLowerCase();

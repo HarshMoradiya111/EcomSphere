@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 const menuItems = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: 'fa-solid fa-gauge', id: 'dashboard' },

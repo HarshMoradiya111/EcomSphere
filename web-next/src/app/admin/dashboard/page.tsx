@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 interface DashboardStats {
   productCount: number;

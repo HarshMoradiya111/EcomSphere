@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { API_URL } from '@/src/config';
-import { useAICatalogStore } from '@/src/store/aiCatalogStore';
-import { getImageUrl } from '@/src/utils/imagePaths';
+import { API_URL } from '@/config';
+import { useAICatalogStore } from '@/store/aiCatalogStore';
+import { getImageUrl } from '@/utils/imagePaths';
 
 export default function AIReviewPage() {
   const router = useRouter();

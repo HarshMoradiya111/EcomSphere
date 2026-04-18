@@ -1,5 +1,5 @@
-import RemoteHtmlPage from '@/src/components/ejs-partials/RemoteHtmlPage';
-import ProfileEnhancer from '@/src/components/ProfileEnhancer';
+import RemoteHtmlPage from '@/components/ejs-partials/RemoteHtmlPage';
+import ProfileEnhancer from '@/components/ProfileEnhancer';
 
 export default async function ProfilePage() {
   return (

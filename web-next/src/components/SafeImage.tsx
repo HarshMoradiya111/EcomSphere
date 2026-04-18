@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { getProductImageFallbackSrc } from '@/src/utils/imagePaths';
+import { getProductImageFallbackSrc } from '@/utils/imagePaths';
 
 type SafeImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
   fallbackSrc?: string;

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import Head from 'next/head';
-import AdminSidebar from '@/src/features/admin/AdminSidebar';
+import AdminSidebar from '@/features/admin/AdminSidebar';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);

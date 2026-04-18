@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 interface Order {
   _id: string;

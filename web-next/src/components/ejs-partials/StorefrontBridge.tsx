@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 function showToast(message: string, type: 'success' | 'error' | 'info' = 'success') {
   const existing = document.querySelector('.toast');

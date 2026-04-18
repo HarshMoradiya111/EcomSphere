@@ -1,5 +1,5 @@
-import { API_URL } from '@/src/config';
-import type { SettingsLike } from '@/src/components/ejs-partials/types';
+import { API_URL } from '@/config';
+import type { SettingsLike } from '@/components/ejs-partials/types';
 
 const DEFAULT_SETTINGS: SettingsLike = {
   address: 'SSCCS',

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 import type { HeaderPartialProps, SearchProduct } from './types';
 
 function toCurrency(price: number) {

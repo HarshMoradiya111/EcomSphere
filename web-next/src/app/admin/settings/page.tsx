@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({

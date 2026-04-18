@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 export default function EditProduct() {
   const router = useRouter();

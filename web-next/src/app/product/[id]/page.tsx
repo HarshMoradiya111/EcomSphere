@@ -1,8 +1,8 @@
-import StorefrontShell from '@/src/components/ejs-partials/StorefrontShell';
-import SafeImage from '@/src/components/SafeImage';
-import { API_URL } from '@/src/config';
-import { getSiteSettings } from '@/src/server/siteSettings';
-import { getProductImageSrc, getProductImageFallbackSrc } from '@/src/utils/imagePaths';
+import StorefrontShell from '@/components/ejs-partials/StorefrontShell';
+import SafeImage from '@/components/SafeImage';
+import { API_URL } from '@/config';
+import { getSiteSettings } from '@/server/siteSettings';
+import { getProductImageSrc, getProductImageFallbackSrc } from '@/utils/imagePaths';
 
 type Product = {
   _id: string;

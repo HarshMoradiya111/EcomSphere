@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 function extractUsernameFromProfileHtml(html: string): string | null {
   const headingMatch = html.match(/Welcome,\s*([^!<\n]+)!/i);

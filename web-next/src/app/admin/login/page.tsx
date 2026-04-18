@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 export default function AdminLogin() {
   const [username, setUsername] = useState('');

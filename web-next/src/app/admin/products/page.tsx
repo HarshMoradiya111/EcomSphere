@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { API_URL } from '@/src/config';
-import { getImageUrl } from '@/src/utils/imagePaths';
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 interface Product {
   _id: string;

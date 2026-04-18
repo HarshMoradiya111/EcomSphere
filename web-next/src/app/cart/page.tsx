@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import StorefrontShell from '@/src/components/ejs-partials/StorefrontShell';
-import { API_URL } from '@/src/config';
+import StorefrontShell from '@/components/ejs-partials/StorefrontShell';
+import { API_URL } from '@/config';
 
 type CartItem = {
   id: string;

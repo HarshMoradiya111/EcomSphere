@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import StorefrontBridge from '@/src/components/ejs-partials/StorefrontBridge';
+import StorefrontBridge from '@/components/ejs-partials/StorefrontBridge';
 import './globals.css';
 
 export const metadata: Metadata = {

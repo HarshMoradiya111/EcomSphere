@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { API_URL } from '@/src/config';
-import { getImageUrl } from '@/src/utils/imagePaths';
+import { API_URL } from '@/config';
+import { getImageUrl } from '@/utils/imagePaths';
 
 export default function AdminBlogs() {
   const [blogs, setBlogs] = useState<any[]>([]);

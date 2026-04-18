@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { API_URL } from '@/src/config';
+import { API_URL } from '@/config';
 
 export default function BulkUpload() {
   const router = useRouter();

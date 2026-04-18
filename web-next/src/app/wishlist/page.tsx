@@ -1,5 +1,5 @@
-import RemoteHtmlPage from '@/src/components/ejs-partials/RemoteHtmlPage';
-import { fetchRemotePagePayload } from '@/src/server/remotePagePayload';
+import RemoteHtmlPage from '@/components/ejs-partials/RemoteHtmlPage';
+import { fetchRemotePagePayload } from '@/server/remotePagePayload';
 
 export default async function WishlistPage() {
   const initialPayload = await fetchRemotePagePayload('/wishlist');
