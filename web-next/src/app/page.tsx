@@ -1,6 +1,7 @@
 import StorefrontShell from '@/components/ejs-partials/StorefrontShell';
 import { API_URL } from '@/config';
 import { getSessionUsername } from '@/server/sessionUser';
+export const dynamic = 'force-dynamic';
 import { getSiteSettings } from '@/server/siteSettings';
 import ProductList from '@/features/shop/ProductList';
 
