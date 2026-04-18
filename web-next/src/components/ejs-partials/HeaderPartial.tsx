@@ -34,25 +34,23 @@ export default function HeaderPartial({
   useEffect(() => {
     let cancelled = false;
 
+    // If sessionUser is passed as prop (server-side), use it.
     if (sessionUser) {
       setResolvedSessionUser(sessionUser);
       return;
     }
 
+    // Otherwise, try to detect session from JSON API
     async function detectSessionUser() {
       try {
-        const response = await fetch(`${API_URL}/profile`, { credentials: 'include' });
+        const response = await fetch(`${API_URL}/api/v1/user/profile`, { credentials: 'include' });
         if (!response.ok) return;
 
-        const html = await response.text();
+        const data = await response.json();
         if (cancelled) return;
 
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const headingText = doc.querySelector('#page-header h2')?.textContent || '';
-        const matched = headingText.match(/Welcome,\s*(.+)!/i);
-        if (matched?.[1]) {
-          setResolvedSessionUser(matched[1].trim());
+        if (data.success && data.user) {
+          setResolvedSessionUser(data.user.username);
         }
       } catch {
         // Keep guest state when detection fails.
