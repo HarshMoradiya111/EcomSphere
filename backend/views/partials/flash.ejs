@@ -1,0 +1,15 @@
+<%# Flash messages partial %>
+<% if (locals.success && success.length > 0) { %>
+  <div class="flash-message flash-success">
+    <% success.forEach(msg => { %>
+      <p><i class="fa-solid fa-circle-check"></i> <%= msg %></p>
+    <% }) %>
+  </div>
+<% } %>
+<% if (locals.errors && errors.length > 0) { %>
+  <div class="flash-message flash-error">
+    <% errors.forEach(msg => { %>
+      <p><i class="fa-solid fa-circle-exclamation"></i> <%= msg %></p>
+    <% }) %>
+  </div>
+<% } %>

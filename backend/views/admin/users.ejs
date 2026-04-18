@@ -1,0 +1,59 @@
+<%- include('./partials/admin_header', { activePage: 'users' }) %>
+
+<% if (locals.success && success.length > 0) { %>
+  <div class="alert alert-success"><% success.forEach(msg => { %><p><%= msg %></p><% }) %></div>
+<% } %>
+<% if (locals.errors && errors.length > 0) { %>
+  <div class="alert alert-error"><% errors.forEach(msg => { %><p><%= msg %></p><% }) %></div>
+<% } %>
+
+<div class="admin-card">
+  <div class="card-header">
+    <h3>All Users (<%= users.length %>)</h3>
+  </div>
+
+  <% if (users.length > 0) { %>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(user => { %>
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#667eea,#764ba2); display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; font-size:14px;">
+                    <%= user.username.charAt(0).toUpperCase() %>
+                  </div>
+                  <%= user.username %>
+                </div>
+              </td>
+              <td><%= user.email %></td>
+              <td><%= new Date(user.createdAt).toLocaleDateString('en-IN') %></td>
+              <td>
+                <form action="/admin/users/<%= user._id %>/delete" method="POST" style="display:inline;" onsubmit="return confirm('Delete user <%= user.username %>? This cannot be undone.')">
+                  <button type="submit" class="admin-btn btn-danger btn-sm">
+                    <i class="fa-solid fa-trash"></i> Delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div style="text-align:center; padding:50px; color:#94a3b8;">
+      <i class="fa-solid fa-users" style="font-size:50px; margin-bottom:15px;"></i>
+      <p>No registered users yet.</p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('./partials/admin_footer') %>

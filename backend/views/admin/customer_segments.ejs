@@ -1,0 +1,160 @@
+<%- include('./partials/admin_header', { activePage: 'segments' }) %>
+
+  <style>
+    .segment-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      border-left: 5px solid #088178;
+    }
+
+    .segment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .segment-Big-Spenders {
+      border-left-color: #ef4444;
+    }
+
+    .segment-Regulars {
+      border-left-color: #3b82f6;
+    }
+
+    .segment-New-Shoppers {
+      border-left-color: #22c55e;
+    }
+
+    .segment-Window-Shoppers {
+      border-left-color: #94a3b8;
+    }
+
+    .segment-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .segment-title h4 {
+      margin: 0;
+      color: #1a1a1a;
+    }
+
+    .segment-count {
+      background: #f1f5f9;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+  </style>
+
+  <div class="segment-grid">
+    <% Object.keys(segments).forEach(segmentName=> { %>
+      <div class="segment-card segment-<%= segmentName.replace(' ', '-') %>">
+        <div class="segment-title">
+          <h4>
+            <%= segmentName %>
+          </h4>
+          <span class="segment-count">
+            <%= segments[segmentName].length %> Users
+          </span>
+        </div>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+          <% if (segmentName==='Big Spenders' ) { %>Spent > ₹20,000 threshold<% } %>
+              <% if (segmentName==='Regulars' ) { %>Placed 3 or more orders<% } %>
+                  <% if (segmentName==='New Shoppers' ) { %>1-2 successful orders<% } %>
+                      <% if (segmentName==='Window Shoppers' ) { %>Registered but 0 orders<% } %>
+        </p>
+        <div style="font-size: 18px; font-weight: 700; color:black  ">
+          ₹<%= segments[segmentName].reduce((acc, curr)=> acc + curr.totalSpent, 0).toLocaleString('en-IN') %>
+            <span style="font-size: 12px; font-weight: 400; color: #888;">total revenue</span>
+        </div>
+      </div>
+      <% }) %>
+  </div>
+
+  <div class="admin-card">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>Detailed User Segments</h3>
+      <div id="segment-filters" style="display:flex; gap:10px;">
+        <button class="admin-btn btn-sm" onclick="filterSegment('all')">All</button>
+        <button class="admin-btn btn-sm btn-danger" onclick="filterSegment('Big Spenders')">Big Spenders</button>
+        <button class="admin-btn btn-sm btn-primary" onclick="filterSegment('Regulars')">Regulars</button>
+        <button class="admin-btn btn-sm btn-success" onclick="filterSegment('New Shoppers')">New Shoppers</button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="admin-table" id="segmentTable">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Segment</th>
+            <th>Total Orders</th>
+            <th>Total Spent</th>
+            <th>Last Order</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% Object.keys(segments).forEach(segmentName=> { %>
+            <% segments[segmentName].forEach(stat=> { %>
+              <tr class="user-row" data-segment="<%= segmentName %>">
+                <td>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div
+                      style="width:35px; height:35px; border-radius:50%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#088178;">
+                      <%= (stat.userDetails.username || stat.userDetails.email || 'U' ).charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                      <strong>
+                        <%= stat.userDetails.username || stat.userDetails.email %>
+                      </strong><br>
+                      <small>
+                        <%= stat.userDetails.email %>
+                      </small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span
+                    class="badge badge-<%= segmentName === 'Big Spenders' ? 'error' : (segmentName === 'Regulars' ? 'info' : (segmentName === 'New Shoppers' ? 'success' : 'secondary')) %>">
+                    <%= segmentName %>
+                  </span>
+                </td>
+                <td>
+                  <%= stat.orderCount %>
+                </td>
+                <td><strong>₹<%= stat.totalSpent.toLocaleString('en-IN') %></strong></td>
+                <td><small>
+                    <%= stat.lastOrderDate==='N/A' ? 'Never' : new Date(stat.lastOrderDate).toLocaleDateString() %>
+                  </small></td>
+                <td>
+                  <a href="/admin/users" class="admin-btn btn-sm">View Profile</a>
+                </td>
+              </tr>
+              <% }) %>
+                <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function filterSegment(segment) {
+      const rows = document.querySelectorAll('.user-row');
+      rows.forEach(row => {
+        if (segment === 'all' || row.dataset.segment === segment) {
+          row.style.display = 'table-row';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  </script>
+
+  <%- include('./partials/admin_footer') %>

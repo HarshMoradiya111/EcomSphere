@@ -1,0 +1,145 @@
+<%- include('./partials/admin_header', { activePage: 'search-analytics' }) %>
+
+  <style>
+    .analytics-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 25px;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .query-tag {
+      background: #f1f5f9;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #088178;
+    }
+
+    .query-count {
+      color: #64748b;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+
+    .zero-badge {
+      background: #fee2e2;
+      color: #ef4444;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .search-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+  </style>
+
+  <div class="card-header" style="margin-bottom: 20px;">
+    <h2><i class="fa-solid fa-magnifying-glass-chart"></i> Search & Intent Analytics</h2>
+    <p>Understand what your customers are looking for to optimize inventory.</p>
+  </div>
+
+  <div class="analytics-grid">
+    <!-- Top Searches -->
+    <div class="analytics-card">
+      <h3 style="margin-bottom: 20px; color:black"><i class="fa-solid fa-fire" style="color: #f97316;"></i> Top Search
+        Queries</h3>
+      <% if (topSearches.length> 0) { %>
+        <% topSearches.forEach(search=> { %>
+          <div class="search-item">
+            <div>
+              <span class="query-tag">#<%= search._id %></span>
+              <span class="query-count">
+                <%= search.count %> searches
+              </span>
+            </div>
+            <div style="font-size: 12px; color: #94a3b8;">
+              Avg. <%= Math.round(search.avgResults) %> results
+            </div>
+          </div>
+          <% }) %>
+            <% } else { %>
+              <p style="color: #888; text-align: center; padding: 20px;">No search data yet.</p>
+              <% } %>
+    </div>
+
+    <!-- Zero Results (Missed Opportunities) -->
+    <div class="analytics-card" style="border-top: 4px solid #ef4444;">
+      <h3 style="margin-bottom: 20px; color:black"><i class="fa-solid fa-triangle-exclamation"
+          style="color: #ef4444;"></i> Zero
+        Results (Missed Opportunities)</h3>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Terms people searched for that returned 0
+        products. Consider adding these to your stock!</p>
+      <% if (zeroResultsQueries.length> 0) { %>
+        <% zeroResultsQueries.forEach(search=> { %>
+          <div class="search-item">
+            <div>
+              <span class="query-tag" style="color: #ef4444; background: #fff1f2;">#<%= search._id %></span>
+              <span class="query-count">
+                <%= search.count %> failed searches
+              </span>
+            </div>
+            <span class="zero-badge">Potential Gap</span>
+          </div>
+          <% }) %>
+            <% } else { %>
+              <div style="text-align: center; color: #22c55e; padding: 20px;">
+                <i class="fa-solid fa-circle-check"></i> Great! Everyone is finding what they need.
+              </div>
+              <% } %>
+    </div>
+  </div>
+
+  <!-- Recent Search Log -->
+  <div class="admin-card">
+    <div class="card-header">
+      <h3>Real-time Search Log</h3>
+    </div>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Query</th>
+            <th>Results Found</th>
+            <th>User</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% recentQueries.forEach(log=> { %>
+            <tr>
+              <td><strong>
+                  <%= log.query %>
+                </strong></td>
+              <td>
+                <span class="badge badge-<%= log.resultsCount > 0 ? 'success' : 'error' %>">
+                  <%= log.resultsCount %> items
+                </span>
+              </td>
+              <td>
+                <%= log.userId ? 'Registered User' : 'Guest' %>
+              </td>
+              <td><small>
+                  <%= new Date(log.timestamp).toLocaleString() %>
+                </small></td>
+            </tr>
+            <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <%- include('./partials/admin_footer') %>

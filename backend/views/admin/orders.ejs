@@ -1,0 +1,67 @@
+<%- include('./partials/admin_header', { activePage: 'orders' }) %>
+
+<% if (locals.success && success.length > 0) { %>
+  <div class="alert alert-success"><% success.forEach(msg => { %><p><%= msg %></p><% }) %></div>
+<% } %>
+
+<div class="admin-card">
+  <div class="card-header">
+    <h3>All Orders (<%= orders.length %>)</h3>
+  </div>
+
+  <% if (orders.length > 0) { %>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td><strong>#<%= order._id.toString().slice(-8).toUpperCase() %></strong></td>
+              <td>
+                <% if (order.userId) { %>
+                  <%= order.userId.username %><br>
+                  <small style="color:#94a3b8;"><%= order.userId.email %></small>
+                <% } else { %>
+                  <span style="color:#94a3b8">Unknown</span>
+                <% } %>
+              </td>
+              <td><%= order.totalQuantity %> item<%= order.totalQuantity !== 1 ? 's' : '' %></td>
+              <td>₹<%= order.totalAmount.toLocaleString('en-IN') %></td>
+              <td>
+                <span class="badge badge-<%= order.status.toLowerCase() %>"><%= order.status %></span>
+              </td>
+              <td><%= new Date(order.createdAt).toLocaleDateString('en-IN') %></td>
+              <td class="action-btns">
+                <a href="/admin/orders/<%= order._id %>" class="admin-btn btn-primary btn-sm">
+                  <i class="fa-solid fa-eye"></i> View
+                </a>
+                <form action="/admin/orders/<%= order._id %>/delete" method="POST" style="display:inline;" onsubmit="return confirm('Delete this order?')">
+                  <button type="submit" class="admin-btn btn-danger btn-sm">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div style="text-align:center; padding:50px; color:#94a3b8;">
+      <i class="fa-solid fa-shopping-bag" style="font-size:50px; margin-bottom:15px;"></i>
+      <p>No orders yet.</p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('./partials/admin_footer') %>

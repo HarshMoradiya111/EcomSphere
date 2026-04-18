@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EcomSphere - Your premium online shopping destination. Browse Men Clothing, Women Clothing, Footwear, Glasses, and Cosmetics.">
+  <title><%= title %></title>
+  <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <%- include('./partials/header') %>
+  <%- include('./partials/flash') %>
+
+  <!-- Hero Section -->
+  <% if (banners && banners.length > 0) { %>
+    <section id="hero" style="background-image: url('/uploads/<%= banners[0].image %>');">
+      <h4><%= banners[0].subtitle %></h4>
+      <h2><%= banners[0].title %></h2>
+      <h1>On all products</h1>
+      <p>Save more with loyalty points & free delivery!</p>
+      <a href="<%= banners[0].buttonLink %>"><button><%= banners[0].buttonText %></button></a>
+    </section>
+  <% } else { %>
+    <section id="hero">
+      <h4>Trade-in-offer</h4>
+      <h2>Super value deals</h2>
+      <h1>On all products</h1>
+      <p>Save more with coupon &amp; up to 70% off!</p>
+      <a href="/shop"><button>Shop now</button></a>
+    </section>
+  <% } %>
+
+  <!-- Features Section -->
+  <section id="feature" class="section-p1">
+    <div class="fe-box">
+      <img src="/img/features/f1.jpg" alt="Free Shipping">
+      <h6>Free Shipping</h6>
+    </div>
+    <div class="fe-box">
+      <img src="/img/features/f2.jpg" alt="Online Order">
+      <h6>Online Order</h6>
+    </div>
+    <div class="fe-box">
+      <img src="/img/features/f3.jpg" alt="Save Money">
+      <h6>Save Money</h6>
+    </div>
+    <div class="fe-box">
+      <img src="/img/features/f4.jpg" alt="Promotion">
+      <h6>Promotion</h6>
+    </div>
+    <div class="fe-box">
+      <img src="/img/features/f5.jpg" alt="Happy Sell">
+      <h6>Happy Sell</h6>
+    </div>
+    <div class="fe-box">
+      <img src="/img/features/f6.jpg" alt="Support">
+      <h6>Support</h6>
+    </div>
+  </section>
+
+  <!-- Products by Category -->
+  <% Object.keys(productsByCategory).forEach(category => { %>
+    <% const products = productsByCategory[category]; %>
+    <% if (products && products.length > 0) { %>
+    <section id="<%= category.toLowerCase().replace(/ /g, '-') %>" class="section-p1 product-section">
+      <h2><%= category %></h2>
+      <p>Explore our <%= category %> collection</p>
+      <div class="pro-container">
+        <% products.forEach(product => { %>
+          <div class="pro">
+            <a href="/product/<%= product._id %>">
+              <img src="/uploads/<%= product.image %>" alt="<%= product.name %>" onerror="this.src='/img/placeholder.jpg'">
+            </a>
+            <div class="des">
+              <span><%= product.category %></span>
+              <div class="star" style="margin: 5px 0;">
+                <% const avg = Math.round(product.averageRating || 0); %>
+                <% for(let i=1; i<=5; i++) { %>
+                  <i class="fa-<%= i <= avg ? 'solid' : 'regular' %> fa-star" style="color: #ffbd27; font-size: 12px;"></i>
+                <% } %>
+                <small style="color: #888; margin-left: 5px;">(<%= product.numReviews || 0 %>)</small>
+              </div>
+              <h5><%= product.name %></h5>
+              <p><%= (product.description || "").substring(0, 60) %>...</p>
+              <h4>₹<%= product.price.toLocaleString('en-IN') %></h4>
+            </div>
+            <% if (locals.sessionUserId) { %>
+              <button class="toggle-wishlist <%= product.isInWishlist ? 'active' : '' %>" 
+                      data-product-id="<%= product._id %>" 
+                      title="Wishlist">
+                <i class="fa-solid fa-heart"></i>
+              </button>
+            <% } %>
+            <a href="#"
+               class="add-to-cart cart1"
+               data-product-id="<%= product._id %>"
+               data-name="<%= product.name %>"
+               data-price="<%= product.price %>"
+               data-image="<%= product.image %>"
+               title="Add to Cart">
+              <i class="fa-solid fa-cart-shopping"></i>
+            </a>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+  <% }) %>
+
+  <!-- Flash Sale Section -->
+  <% if (flashSale && flashSale.isActive) { %>
+    <section id="banner" class="section-m1" style="background-image: url('/img/banner/b2.jpg');">
+      <h4><%= flashSale.title %></h4>
+      <h2><%= flashSale.discountText %></h2>
+      <div id="countdown" style="display:flex; gap:20px; margin:20px 0; justify-content:center; color:#fff;">
+         <div class="time-box" style="text-align:center;"><span id="days" style="font-size:32px; font-weight:700; display:block;">00</span><small>Days</small></div>
+         <div class="time-box" style="text-align:center;"><span id="hours" style="font-size:32px; font-weight:700; display:block;">00</span><small>Hours</small></div>
+         <div class="time-box" style="text-align:center;"><span id="mins" style="font-size:32px; font-weight:700; display:block;">00</span><small>Mins</small></div>
+         <div class="time-box" style="text-align:center;"><span id="secs" style="font-size:32px; font-weight:700; display:block;">00</span><small>Secs</small></div>
+      </div>
+      <a href="/shop"><button class="normal">Explore Now</button></a>
+    </section>
+
+    <script>
+      const countDownDate = new Date("<%= flashSale.endTime %>").getTime();
+      const x = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = countDownDate - now;
+        
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById("days").innerHTML = days < 10 ? "0" + days : days;
+        document.getElementById("hours").innerHTML = hours < 10 ? "0" + hours : hours;
+        document.getElementById("mins").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+        document.getElementById("secs").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+        
+        if (distance < 0) {
+          clearInterval(x);
+          document.getElementById("countdown").innerHTML = "SALE EXPIRED";
+        }
+      }, 1000);
+    </script>
+  <% } else { %>
+    <section id="banner" class="section-m1">
+      <h4>Repair service</h4>
+      <h2>Up to <span>70% off</span> - All T-Shirts &amp; Accessories</h2>
+      <a href="/shop"><button class="normal">Explore More</button></a>
+    </section>
+  <% } %>
+
+  <!-- Small Banners -->
+  <section id="sm-banner" class="section-p1">
+    <div class="banner-box">
+      <h4>Crazy deals</h4>
+      <h2>Buy 1 get 1 free</h2>
+      <span>The best classic dress is on sale at EcomSphere</span>
+      <a href="/shop"><button class="white">Learn More</button></a>
+    </div>
+    <div class="banner-box banner-box2">
+      <h4>Spring/Summer</h4>
+      <h2>Upcoming Season</h2>
+      <span>The best classic dress is on sale at EcomSphere</span>
+      <a href="/shop"><button class="white">Collection</button></a>
+    </div>
+  </section>
+
+  <!-- Banner 3 -->
+  <section id="banner3">
+    <div class="banner-box">
+      <h2>SEASONAL SALE</h2>
+      <h3>Winter Collection -50% OFF</h3>
+    </div>
+    <div class="banner-box banner-box2">
+      <h2>NEW FOOTWEAR COLLECTION</h2>
+      <h3>Spring / Summer 2025</h3>
+    </div>
+    <div class="banner-box banner-box3">
+      <h2>T-SHIRTS</h2>
+      <h3>New Trendy Prints</h3>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section id="newsletter" class="section-p1 section-m1">
+    <div class="newstext">
+      <h4>Sign Up For Newsletter</h4>
+      <p>Get E-mail updates about our latest shop and <span>special offers.</span></p>
+    </div>
+    <form class="form" action="/subscribe-newsletter" method="POST">
+      <input type="email" name="email" placeholder="Your E-mail address" required>
+      <button type="submit" class="normal">Sign Up</button>
+    </form>
+  </section>
+
+  <%- include('./partials/footer') %>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<%# Admin header partial %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css">
+  <script src="https://kit.fontawesome.com/db75cd62a8.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <h2>🛍️ EcomSphere</h2>
+      <p>Admin Panel</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin/dashboard" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+        <i class="fa-solid fa-gauge"></i> Dashboard
+      </a>
+      <a href="/admin/products" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'products' ? 'active' : '' %>">
+        <i class="fa-solid fa-box"></i> Products
+      </a>
+      <a href="/admin/orders" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'orders' ? 'active' : '' %>">
+        <i class="fa-solid fa-shopping-bag"></i> Orders
+      </a>
+      <a href="/admin/users" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>">
+        <i class="fa-solid fa-users"></i> Users
+      </a>
+      <a href="/admin/blogs" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'blogs' ? 'active' : '' %>">
+        <i class="fa-solid fa-pen-to-square"></i> Blogs
+      </a>
+      <a href="/admin/coupons" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'coupons' ? 'active' : '' %>">
+        <i class="fa-solid fa-tag"></i> Coupons
+      </a>
+      <a href="/admin/settings" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">
+        <i class="fa-solid fa-gear"></i> Settings
+      </a>
+      <a href="/admin/marketing" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'marketing' ? 'active' : '' %>">
+        <i class="fa-solid fa-bullhorn"></i> Marketing
+      </a>
+      <a href="/admin/inventory" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'inventory' ? 'active' : '' %>">
+        <i class="fa-solid fa-warehouse"></i> 
+        Inventory 
+        <% if (globalLowStockCount > 0) { %>
+          <span class="sidebar-badge" style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:10px; font-size:11px; margin-left:auto;"><%= globalLowStockCount %></span>
+        <% } %>
+      </a>
+      <a href="/admin/faqs" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'faqs' ? 'active' : '' %>">
+        <i class="fa-solid fa-circle-question"></i> FAQ Management
+      </a>
+      <a href="/admin/customers/segments" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'segments' ? 'active' : '' %>">
+        <i class="fa-solid fa-chart-pie"></i> Customer Segments
+      </a>
+      <a href="/admin/customers/search-analytics" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'search-analytics' ? 'active' : '' %>">
+        <i class="fa-solid fa-magnifying-glass-chart"></i> Search Analytics
+      </a>
+      <hr style="border-color:rgba(255,255,255,0.1); margin:15px 0;">
+      <a href="/" class="nav-item" target="_blank">
+        <i class="fa-solid fa-globe"></i> View Site
+      </a>
+      <a href="/admin/logout" class="nav-item nav-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>Logged in as <strong><%= locals.adminUsername || 'Admin' %></strong></p>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex; align-items:center; gap:15px;">
+        <button id="sidebar-toggle" style="background:none; border:none; color:var(--accent); font-size:20px; cursor:pointer; display:none;">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="page-title"><%= title %></h1>
+      </div>
+      <div style="display:flex; align-items:center; gap:15px;">
+        <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> <%= locals.adminUsername || 'Admin' %></span>
+      </div>
+    </div>

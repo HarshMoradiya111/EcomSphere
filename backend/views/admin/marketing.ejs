@@ -1,0 +1,163 @@
+<%- include('./partials/admin_header', { activePage: 'marketing' }) %>
+
+<style>
+  .marketing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 30px; margin-bottom: 30px; }
+  .subscriber-list { max-height: 400px; overflow-y: auto; }
+</style>
+
+<!-- Flash messages -->
+<% if (locals.success && success.length > 0) { %>
+  <div class="alert alert-success">
+    <% success.forEach(msg => { %><p><i class="fa-solid fa-circle-check"></i> <%= msg %></p><% }) %>
+  </div>
+<% } %>
+<% if (locals.errors && errors.length > 0) { %>
+  <div class="alert alert-error">
+    <% errors.forEach(msg => { %><p><i class="fa-solid fa-circle-exclamation"></i> <%= msg %></p><% }) %>
+  </div>
+<% } %>
+
+<div class="marketing-grid">
+  <!-- Banner Management -->
+  <div class="admin-card">
+    <div class="card-header">
+      <h3>Hero Banners</h3>
+      <p style="font-size:12px; color:#888;">Manage homepage carousel</p>
+    </div>
+    <div style="padding: 20px;">
+      <form action="/admin/marketing/banner" method="POST" enctype="multipart/form-data" class="admin-form">
+        <div class="form-group">
+          <label>Banner Image</label>
+          <input type="file" name="bannerImage" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" name="title" placeholder="e.g. Summer Collection" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Subtitle</label>
+          <input type="text" name="subtitle" placeholder="e.g. Up to 50% Off" required class="form-control">
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+           <div class="form-group">
+             <label>Button Text</label>
+             <input type="text" name="buttonText" value="Shop Now" class="form-control">
+           </div>
+           <div class="form-group">
+             <label>Button Link</label>
+             <input type="text" name="buttonLink" value="/shop" class="form-control">
+           </div>
+        </div>
+        <button type="submit" class="admin-btn btn-primary" style="width:100%;">Add Banner</button>
+      </form>
+
+      <hr style="margin:25px 0; border:none; border-top:1px solid #eee;">
+
+      <div class="banner-list">
+        <% if (banners && banners.length > 0) { %>
+          <% banners.forEach(banner => { %>
+            <div style="display:flex; gap:15px; background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px; align-items:center;">
+              <img src="<%= (banner.image && banner.image.startsWith('http')) ? banner.image : '/uploads/' + banner.image %>" style="width:100px; height:60px; object-fit:cover; border-radius:4px;">
+              <div style="flex:1;">
+                <h5 style="margin:0;"><%= banner.title %></h5>
+                <p style="margin:0; font-size:12px; color:#666;"><%= banner.subtitle %></p>
+              </div>
+              <form action="/admin/marketing/banner/delete/<%= banner._id %>" method="POST" onsubmit="return confirm('Delete this banner?')">
+                <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+              </form>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p style="text-align:center; color:#999; font-size:14px;">No banners added yet.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash Sale Management -->
+  <div class="admin-card">
+    <div class="card-header">
+      <h3>Flash Sale Timer</h3>
+      <p style="font-size:12px; color:#888;">Countdown timer for homepage</p>
+    </div>
+    <div style="padding: 20px;">
+      <form action="/admin/marketing/flash-sale" method="POST" class="admin-form">
+        <div class="form-group">
+          <label>Campaign Title</label>
+          <input type="text" name="title" placeholder="e.g. Deal of the Day" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Discount Text</label>
+          <input type="text" name="discountText" placeholder="e.g. 60% OFF ON ALL ITEMS" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>End Date & Time</label>
+          <input type="datetime-local" name="endTime" required class="form-control">
+        </div>
+        <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+           <input type="checkbox" name="isActive" id="fsActive" checked style="width:20px; height:20px;">
+           <label for="fsActive" style="margin:0;">Show on Homepage</label>
+        </div>
+        <button type="submit" class="admin-btn btn-warning" style="width:100%; color:#000; font-weight:700;">Update Flash Sale</button>
+      </form>
+
+    <style>
+      .sale-active { background: #fffbeb !important; border-color: #fde68a !important; }
+      .sale-inactive { background: #f9f9f9 !important; border-color: #eee !important; }
+    </style>
+    <h5>History / Active Campaign</h5>
+      <% if (flashSales && flashSales.length > 0) { %>
+        <% flashSales.slice(0, 3).forEach(sale => { %>
+          <div class="<%= sale.isActive ? 'sale-active' : 'sale-inactive' %>" style="padding:12px; border-radius:8px; border:1px solid; margin-bottom:10px;">
+             <div style="display:flex; justify-content:space-between;">
+               <strong><%= sale.title %></strong>
+               <span class="badge <%= sale.isActive ? 'badge-success' : 'badge-secondary' %>"><%= sale.isActive ? 'Active' : 'Inactive' %></span>
+             </div>
+             <p style="margin:5px 0; font-size:13px;"><%= sale.discountText %></p>
+             <small style="color:#888;">Ends: <%= new Date(sale.endTime).toLocaleString() %></small>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p style="text-align:center; color:#999; font-size:14px;">No campaigns configured.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- News Letter Subscribers -->
+<div class="admin-card">
+  <div class="card-header">
+    <h3>Newsletter Subscribers</h3>
+    <span class="badge badge-info"><%= subscribers.length %> Total Subscribers</span>
+  </div>
+  <div class="table-responsive subscriber-list">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Email Address</th>
+          <th>Subscribed Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (subscribers && subscribers.length > 0) { %>
+          <% subscribers.forEach(sub => { %>
+            <tr>
+              <td><strong><%= sub.email %></strong></td>
+              <td><%= new Date(sub.subscribedAt).toLocaleDateString() %></td>
+              <td>
+                <form action="/admin/marketing/subscribers/delete/<%= sub._id %>" method="POST" onsubmit="return confirm('Remove subscriber?')">
+                  <button type="submit" class="admin-btn btn-danger btn-sm">Remove</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="3" style="text-align:center; padding:30px; color:#999;">No subscribers yet.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('./partials/admin_footer') %>

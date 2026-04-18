@@ -1,0 +1,98 @@
+<section id="header">
+  <a href="/"><img src="<%= locals.settings ? locals.settings.logo : '/img/logo1.png' %>" class="logo" alt="EcomSphere" height="60"></a>
+
+  <!-- Search Bar -->
+  <form action="/shop" method="GET" id="search-bar-desktop" style="position: relative;">
+    <input type="text" name="search" id="live-search-input-desktop" placeholder="Search products..." value="<%= locals.search || '' %>" autocomplete="off">
+    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <div id="search-results-desktop" class="search-results-dropdown"></div>
+  </form>
+
+  <!-- Desktop Navigation (inside header = correct stacking context) -->
+  <div id="nav-desktop">
+    <ul>
+      <li><a href="/" class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>">Home</a></li>
+      <li><a href="/shop" class="<%= typeof activePage !== 'undefined' && activePage === 'shop' ? 'active' : '' %>">Shop</a></li>
+      <li><a href="/blog">Blog</a></li>
+      <li><a href="/about" class="<%= typeof activePage !== 'undefined' && activePage === 'about' ? 'active' : '' %>">About</a></li>
+      <li><a href="/contact" class="<%= typeof activePage !== 'undefined' && activePage === 'contact' ? 'active' : '' %>">Contact</a></li>
+      <% if (locals.sessionUser) { %>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/wishlist" class="<%= typeof activePage !== 'undefined' && activePage === 'wishlist' ? 'active' : '' %>"><i class="fa-regular fa-heart"></i></a></li>
+        <li><a href="/auth/logout">Logout (<%= locals.sessionUser %>)</a></li>
+      <% } else { %>
+        <li><a href="/auth/login">Login</a></li>
+      <% } %>
+      <li><a href="/admin/dashboard">Admin</a></li>
+      <li id="lg-bag"><a href="/cart"><img src="/img/cart.png" class="cart" alt="Cart" height="30"></a></li>
+    </ul>
+  </div>
+
+  <!-- Mobile Top Bar -->
+  <div id="mobile">
+    <a href="/cart" aria-label="Cart"><img src="/img/cart.svg" height="20" alt="Cart"></a>
+    <button id="bar" aria-label="Open menu" aria-expanded="false">
+      <img src="/img/menu.svg" height="20" width="30" alt="Menu">
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     Mobile Sidebar — OUTSIDE #header to avoid stacking context
+     issue where header's z-index:999 caps all child z-indexes.
+     ══════════════════════════════════════════════════════════ -->
+<nav id="navbar" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+
+  <!-- Profile Header -->
+  <div id="drawer-profile">
+    <div id="drawer-profile-icon">
+      <% if (locals.sessionPhoto) { %>
+        <img src="<%= locals.sessionPhoto %>" alt="User" class="drawer-avatar">
+      <% } else { %>
+        <i class="fa-solid fa-circle-user"></i>
+      <% } %>
+    </div>
+    <div id="drawer-profile-text">
+      <% if (locals.sessionUser) { %>
+        <span class="drawer-hello">Hello,</span>
+        <strong><%= locals.sessionUser %></strong>
+      <% } else { %>
+        <span class="drawer-hello">Hello,</span>
+        <a href="/auth/login"><strong>Sign In</strong></a>
+      <% } %>
+    </div>
+    <a href="#" id="close" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></a>
+  </div>
+
+  <!-- Nav Links -->
+  <ul>
+    <li style="padding: 10px 25px;">
+      <form action="/shop" method="GET" id="search-bar-mobile" style="position: relative;">
+        <input type="text" name="search" id="live-search-input-mobile" placeholder="Search..." value="<%= locals.search || '' %>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" autocomplete="off">
+        <div id="search-results-mobile" class="search-results-dropdown"></div>
+      </form>
+    </li>
+    <li class="drawer-section-label">Browse</li>
+    <li><a href="/" class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>" data-track="sidebar_click" data-label="home"><i class="fa-solid fa-house"></i> Home</a></li>
+    <li><a href="/shop" class="<%= typeof activePage !== 'undefined' && activePage === 'shop' ? 'active' : '' %>" data-track="sidebar_click" data-label="shop"><i class="fa-solid fa-bag-shopping"></i> Shop</a></li>
+    <li><a href="/blog" data-track="sidebar_click" data-label="blog"><i class="fa-solid fa-newspaper"></i> Blog</a></li>
+
+    <li class="drawer-section-label">Discover</li>
+    <li><a href="/about" class="<%= typeof activePage !== 'undefined' && activePage === 'about' ? 'active' : '' %>" data-track="sidebar_click" data-label="about"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+    <li><a href="/contact" class="<%= typeof activePage !== 'undefined' && activePage === 'contact' ? 'active' : '' %>" data-track="sidebar_click" data-label="contact"><i class="fa-solid fa-headset"></i> Contact Us</a></li>
+
+    <li class="drawer-section-label">My Account</li>
+    <li><a href="/profile" data-track="sidebar_click" data-label="profile"><i class="fa-solid fa-user"></i> My Profile</a></li>
+    <li><a href="/cart" data-track="sidebar_click" data-label="cart"><i class="fa-solid fa-cart-shopping"></i> My Cart</a></li>
+
+    <li class="drawer-section-label">Settings</li>
+    <li><a href="/admin/dashboard" data-track="sidebar_click" data-label="admin"><i class="fa-solid fa-screwdriver-wrench"></i> Admin Dashboard</a></li>
+    <% if (locals.sessionUser) { %>
+      <li><a href="/auth/logout" data-track="sidebar_click" data-label="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+    <% } else { %>
+      <li><a href="/auth/login" data-track="sidebar_click" data-label="login"><i class="fa-solid fa-right-to-bracket"></i> Login / Register</a></li>
+    <% } %>
+  </ul>
+</nav>
+
+<div id="drawer-overlay"></div>
