@@ -61,55 +61,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!isAdmin && !isLoginPage) return null;
 
   if (isLoginPage) {
-    return (
-      <div className="admin-panel-root min-vh-100">
-        <style>{`
-          @font-face {
-            font-family: 'Deltha';
-            src: url('/fonts/Deltha.otf') format('opentype'),
-                 url('/fonts/Deltha.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-          }
-          .admin-panel-root {
-            font-family: 'Deltha', sans-serif !important;
-          }
-        `}</style>
-        {children}
-      </div>
-    );
+    return <>{children}</>;
   }
 
   return (
     <div className="container-fluid p-0 bg-light min-vh-100">
       <style>{`
-        @font-face {
-          font-family: 'Deltha';
-          src: url('/fonts/Deltha.otf') format('opentype'),
-               url('/fonts/Deltha.ttf') format('truetype');
-          font-weight: normal;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        .admin-panel-root {
-          font-family: 'Deltha', system-ui, -apple-system, sans-serif !important;
-        }
-
-        .admin-panel-root h1, 
-        .admin-panel-root h2, 
-        .admin-panel-root h3, 
-        .admin-panel-root h4, 
-        .admin-panel-root h5, 
-        .admin-panel-root h6,
-        .admin-panel-root .navbar-brand,
-        .admin-panel-root .btn,
-        .admin-panel-root .nav-link,
-        .admin-panel-root table {
-          font-family: 'Deltha', sans-serif !important;
-        }
-
         .btn {
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -130,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           background-color: rgba(255, 255, 255, 0.1);
         }
       `}</style>
-      <div className="row g-0 h-100 admin-panel-root">
+      <div className="row g-0 h-100">
         <div className="col-auto bg-dark border-end" style={{ minWidth: '250px' }}>
           <AdminSidebar />
         </div>
