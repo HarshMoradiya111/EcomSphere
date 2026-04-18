@@ -8,7 +8,12 @@ const morgan = require('morgan');
 const path = require('path');
 const cors = require('cors');
 const passport = require('passport');
-require('./config/passport');
+try {
+  require('./config/passport');
+  console.log('✅ Passport Strategy Loaded');
+} catch (err) {
+  console.error('❌ Passport Strategy Load Error:', err.message);
+}
 
 // Route Aggregator
 const routesV1 = require('./routes');
