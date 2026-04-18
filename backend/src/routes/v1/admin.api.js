@@ -39,17 +39,7 @@ const cloudStorage = new CloudinaryStorage({
   },
 });
 
-// Specific storage for AI Cataloging (temp folder)
-const aiStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'ecomsphere/ai_temp',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-  },
-});
-
 const upload = multer({ storage: cloudStorage });
-const uploadAI = multer({ storage: aiStorage });
 const uploadStandard = multer({ storage: cloudStorage }); // Generic fallback
 
 // @desc    Mass Ingestion (Bulk CSV Import)
@@ -105,9 +95,10 @@ router.post('/products/bulk', uploadBulk.single('csvFile'), async (req, res) => 
         
         res.status(200).json({ success: true, count: products.length, importId: importLog._id });
       } catch (err) {
+        console.error('[Bulk Import Error]:', err);
         importLog.status = 'Failed';
         await importLog.save();
-        res.status(500).json({ success: false, error: 'Ingestion Fault' });
+        res.status(500).json({ success: false, error: 'Ingestion Fault', details: err.message });
       }
     });
 });
@@ -618,82 +609,6 @@ router.get('/blogs', async (req, res) => {
   }
 });
 
-// AI CATALOGING API ENDPOINTS
-const { analyzeProductImage } = require('../../services/ai.service');
-
-// @desc    AI Bulk Image Upload & Analysis
-// @route   POST /api/v1/admin/products/ai
-router.post('/products/ai', uploadAI.array('productImages', 20), async (req, res) => {
-  try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ success: false, error: 'No vision assets detected' });
-    }
-
-    const CATEGORIES = Product.CATEGORIES || ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
-    const results = [];
-    const errors = [];
-
-    for (const file of req.files) {
-      try {
-        console.log('[AI DEBUG] Processing file:', {
-          originalname: file.originalname,
-          mimetype: file.mimetype,
-          path: file.path,
-          size: file.size
-        });
-        // AI Vision Analysis
-        const aiData = await analyzeProductImage(file.path, file.mimetype);
-        results.push({
-          ...aiData,
-          tempImage: file.path // This is the Cloudinary URL
-        });
-        
-        // Anti-Rate-Limit Gap
-        if (req.files.length > 1) {
-          await new Promise(resolve => setTimeout(resolve, 3000));
-        }
-      } catch (err) {
-        console.error('AI Processing error for:', file.path, err);
-        errors.push(`${file.originalname}: ${err.message || 'Unknown error'}`);
-      }
-    }
-
-    res.status(200).json({
-      success: true,
-      products: results,
-      errors: errors.length > 0 ? errors : null,
-      categories: CATEGORIES
-    });
-  } catch (error) {
-    console.error('AI Catalog Error:', error);
-    res.status(500).json({ success: false, error: 'AI Neural Link Failure' });
-  }
-});
-
-// @desc    Confirm & Save AI Products
-// @route   POST /api/v1/admin/products/save-ai
-router.post('/products/save-ai', async (req, res) => {
-  try {
-    const { products } = req.body;
-    if (!products || !Array.isArray(products)) {
-        return res.status(400).json({ success: false, error: 'No data payload' });
-    }
-
-    const savedProducts = await Product.insertMany(products);
-    await dbCache.del('home_products');
-
-    res.status(201).json({ 
-        success: true, 
-        count: savedProducts.length,
-        message: 'Intelligence successfully integrated into catalog' 
-    });
-  } catch (error) {
-    console.error('AI Save Error:', error);
-    res.status(500).json({ success: false, error: 'Database commitment failed' });
-  }
-});
-
-const SearchAnalytics = require('../../models/SearchAnalytics');
 
 // @desc    Get High-Velocity Search Analytics (Top Queries)
 // @route   GET /api/v1/admin/search-analytics

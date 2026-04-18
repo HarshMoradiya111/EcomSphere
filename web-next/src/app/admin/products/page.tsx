@@ -151,9 +151,6 @@ export default function AdminProducts() {
           >
             <i className="fa-solid fa-fire"></i> Wipe Catalog
           </button>
-          <Link href="/admin/products/ai" className="btn btn-sm text-white d-flex align-items-center gap-2 shadow-sm" style={{ background: '#6366f1' }}>
-            <i className="fa-solid fa-brain"></i> Neural Assist
-          </Link>
           <Link href="/admin/products/bulk" className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2 shadow-sm">
             <i className="fa-solid fa-file-import"></i> Bulk Ops
           </Link>
