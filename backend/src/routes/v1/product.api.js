@@ -5,9 +5,31 @@ const FlashSale = require('../../models/FlashSale');
 const HeroBanner = require('../../models/HeroBanner');
 const { dbCache } = require('../../utils/cacheManager');
 
-// GET /api/v1/products - JSON API for the future React/Next.js frontend
+// GET /api/v1/products - JSON API with Pagination Support
 router.get('/', async (req, res) => {
   try {
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+
+    if (page && limit) {
+      // 1. Paginated Response (Standard)
+      const skip = (page - 1) * limit;
+      const totalCount = await Product.countDocuments();
+      const products = await Product.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      return res.status(200).json({
+        success: true,
+        products,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        totalCount
+      });
+    }
+
+    // 2. Legacy Response (For EcomSphere V1 compatibility)
     const products = await Product.find().sort({ createdAt: -1 });
 
     // Group by category just like the EJS version
@@ -51,8 +73,6 @@ router.get('/:id', async (req, res) => {
 
 const { postAddReview } = require('../../controllers/product.controller');
 const { isAuthenticatedApi } = require('../../middleware/auth.api.middleware');
-
-// ... (other product routes)
 
 // @desc    Add product review
 // @route   POST /api/v1/products/review
