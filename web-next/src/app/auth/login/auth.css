@@ -24,14 +24,14 @@
   position: relative;
   width: 750px;
   height: 550px;
-  background: var(--white); /* Base background is white */
+  background: var(--white);
   border: 2px solid var(--black);
   border-radius: 12px;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 }
 
-/* The Black Background Shape */
+/* Background elements */
 .wrapper .rotate-bg {
   position: absolute;
   top: -4px;
@@ -43,16 +43,15 @@
   transform-origin: bottom right;
   transition: 1.5s ease;
   transition-delay: 1.6s;
-  z-index: 1; /* Shapes above base wrapper bg */
+  z-index: 5; /* Lower than forms (10) but above base bg */
 }
 
-/* In Register mode, the black shape slides to cover the left side */
 .wrapper.active .rotate-bg {
   transform: rotate(0) skewY(0);
   transition-delay: 0.5s;
+  right: 50%; /* Shift to left half in register mode */
 }
 
-/* The White Background Shape (for the other side) */
 .wrapper .rotate-bg2 {
   position: absolute;
   top: 100%;
@@ -64,7 +63,7 @@
   transform-origin: bottom left;
   transition: 1.5s ease;
   transition-delay: 0.5s;
-  z-index: 1;
+  z-index: 5;
 }
 
 .wrapper.active .rotate-bg2 {
@@ -81,7 +80,7 @@
   justify-content: center;
   flex-direction: column;
   overflow-y: auto;
-  z-index: 2; /* Forms MUST be above the shapes */
+  z-index: 10; /* CRITICAL: Must be higher than rotate-bg */
 }
 
 .wrapper .form-box.login {
@@ -219,7 +218,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  z-index: 2;
+  z-index: 10;
 }
 
 .wrapper .info-text.login {
@@ -302,7 +301,7 @@
   font-size: 13px;
   text-align: center;
   position: relative;
-  z-index: 10;
+  z-index: 20;
 }
 .auth-alert-danger { background: #ffebee; color: #c62828; }
 .auth-alert-success { background: #e8f5e9; color: #2e7d32; }
