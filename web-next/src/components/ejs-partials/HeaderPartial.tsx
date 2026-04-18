@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { API_URL } from '@/config';
 import type { HeaderPartialProps } from './types';
 
@@ -23,8 +24,10 @@ export default function HeaderPartial({
   sessionUser = null,
   showAdminLink = true,
 }: HeaderPartialProps) {
+  const router = useRouter();
   const [resolvedSessionUser, setResolvedSessionUser] = useState<string | null>(sessionUser);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const logoSrc = resolveLogoSrc(settings?.logo);
 
@@ -63,6 +66,13 @@ export default function HeaderPartial({
     };
   }, [sessionUser]);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <>
       <section id="header" style={{ 
@@ -79,8 +89,22 @@ export default function HeaderPartial({
         zIndex: 1000
       }}>
         <a href="/">
-          <img src={logoSrc} className="logo" alt="EcomSphere" height={45} />
+          <img src={logoSrc} className="logo" alt="EcomSphere" height={40} />
         </a>
+
+        {/* Mini Search Button/Input */}
+        <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', background: '#fff', borderRadius: '20px', padding: '5px 15px', border: '1px solid #ddd', margin: '0 20px', flex: '0 1 300px' }}>
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ border: 'none', outline: 'none', background: 'transparent', width: '100%', fontSize: '13px' }}
+          />
+          <button type="submit" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#088178' }}>
+            <i className="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
 
         <div id="nav-desktop">
           <ul id="navbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', listStyle: 'none' }}>
@@ -109,7 +133,7 @@ export default function HeaderPartial({
       </section>
 
       {/* Spacer to prevent content from going under the fixed header */}
-      <div style={{ height: '85px' }}></div>
+      <div style={{ height: '75px' }}></div>
 
       {/* Mobile Menu Drawer */}
       <nav id="navbar" className={drawerOpen ? 'active' : ''} style={{
