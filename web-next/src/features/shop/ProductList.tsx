@@ -25,21 +25,13 @@ function ProductListContent() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   
-  // Filter States - initialized from URL
+  // Filter States
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [category, setCategory] = useState(searchParams.get('category') || 'All');
   const [sort, setSort] = useState('newest');
   const [allCategories, setAllCategories] = useState<string[]>([]);
   
   const limit = 20;
-
-  // Sync state with URL changes (e.g. from header search)
-  useEffect(() => {
-    const urlSearch = searchParams.get('search') || '';
-    const urlCategory = searchParams.get('category') || 'All';
-    setSearch(urlSearch);
-    setCategory(urlCategory);
-  }, [searchParams]);
 
   const fetchProducts = useCallback(async (pageNum: number, isNewFilter: boolean = false) => {
     setLoading(true);
@@ -70,7 +62,6 @@ function ProductListContent() {
     }
   }, [category, search, sort]);
 
-  // Fetch categories once on mount
   useEffect(() => {
     fetch(`${API_URL}/api/v1/products/categories/list`)
       .then(res => res.json())
@@ -80,13 +71,11 @@ function ProductListContent() {
       .catch(err => console.error("Category fetch error:", err));
   }, []);
 
-  // Effect for filter changes
   useEffect(() => {
     setPage(1);
     fetchProducts(1, true);
   }, [category, sort, fetchProducts]);
 
-  // Debounced search effect
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(1);
@@ -103,59 +92,81 @@ function ProductListContent() {
 
   return (
     <div className="section-p1">
-      {/* Local Filter Bar (Can be kept or styled as "In-page results controls") */}
-      <div className="filter-bar" style={{ 
-        display: 'flex', 
-        flexWrap: 'wrap', 
-        gap: '20px', 
-        marginBottom: '40px',
-        background: '#f8f9fa',
-        padding: '20px',
-        borderRadius: '15px',
-        alignItems: 'center',
-        justifyContent: 'space-between'
+      {/* Amazon-Inspired Filter Bar within the Page */}
+      <div className="filter-container" style={{ 
+        background: '#fff',
+        padding: '25px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        marginBottom: '50px',
+        border: '1px solid #e1e1e1'
       }}>
-        <div style={{ flex: '1', minWidth: '250px', position: 'relative' }}>
-          <i className="fa-solid fa-magnifying-glass" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}></i>
-          <input 
-            type="text" 
-            placeholder="Search within results..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ 
-              width: '100%', 
-              padding: '12px 15px 12px 45px', 
-              borderRadius: '10px', 
-              border: '1px solid #ddd',
-              fontSize: '14px'
-            }}
-          />
-        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'center' }}>
+          
+          {/* Search Box with Button */}
+          <div style={{ flex: '2', minWidth: '300px', display: 'flex', border: '2px solid #088178', borderRadius: '6px', overflow: 'hidden' }}>
+            <input 
+              type="text" 
+              placeholder="Search for products (e.g. shirt, shoes...)" 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ 
+                flex: '1', 
+                padding: '12px 15px', 
+                border: 'none', 
+                fontSize: '15px',
+                outline: 'none'
+              }}
+            />
+            <button style={{ 
+              padding: '0 25px', 
+              background: '#088178', 
+              color: '#fff', 
+              border: 'none', 
+              cursor: 'pointer',
+              fontSize: '18px'
+            }}>
+              <i className="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
 
-        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-          <select 
-            value={category} 
-            onChange={(e) => setCategory(e.target.value)}
-            style={{ padding: '12px 20px', borderRadius: '10px', border: '1px solid #ddd', background: '#fff' }}
-          >
-            <option value="All">All Categories</option>
-            {allCategories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+          {/* Category Dropdown */}
+          <div style={{ flex: '1', minWidth: '180px' }}>
+            <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '5px', fontWeight: '600' }}>CATEGORY</label>
+            <select 
+              value={category} 
+              onChange={(e) => setCategory(e.target.value)}
+              style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ddd', background: '#f9f9f9', fontSize: '14px', cursor: 'pointer' }}
+            >
+              <option value="All">All Collections</option>
+              {allCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
 
-          <select 
-            value={sort} 
-            onChange={(e) => setSort(e.target.value)}
-            style={{ padding: '12px 20px', borderRadius: '10px', border: '1px solid #ddd', background: '#fff' }}
-          >
-            <option value="newest">Newest First</option>
-            <option value="priceAsc">Price: Low to High</option>
-            <option value="priceDesc">Price: High to Low</option>
-            <option value="nameAsc">Name: A to Z</option>
-            <option value="nameDesc">Name: Z to A</option>
-          </select>
+          {/* Sort Dropdown */}
+          <div style={{ flex: '1', minWidth: '180px' }}>
+            <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '5px', fontWeight: '600' }}>SORT BY</label>
+            <select 
+              value={sort} 
+              onChange={(e) => setSort(e.target.value)}
+              style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ddd', background: '#f9f9f9', fontSize: '14px', cursor: 'pointer' }}
+            >
+              <option value="newest">Newest Arrivals</option>
+              <option value="priceAsc">Price: Low to High</option>
+              <option value="priceDesc">Price: High to Low</option>
+              <option value="nameAsc">Name: A to Z</option>
+              <option value="nameDesc">Name: Z to A</option>
+            </select>
+          </div>
         </div>
+        
+        {search && (
+          <div style={{ marginTop: '15px', fontSize: '14px', color: '#088178' }}>
+            Showing results for "<strong>{search}</strong>" in <strong>{category}</strong>
+          </div>
+        )}
       </div>
 
       <div className="pro-container">
