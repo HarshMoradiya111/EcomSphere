@@ -47,13 +47,15 @@ export default function AIUploadPage() {
       });
 
       const data = await response.json();
+      console.log('[AI DEBUG] Response data:', data);
 
-      if (data.success) {
+      if (data.success && data.products && data.products.length > 0) {
         setPendingProducts(data.products);
         setCategories(data.categories);
         router.push('/admin/products/ai/review');
       } else {
-        setError(data.error || 'AI Analysis failed to ignite.');
+        const errorMsg = data.error || (data.errors ? data.errors.join(', ') : 'AI Analysis yielded no results. Please try again.');
+        setError(errorMsg);
       }
     } catch (err) {
       setError('Neural link synchronization failed. Check server status.');

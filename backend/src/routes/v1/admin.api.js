@@ -3,6 +3,7 @@ const router = express.Router();
 const Product = require('../../models/Product');
 const User = require('../../models/User');
 const Order = require('../../models/Order');
+const ImportLog = require('../../models/ImportLog');
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
@@ -60,6 +61,14 @@ router.post('/products/bulk', uploadBulk.single('csvFile'), async (req, res) => 
   const errors = [];
   let rowCount = 0;
 
+  // 1. Create the Import Log Entry
+  const importLog = new ImportLog({
+    filename: req.file.originalname,
+    count: 0,
+    status: 'Success'
+  });
+  await importLog.save();
+
   fs.createReadStream(req.file.path)
     .pipe(csv())
     .on('data', (row) => {
@@ -74,19 +83,30 @@ router.post('/products/bulk', uploadBulk.single('csvFile'), async (req, res) => 
         price: parseFloat(row.price),
         category: row.category || 'Uncategorized',
         countInStock: parseInt(row.countInStock) || 0,
-        image: row.image || 'placeholder.jpg'
+        image: row.image || 'placeholder.jpg',
+        importId: importLog._id // Tag with session ID
       });
     })
     .on('end', async () => {
       try {
         fs.unlinkSync(req.file.path);
-        if (products.length === 0) return res.status(400).json({ success: false, error: 'Empty Buffer' });
+        if (products.length === 0) {
+          await ImportLog.findByIdAndDelete(importLog._id);
+          return res.status(400).json({ success: false, error: 'Empty Buffer' });
+        }
         
         await Product.insertMany(products);
+        
+        // Update log with final count
+        importLog.count = products.length;
+        await importLog.save();
+
         await dbCache.del('home_products'); // Invalidate
         
-        res.status(200).json({ success: true, count: products.length });
+        res.status(200).json({ success: true, count: products.length, importId: importLog._id });
       } catch (err) {
+        importLog.status = 'Failed';
+        await importLog.save();
         res.status(500).json({ success: false, error: 'Ingestion Fault' });
       }
     });
@@ -313,6 +333,36 @@ router.delete('/products/wipe', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Catalog wipe failed' });
+  }
+});
+
+// @desc    Get Import History
+// @route   GET /api/v1/admin/imports
+router.get('/imports', async (req, res) => {
+  try {
+    const imports = await ImportLog.find().sort({ createdAt: -1 });
+    res.json({ success: true, imports });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch history' });
+  }
+});
+
+// @desc    Delete products from a specific import batch
+// @route   DELETE /api/v1/admin/imports/:id
+router.delete('/imports/:id', async (req, res) => {
+  try {
+    const result = await Product.deleteMany({ importId: req.params.id });
+    await ImportLog.findByIdAndDelete(req.params.id);
+    
+    await dbCache.del('home_products');
+
+    res.json({ 
+      success: true, 
+      message: `${result.deletedCount} products from batch removed`,
+      count: result.deletedCount 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Batch deletion failed' });
   }
 });
 

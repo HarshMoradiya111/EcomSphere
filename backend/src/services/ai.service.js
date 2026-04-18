@@ -3,9 +3,14 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Initialize the Google Generative AI with your API key
+console.log('-------------------------------------------');
+console.log('🤖 [AI SERVICE] INITIALIZING VERSION 4.0 (FORCED V1)');
+console.log('-------------------------------------------');
+
 if (!process.env.GEMINI_API_KEY) {
   console.error('CRITICAL: GEMINI_API_KEY is not defined in .env file');
+} else {
+  console.log(`[AI DIAGNOSTIC] API Key loaded: ${process.env.GEMINI_API_KEY.substring(0, 10)}...`);
 }
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'AIza_dummy_key_to_prevent_crash');
 
@@ -14,24 +19,55 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'AIza_dummy_k
  */
 const VALID_CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics'];
 
+const axios = require('axios');
+const fs = require('fs');
+
 /**
  * Analyzes a product image using Gemini 2.0 Flash
- * @param {Buffer} imageBuffer - The image file buffer
- * @param {string} mimeType - The mime type of the image (e.g., 'image/jpeg')
+ * @param {string|Buffer} imageInput - The image URL, local path, or Buffer
+ * @param {string} mimeType - The mime type of the image
  * @returns {Promise<Object>} - The analyzed product data
  */
-async function analyzeProductImage(imageBuffer, mimeType) {
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY_MS = 12000; // 12 seconds for rate limit backoff
+async function analyzeProductImage(imageInput, mimeType) {
+  const MAX_RETRIES = 4;
+  const RETRY_DELAY_MS = 30000;
   let lastError = null;
+  let imageBuffer;
 
   try {
-    console.log(`[AI DIAGNOSTIC] Starting analysis of image (${mimeType}, size: ${imageBuffer.length} bytes)`);
-    console.log(`[AI DIAGNOSTIC] Using Model: gemini-flash-latest`);
+    // 1. Resolve image to a Buffer
+    if (Buffer.isBuffer(imageInput)) {
+      imageBuffer = imageInput;
+    } else if (typeof imageInput === 'string') {
+      if (imageInput.startsWith('http')) {
+        console.log(`[AI DIAGNOSTIC] Fetching image from URL: ${imageInput}`);
+        const response = await axios.get(imageInput, { 
+          responseType: 'arraybuffer',
+          timeout: 10000 // 10 second timeout for fetch
+        });
+        console.log(`[AI DIAGNOSTIC] Fetch status: ${response.status}`);
+        imageBuffer = Buffer.from(response.data);
+      } else {
+        console.log(`[AI DIAGNOSTIC] Reading image from local path: ${imageInput}`);
+        imageBuffer = fs.readFileSync(imageInput);
+      }
+    } else {
+      throw new Error('Invalid image input type. Expected Buffer, URL string, or path string.');
+    }
+
+    // 2. Normalize mimeType (Gemini is strict)
+    let normalizedMimeType = mimeType;
+    if (normalizedMimeType === 'image/jpg') normalizedMimeType = 'image/jpeg';
 
     // For images, the flash model is fast and efficient
-    // Defaulting to gemini-flash-latest to bypass aggressive 2.0 load API rate limits
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const modelName = "gemini-2.0-flash";
+    console.log(`[AI DIAGNOSTIC] Starting analysis of image (${normalizedMimeType}, size: ${imageBuffer.length} bytes)`);
+    console.log(`[AI DIAGNOSTIC] Using Model: ${modelName}`);
+    console.log(`[AI DIAGNOSTIC] Creating model instance for: ${modelName}`);
+    const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: 'v1' });
+
+    // DIAGNOSTIC: List models if we get a 404 (optional, but helpful for debugging)
+    // We'll keep this as a note for now and just try a safer model name if it fails
 
     const prompt = `
       Analyze this product image and provide details for an e-commerce listing in STRICT JSON.
@@ -54,11 +90,11 @@ async function analyzeProductImage(imageBuffer, mimeType) {
         const startTime = Date.now();
 
         result = await model.generateContent([
-          prompt,
+          { text: prompt },
           {
             inlineData: {
               data: imageBuffer.toString('base64'),
-              mimeType
+              mimeType: normalizedMimeType
             }
           }
         ]);

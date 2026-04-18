@@ -8,6 +8,7 @@ import { API_URL } from '@/config';
 const menuItems = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: 'fa-solid fa-gauge', id: 'dashboard' },
   { name: 'Products', path: '/admin/products', icon: 'fa-solid fa-box', id: 'products' },
+  { name: 'Import History', path: '/admin/imports', icon: 'fa-solid fa-clock-rotate-left', id: 'imports' },
   { name: 'Orders', path: '/admin/orders', icon: 'fa-solid fa-shopping-bag', id: 'orders' },
   { name: 'Users', path: '/admin/users', icon: 'fa-solid fa-users', id: 'users' },
   { name: 'Blogs', path: '/admin/blogs', icon: 'fa-solid fa-pen-to-square', id: 'blogs' },
@@ -43,12 +44,12 @@ export default function AdminSidebar() {
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${API_URL}/api/v1/admin/stats`, {
+            const res = await fetch(`${API_URL}/api/v1/admin/low-stock`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
             if (data.success) {
-                setLowStockCount(data.stats.zeroStockCount || 0);
+                setLowStockCount(data.count || 0);
             }
         } catch (e) {}
     };

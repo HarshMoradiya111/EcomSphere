@@ -50,8 +50,6 @@ export default function AdminOrders() {
 
   useEffect(() => { fetchOrders(); }, []);
 
-  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Loading orders...</div>;
-
   const getStatusBadgeClass = (status: string) => {
     switch (status.toLowerCase()) {
       case 'processing': return 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25';
@@ -89,7 +87,18 @@ export default function AdminOrders() {
                 </tr>
               </thead>
               <tbody>
-                {orders.map((o) => (
+                {loading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="placeholder-glow">
+                      <td className="ps-4 py-3"><div className="placeholder col-8"></div></td>
+                      <td><div className="placeholder col-6"></div></td>
+                      <td><div className="placeholder col-4"></div></td>
+                      <td><div className="placeholder col-5"></div></td>
+                      <td><div className="placeholder col-7"></div></td>
+                      <td className="pe-4"><div className="placeholder col-3 float-end"></div></td>
+                    </tr>
+                  ))
+                ) : orders.map((o) => (
                   <tr key={o._id}>
                     <td className="ps-4 font-monospace text-muted small tracking-wider">
                       ORD-{o._id?.slice(-8).toUpperCase() || 'UNKNOWN'}

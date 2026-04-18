@@ -59,24 +59,27 @@ export default function BulkUpload() {
         </Link>
       </div>
 
-      <div className="card shadow-sm border-0 mb-4" style={{ maxWidth: '800px' }}>
-        <div className="card-header bg-white border-bottom-0 pt-4 pb-0">
-           <h3 className="fs-6 fw-bold text-dark text-uppercase tracking-widest mb-0">CSV Payload Vector</h3>
+      <div className="card shadow-sm border-0 mb-4" style={{ maxWidth: '800px', borderRadius: '16px', overflow: 'hidden' }}>
+        <div className="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+           <h3 className="fs-6 fw-bold text-primary text-uppercase tracking-widest mb-0" style={{ fontSize: '12px' }}>CSV Payload Vector</h3>
         </div>
         <div className="card-body p-4">
           <form onSubmit={handleUpload}>
             {error && (
-              <div className="alert alert-danger border-0 shadow-sm mb-4 fw-bold text-uppercase" style={{ fontSize: '11px', letterSpacing: '1px' }}>
-                <i className="fa-solid fa-circle-exclamation me-2"></i> {error}
+              <div className="alert alert-danger border-0 shadow-sm mb-4 fw-bold text-uppercase d-flex align-items-center gap-2" style={{ fontSize: '11px', letterSpacing: '1px', borderRadius: '12px' }}>
+                <i className="fa-solid fa-circle-exclamation"></i> {error}
               </div>
             )}
             
-            <div className="p-5 text-center mb-4 rounded-4 border-2 border-dashed bg-light bg-opacity-50" style={{ borderColor: '#dee2e6' }}>
-                <i className="fa-solid fa-file-csv display-1 text-primary opacity-25 mb-3"></i>
+            <div className="p-5 text-center mb-4 rounded-4 border-2 border-dashed bg-light bg-opacity-75" style={{ borderColor: '#cbd5e1', borderStyle: 'dashed' }}>
+                <div className="mb-3">
+                  <i className="fa-solid fa-cloud-arrow-up display-3 text-primary opacity-50"></i>
+                </div>
                 <label className="d-block cursor-pointer">
-                    <span className="d-block fs-5 fw-bold text-dark mb-2">{file ? file.name : 'Select CSV Payload'}</span>
-                    <span className="btn btn-primary rounded-pill px-4 shadow-sm mb-2">
-                        {file ? 'Change File' : 'Browse Files'}
+                    <span className="d-block fs-5 fw-bold text-dark mb-2">{file ? file.name : 'Drop CSV Payload Here'}</span>
+                    <span className="text-muted small d-block mb-3">Only standard catalog schemas are accepted</span>
+                    <span className="btn btn-primary rounded-pill px-4 shadow-sm fw-bold text-uppercase" style={{ fontSize: '11px', letterSpacing: '1px' }}>
+                        {file ? 'Change Vector' : 'Select Source'}
                     </span>
                     <input 
                       required
@@ -86,39 +89,45 @@ export default function BulkUpload() {
                       className="visually-hidden" 
                     />
                 </label>
-                <p className="text-muted small fw-bold text-uppercase mt-2 mb-0" style={{ letterSpacing: '1px', fontSize: '10px' }}>
-                   Standard Catalog Schema Compliance Required
-                </p>
             </div>
 
             <button 
               type="submit" 
               disabled={!file || uploading}
-              className="btn btn-primary btn-lg w-100 fw-bold text-uppercase py-3 shadow-sm rounded-3"
-              style={{ fontSize: '13px', letterSpacing: '2px' }}
+              className="btn btn-primary btn-lg w-100 fw-bold text-uppercase py-3 shadow-sm rounded-4 border-0"
+              style={{ 
+                fontSize: '13px', 
+                letterSpacing: '2px',
+                background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)'
+              }}
             >
                 {uploading ? (
                   <span className="d-flex align-items-center justify-content-center gap-2">
                     <span className="spinner-border spinner-border-sm" role="status"></span>
-                    Ingesting Payload...
+                    Executing Transmission...
                   </span>
-                ) : 'Execute Mass Import'}
+                ) : (
+                  <span className="d-flex align-items-center justify-content-center gap-2">
+                    <i className="fa-solid fa-bolt"></i> Execute Mass Import
+                  </span>
+                )}
             </button>
           </form>
 
-          <div className="mt-5 p-4 rounded-4 bg-dark text-white shadow-lg">
-              <h4 className="fw-bold text-uppercase mb-3" style={{ fontSize: '11px', color: '#ffd700', letterSpacing: '2px' }}>
-                <i className="fa-solid fa-shield-halved me-2"></i> Payload Constraints
+          <div className="mt-5 p-4 rounded-4 bg-dark text-white shadow-lg border-0">
+              <h4 className="fw-bold text-uppercase mb-3 d-flex align-items-center gap-2" style={{ fontSize: '11px', color: '#60a5fa', letterSpacing: '2px' }}>
+                <i className="fa-solid fa-shield-halved"></i> Schema Constraints
               </h4>
               <div className="row g-3">
                   {[
                     'Name (Identity)', 'Price (Valuation)', 
                     'Category (Vertical)', 'Description (Specs)', 
-                    'Image (Visual Link)', 'Stock (Capacity)'
+                    'Image (Visual URL)', 'Stock (Inventory Level)'
                   ].map((item, idx) => (
-                    <div key={idx} className="col-6">
-                      <div className="d-flex align-items-center gap-2 small fw-bold text-uppercase opacity-75" style={{ fontSize: '10px', letterSpacing: '1px' }}>
-                        <i className="fa-solid fa-square-check text-success"></i> {item}
+                    <div key={idx} className="col-12 col-md-6">
+                      <div className="d-flex align-items-center gap-2 small fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '1px', color: '#cbd5e1' }}>
+                        <i className="fa-solid fa-check-double text-success"></i> {item}
                       </div>
                     </div>
                   ))}

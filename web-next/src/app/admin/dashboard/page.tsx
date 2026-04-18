@@ -38,20 +38,19 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Loading statistics...</div>;
-
   return (
     <div className="container-fluid p-0">
       {/* 1. Global Metrics Strip */}
       <div className="row g-4 mb-4">
         <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 h-100">
+          <div className={`card shadow-sm border-0 h-100 ${loading ? 'placeholder-glow' : ''}`}>
             <div className="card-body d-flex align-items-center">
               <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', fontSize: '24px' }}>
                 <i className="fa-solid fa-box"></i>
               </div>
-              <div>
-                <h3 className="mb-0 fw-bold">{stats?.productCount || 0}</h3>
+              <div className="w-100">
+                {loading ? <span className="placeholder col-6 h3"></span> : <h3 className="mb-0 fw-bold">{stats?.productCount || 0}</h3>}
+                <br />
                 <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Inventory Items</small>
               </div>
             </div>
@@ -59,13 +58,14 @@ export default function AdminDashboard() {
         </div>
 
         <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 h-100">
+          <div className={`card shadow-sm border-0 h-100 ${loading ? 'placeholder-glow' : ''}`}>
             <div className="card-body d-flex align-items-center">
               <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #10b981, #047857)', fontSize: '24px' }}>
                 <i className="fa-solid fa-users"></i>
               </div>
-              <div>
-                <h3 className="mb-0 fw-bold">{stats?.userCount || 0}</h3>
+              <div className="w-100">
+                {loading ? <span className="placeholder col-6 h3"></span> : <h3 className="mb-0 fw-bold">{stats?.userCount || 0}</h3>}
+                <br />
                 <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Verified Nodes</small>
               </div>
             </div>
@@ -73,13 +73,14 @@ export default function AdminDashboard() {
         </div>
 
         <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 h-100">
+          <div className={`card shadow-sm border-0 h-100 ${loading ? 'placeholder-glow' : ''}`}>
             <div className="card-body d-flex align-items-center">
               <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', fontSize: '24px' }}>
                 <i className="fa-solid fa-shopping-bag"></i>
               </div>
-              <div>
-                <h3 className="mb-0 fw-bold">{stats?.orderCount || 0}</h3>
+              <div className="w-100">
+                {loading ? <span className="placeholder col-6 h3"></span> : <h3 className="mb-0 fw-bold">{stats?.orderCount || 0}</h3>}
+                <br />
                 <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Active Protocols</small>
               </div>
             </div>
@@ -87,13 +88,14 @@ export default function AdminDashboard() {
         </div>
 
         <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 h-100">
+          <div className={`card shadow-sm border-0 h-100 ${loading ? 'placeholder-glow' : ''}`}>
             <div className="card-body d-flex align-items-center">
               <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #f43f5e, #be123c)', fontSize: '24px' }}>
                 <i className="fa-solid fa-triangle-exclamation"></i>
               </div>
-              <div>
-                <h3 className="mb-0 fw-bold">{stats?.zeroStockCount || 0}</h3>
+              <div className="w-100">
+                {loading ? <span className="placeholder col-6 h3"></span> : <h3 className="mb-0 fw-bold">{stats?.zeroStockCount || 0}</h3>}
+                <br />
                 <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Critical Low Stock</small>
               </div>
             </div>
@@ -117,19 +119,25 @@ export default function AdminDashboard() {
       {/* 3. Deep Analysis Reports */}
       <div className="row g-4">
         <div className="col-lg-6">
-          <div className="card shadow-sm border-0 h-100">
+          <div className={`card shadow-sm border-0 h-100 ${loading ? 'placeholder-glow' : ''}`}>
             <div className="card-header bg-white border-bottom-0 pt-4 pb-0">
-              <h5 className="text-uppercase fw-bold text-muted mb-0 flex items-center gap-2" style={{ letterSpacing: '2px', fontSize: '13px' }}>
+              <h5 className="text-uppercase fw-bold text-muted mb-0 d-flex align-items-center gap-2" style={{ letterSpacing: '2px', fontSize: '13px' }}>
                 <i className="fa-solid fa-chart-line text-primary"></i> Financial Matrix
               </h5>
             </div>
             <div className="card-body d-flex flex-column align-items-center justify-content-center py-5">
               <div className="d-flex align-items-baseline mb-2">
                 <span className="fs-3 fw-bold text-primary opacity-75 me-1">₹</span>
-                <h2 className="display-4 fw-bold text-dark mb-0 leading-none">
-                  {Number((stats?.pipelineRevenue || 0).toFixed(2).split('.')[0]).toLocaleString()}
-                </h2>
-                <span className="fs-4 fw-bold text-muted">.{((stats?.pipelineRevenue || 0).toFixed(2).split('.')[1]) || '00'}</span>
+                {loading ? (
+                  <span className="placeholder col-8 display-4"></span>
+                ) : (
+                  <>
+                    <h2 className="display-4 fw-bold text-dark mb-0 leading-none">
+                      {Number((stats?.pipelineRevenue || 0).toFixed(2).split('.')[0]).toLocaleString()}
+                    </h2>
+                    <span className="fs-4 fw-bold text-muted">.{((stats?.pipelineRevenue || 0).toFixed(2).split('.')[1]) || '00'}</span>
+                  </>
+                )}
               </div>
               <p className="text-primary fw-bold text-uppercase opacity-75 mb-4" style={{ fontSize: '11px', letterSpacing: '0.2em' }}>Total Pipeline Valuation</p>
               
@@ -142,7 +150,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="col-lg-6">
-          <div className="card shadow-sm border-0 h-100">
+          <div className={`card shadow-sm border-0 h-100 ${loading ? 'placeholder-glow' : ''}`}>
             <div className="card-header bg-white border-bottom-0 pt-4 pb-3 d-flex align-items-center justify-content-between">
               <h5 className="text-uppercase fw-bold text-muted mb-0" style={{ letterSpacing: '2px', fontSize: '13px' }}>High Velocity Assets</h5>
               <a href="/admin/products" className="text-primary text-decoration-none text-uppercase fw-bold" style={{ fontSize: '11px', letterSpacing: '1px' }}>Monitor All</a>
@@ -158,7 +166,15 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(stats?.topSellers || []).map((prod, idx) => (
+                    {loading ? (
+                      [...Array(3)].map((_, i) => (
+                        <tr key={i}>
+                          <td className="ps-4"><span className="placeholder col-10"></span></td>
+                          <td><span className="placeholder col-6"></span></td>
+                          <td className="pe-4"><span className="placeholder col-4 float-end"></span></td>
+                        </tr>
+                      ))
+                    ) : (stats?.topSellers || []).map((prod, idx) => (
                       <tr key={idx}>
                         <td className="ps-4 fw-semibold text-dark">{prod.name}</td>
                         <td>
@@ -170,7 +186,7 @@ export default function AdminDashboard() {
                         <td className="pe-4 font-monospace text-end fw-bold">₹{prod.revenue.toLocaleString()}</td>
                       </tr>
                     ))}
-                    {(!stats?.topSellers || stats.topSellers.length === 0) && (
+                    {!loading && (!stats?.topSellers || stats.topSellers.length === 0) && (
                       <tr>
                         <td colSpan={3} className="text-center py-4 text-muted">No high velocity assets recorded.</td>
                       </tr>

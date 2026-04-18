@@ -79,6 +79,11 @@ const productSchema = new mongoose.Schema({
     enum: ['In Stock', 'Out of Stock', 'Low Stock'],
     default: 'In Stock',
   },
+  importId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ImportLog',
+    default: null
+  },
   reviews: [reviewSchema],
   createdAt: {
     type: Date,

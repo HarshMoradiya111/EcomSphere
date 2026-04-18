@@ -35,25 +35,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     }
 
-    // Dynamic style loading for Admin panel (Bootstrap 5)
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';
-    link.id = 'bootstrap-admin-theme';
-    document.head.appendChild(link);
+    // Load Bootstrap only if not already present
+    if (!document.getElementById('bootstrap-admin-theme')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';
+      link.id = 'bootstrap-admin-theme';
+      document.head.appendChild(link);
+    }
 
-    // Dynamic JS loading for Bootstrap
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
-    script.id = 'bootstrap-admin-script';
-    document.body.appendChild(script);
-
-    return () => {
-      const existingLink = document.getElementById('bootstrap-admin-theme');
-      if (existingLink) document.head.removeChild(existingLink);
-      const existingScript = document.getElementById('bootstrap-admin-script');
-      if (existingScript) document.body.removeChild(existingScript);
-    };
+    if (!document.getElementById('bootstrap-admin-script')) {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+      script.id = 'bootstrap-admin-script';
+      script.async = true;
+      document.body.appendChild(script);
+    }
   }, [router, pathname]);
 
   const isLoginPage = pathname === '/admin/login';
