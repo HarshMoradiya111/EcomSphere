@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { API_URL } from '@/config';
 import './auth.css';
 
@@ -18,14 +18,35 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
+    // 1. Check for token in URL (from Google Auth redirect)
+    const token = searchParams.get('token');
+    const authError = searchParams.get('error');
+
+    if (token) {
+      // 1. Save token to cookie (7 days)
+      const expires = new Date();
+      expires.setDate(expires.getDate() + 7);
+      document.cookie = `token=${token}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
+      
+      setSuccess('Logged in via Google! Redirecting...');
+      window.location.href = '/'; 
+    }
+
+    if (authError) {
+      setError(authError);
+    }
+
+    // 2. Load boxicons
     if (!document.querySelector('link[href*="boxicons"]')) {
       const link = document.createElement('link');
       link.href = 'https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css';
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-  }, []);
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +60,11 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (data.success) {
+        // Save token to cookie (7 days)
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 7);
+        document.cookie = `token=${data.token}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
+        
         window.location.href = '/'; 
       } else {
         setError(data.error || 'Invalid credentials');
@@ -66,8 +92,15 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('Account created! Please login.');
-        setIsRegister(false);
+        // Save token to cookie (7 days)
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 7);
+        document.cookie = `token=${data.token}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
+
+        setSuccess('Registration successful! Redirecting...');
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
       } else {
         setError(data.error || 'Registration failed');
       }
@@ -126,7 +159,7 @@ export default function LoginPage() {
 
             <div className="social-login animation" style={{ "--i": 5, "--j": 26, marginTop: '15px', textAlign: 'center' } as any}>
               <p style={{ marginBottom: '10px', fontSize: '12px', color: '#666' }}>Or sign in with</p>
-              <a href="#" className="google-btn" style={{ 
+              <a href={`${API_URL}/api/v1/auth/google`} className="google-btn" style={{ 
                 background: '#f1f1f1', color: '#444', display: 'flex', alignItems: 'center', 
                 justifyContent: 'center', gap: '10px', textDecoration: 'none', fontSize: '14px',
                 fontWeight: '600', borderRadius: '40px', height: '40px' 

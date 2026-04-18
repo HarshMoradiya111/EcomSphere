@@ -66,4 +66,26 @@ router.post('/admin/login', async (req, res) => {
   }
 });
 
+const passport = require('passport');
+
+// @desc    Auth with Google
+// @route   GET /api/v1/auth/google
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// @desc    Google auth callback
+// @route   GET /api/v1/auth/google/callback
+router.get('/google/callback', 
+  passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL}/auth/login?error=Google auth failed`, session: false }),
+  (req, res) => {
+    // On success, create JWT and redirect to frontend with token
+    const payload = { id: req.user._id.toString(), role: 'user' };
+    const secret = process.env.JWT_SECRET || 'ecomsphere_super_secret_jwt';
+    const token = jwt.sign(payload, secret, { expiresIn: '7d' });
+
+    // Redirect to frontend with token in query param
+    // The frontend will catch this and save it to localStorage
+    res.redirect(`${process.env.CLIENT_URL}/auth/login?token=${token}`);
+  }
+);
+
 module.exports = router;

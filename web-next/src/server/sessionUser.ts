@@ -1,44 +1,32 @@
 import { cookies } from 'next/headers';
 import { API_URL } from '@/config';
 
-function extractUsernameFromProfileHtml(html: string): string | null {
-  const headingMatch = html.match(/Welcome,\s*([^!<\n]+)!/i);
-  if (headingMatch?.[1]) {
-    return headingMatch[1].trim();
-  }
-
-  const logoutMatch = html.match(/Logout\s*\(([^)]+)\)/i);
-  if (logoutMatch?.[1]) {
-    return logoutMatch[1].trim();
-  }
-
-  return null;
-}
 
 export async function getSessionUsername(): Promise<string | null> {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((cookie) => `${cookie.name}=${cookie.value}`)
-      .join('; ');
+    const token = cookieStore.get('token')?.value;
 
-    if (!cookieHeader) {
+    if (!token) {
       return null;
     }
 
-    const response = await fetch(`${API_URL}/profile`, {
+    // Call the new JSON API instead of legacy HTML page
+    const response = await fetch(`${API_URL}/api/v1/user/profile`, {
       cache: 'no-store',
-      headers: { cookie: cookieHeader },
+      headers: { 
+        'Authorization': `Bearer ${token}` 
+      },
     });
 
     if (!response.ok) {
       return null;
     }
 
-    const html = await response.text();
-    return extractUsernameFromProfileHtml(html);
-  } catch {
+    const data = await response.json();
+    return data.success && data.user ? data.user.username : null;
+  } catch (error) {
+    console.error('Session check error:', error);
     return null;
   }
 }

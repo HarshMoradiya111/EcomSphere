@@ -7,11 +7,16 @@ const hpp = require('hpp');
 const morgan = require('morgan');
 const path = require('path');
 const cors = require('cors');
+const passport = require('passport');
+require('./config/passport');
 
 // Route Aggregator
 const routesV1 = require('./routes');
 
 const app = express();
+
+// Initialize Passport
+app.use(passport.initialize());
 
 // 0. PRODUCTION SECURITY & LOAD BALANCER CONFIG
 if (process.env.NODE_ENV === 'production') {
