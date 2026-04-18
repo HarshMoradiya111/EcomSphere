@@ -66,6 +66,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="container-fluid p-0 bg-light min-vh-100">
+      <style>{`
+        .btn {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+          filter: brightness(1.05);
+        }
+        .btn:active:not(:disabled) {
+          transform: translateY(0);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+        .nav-pills .nav-link {
+          transition: all 0.3s ease;
+        }
+        .nav-pills .nav-link:hover:not(.active) {
+          transform: translateX(4px);
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      `}</style>
       <div className="row g-0 h-100">
         <div className="col-auto bg-dark border-end" style={{ minWidth: '250px' }}>
           <AdminSidebar />
