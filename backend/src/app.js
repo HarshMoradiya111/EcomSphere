@@ -76,8 +76,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 4. API ROUTES
+// 4. API & VIEW ROUTES
 app.use('/api/v1', routesV1.apiRouter);
+app.use('/', routesV1.viewRouter);
 
 // 4b. ROOT-LEVEL GOOGLE AUTH ROUTES
 // Google Console has callback registered at /auth/google/callback (without /api/v1)
