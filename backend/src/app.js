@@ -83,8 +83,8 @@ app.use('/api/v1', routesV1.apiRouter);
 app.get('/', (req, res) => {
   res.json({ 
     success: true, 
-    message: 'EcomSphere API Core is active',
-    version: '2.0.0',
+    message: 'EcomSphere API Core - REFRESHED AND UPDATED',
+    version: '2.1.0',
     environment: process.env.NODE_ENV
   });
 });
