@@ -40,52 +40,52 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-[20px] font-sans">
-      <div className="w-full max-w-[420px] bg-[#1e293b] p-[48px_40px] rounded-[16px] shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
-        <div className="text-center mb-[30px]">
-          <div className="text-[40px] mb-[8px]">🛍️</div>
-          <h2 className="text-[#ffd700] text-[26px] font-[700]">EcomSphere Admin</h2>
-          <p className="text-[#94a3b8] text-[14px]">Sign in to manage your store</p>
+    <div className="vh-100 bg-dark d-flex align-items-center justify-content-center p-3">
+      <div className="card border-0 shadow-lg p-4 p-md-5 w-100 bg-dark text-light" style={{ maxWidth: '420px', borderRadius: '16px' }}>
+        <div className="text-center mb-4">
+          <div className="display-4 mb-2">🛍️</div>
+          <h2 className="fs-3 fw-bold text-warning mb-1">EcomSphere Admin</h2>
+          <p className="text-muted small">Sign in to manage your store</p>
         </div>
 
         {error && (
-          <div className="bg-[rgba(220,53,69,0.15)] border border-[#dc3545] text-[#ff6b6b] p-[10px_14px] rounded-[8px] mb-[15px] text-[14px]">
-            <i className="fa-solid fa-circle-exclamation mr-2"></i> {error}
+          <div className="alert alert-danger d-flex align-items-center mb-3 py-2 px-3 small" role="alert">
+            <i className="fa-solid fa-circle-exclamation me-2"></i> {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="flex flex-col">
-          <label className="block text-[#cbd5e1] text-[13px] font-[600] mb-[6px] uppercase tracking-[0.5px]">Username</label>
+        <form onSubmit={handleLogin} className="d-flex flex-column">
+          <label className="form-label text-light fw-bold small text-uppercase mb-1" style={{ letterSpacing: '0.5px' }}>Username</label>
           <input 
             type="text" 
             required
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-[13px_16px] border border-[#334155] bg-[#0f172a] text-[#f1f5f9] rounded-[8px] text-[15px] mb-[18px] focus:border-[#ffd700] outline-none transition-all"
+            className="form-control bg-dark text-light border-secondary mb-3 py-2"
             placeholder="admin"
           />
 
-          <label className="block text-[#cbd5e1] text-[13px] font-[600] mb-[6px] uppercase tracking-[0.5px]">Password</label>
+          <label className="form-label text-light fw-bold small text-uppercase mb-1" style={{ letterSpacing: '0.5px' }}>Password</label>
           <input 
             type="password" 
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-[13px_16px] border border-[#334155] bg-[#0f172a] text-[#f1f5f9] rounded-[8px] text-[15px] mb-[18px] focus:border-[#ffd700] outline-none transition-all"
+            className="form-control bg-dark text-light border-secondary mb-4 py-2"
             placeholder="••••••••"
           />
 
           <button 
             disabled={loading}
-            className="w-full p-[15px] bg-[#ffd700] text-[#0f172a] border-none rounded-[8px] text-[16px] font-[700] cursor-pointer hover:bg-[#f0c800] transition-all flex items-center justify-center gap-2"
+            className="btn btn-warning w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2"
           >
             <i className="fa-solid fa-right-to-bracket"></i> {loading ? 'Checking...' : 'Sign In'}
           </button>
         </form>
 
-        <div className="text-center mt-[20px]">
-          <a href="/" className="text-[#64748b] text-[13px] hover:text-[#ffd700] transition-all">
-            <i className="fa-solid fa-arrow-left"></i> Back to Store
+        <div className="text-center mt-4">
+          <a href="/" className="text-muted text-decoration-none small transition-all">
+            <i className="fa-solid fa-arrow-left me-1"></i> Back to Store
           </a>
         </div>
       </div>

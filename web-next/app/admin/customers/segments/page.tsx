@@ -25,72 +25,76 @@ export default function CustomerSegmentsPage() {
     fetchSegments();
   }, []);
 
-  if (loading) return <div className="p-10 font-bold text-[#64748b]">Clustering behavioral nodes...</div>;
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm text-primary" role="status"></div><span className="fw-bold">Clustering behavioral nodes...</span></div>;
 
   return (
-    <div className="admin-content" style={{ padding: '25px 30px' }}>
-      <div className="card-header" style={{ marginBottom: '25px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>
-            <i className="fa-solid fa-chart-pie" style={{ color: 'var(--accent)', marginRight: '10px' }}></i> 
+    <div className="container-fluid p-0">
+      <div className="mb-4 pb-3 border-bottom">
+        <h2 className="fs-4 fw-bold text-dark d-flex align-items-center gap-2 mb-1">
+            <i className="fa-solid fa-chart-pie text-primary"></i> 
             Customer Segments
         </h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Automated behavioral clustering via purchase history logic.</p>
+        <p className="text-muted small mb-0">Automated behavioral clustering via purchase history logic.</p>
       </div>
 
-      <div className="stats-grid" style={{ padding: 0, marginBottom: '30px' }}>
+      <div className="row g-3 mb-4">
         {[
-          { label: 'High Spenders', icon: 'fa-solid fa-crown', color: '#ffd700', bg: 'rgba(255,215,0,0.1)' },
-          { label: 'Frequent Buyers', icon: 'fa-solid fa-bolt', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
-          { label: 'Lapsed Retained', icon: 'fa-solid fa-clock-rotate-left', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
-          { label: 'New Nodes', icon: 'fa-solid fa-user-plus', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' }
+          { label: 'High Spenders', icon: 'fa-solid fa-crown', color: 'text-warning', bg: 'bg-warning' },
+          { label: 'Frequent Buyers', icon: 'fa-solid fa-bolt', color: 'text-primary', bg: 'bg-primary' },
+          { label: 'Lapsed Retained', icon: 'fa-solid fa-clock-rotate-left', color: 'text-danger', bg: 'bg-danger' },
+          { label: 'New Nodes', icon: 'fa-solid fa-user-plus', color: 'text-success', bg: 'bg-success' }
         ].map((stat, i) => (
-          <div key={i} className="stat-card">
-            <div className="stat-icon" style={{ background: stat.bg, color: stat.color }}>
-              <i className={stat.icon}></i>
-            </div>
-            <div className="stat-info">
-              <h3 style={{ fontSize: '20px' }}>{Math.floor(Math.random() * 500)}</h3>
-              <p>{stat.label}</p>
+          <div key={i} className="col-12 col-sm-6 col-xl-3">
+            <div className="card shadow-sm border-0 h-100 p-3 d-flex flex-row align-items-center gap-3">
+              <div className={`d-flex align-items-center justify-content-center rounded-circle ${stat.bg} bg-opacity-10 ${stat.color}`} style={{ width: '48px', height: '48px' }}>
+                <i className={`${stat.icon} fs-5`}></i>
+              </div>
+              <div>
+                <h3 className="fs-4 fw-bold text-dark mb-0">{Math.floor(Math.random() * 500)}</h3>
+                <p className="text-muted small fw-bold mb-0 text-uppercase tracking-widest">{stat.label}</p>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="admin-card">
-        <div className="card-header">
-           <h3 style={{ fontSize: '16px' }}>Segmentation Registry</h3>
+      <div className="card shadow-sm border-0 mb-4">
+        <div className="card-header bg-white border-bottom-0 pt-4 pb-3">
+           <h3 className="fs-6 fw-bold text-dark mb-0 text-uppercase tracking-widest">Segmentation Registry</h3>
         </div>
-        <div className="table-responsive">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Segment Name</th>
-                <th>Criteria Logic</th>
-                <th>Population</th>
-                <th>Growth (30d)</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {segments.length > 0 ? segments.map((seg: any) => (
-                <tr key={seg._id}>
-                  <td><strong>{seg.name}</strong></td>
-                  <td style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{seg.criteria}</td>
-                  <td>{seg.count} Nodes</td>
-                  <td style={{ color: '#22c55e' }}>+{seg.growth}%</td>
-                  <td>
-                    <button className="admin-btn btn-secondary btn-sm">Dispatch Campaign</button>
-                  </td>
-                </tr>
-              )) : (
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light text-muted small text-uppercase">
                 <tr>
-                   <td colSpan={5} style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>
-                      Behavioral clusters are being recalculated.
-                   </td>
+                  <th className="ps-4">Segment Name</th>
+                  <th>Criteria Logic</th>
+                  <th>Population</th>
+                  <th>Growth (30d)</th>
+                  <th className="text-end pe-4">Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {segments.length > 0 ? segments.map((seg: any) => (
+                  <tr key={seg._id}>
+                    <td className="ps-4 fw-bold text-dark">{seg.name}</td>
+                    <td className="text-muted small fw-bold">{seg.criteria}</td>
+                    <td className="fw-bold">{seg.count} Nodes</td>
+                    <td className="text-success fw-bold">+{seg.growth}%</td>
+                    <td className="text-end pe-4">
+                      <button className="btn btn-sm btn-outline-secondary fw-bold text-uppercase" style={{ fontSize: '11px', padding: '4px 12px' }}>Dispatch Campaign</button>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                     <td colSpan={5} className="text-center py-5 text-muted fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>
+                        Behavioral clusters are being recalculated.
+                     </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

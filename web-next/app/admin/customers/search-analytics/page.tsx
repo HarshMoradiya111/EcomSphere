@@ -29,108 +29,112 @@ export default function SearchAnalyticsPage() {
     fetchData();
   }, []);
 
-  if (loading) return <div className="p-10 font-bold text-[#64748b]">Mapping intent signals...</div>;
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm text-primary" role="status"></div><span className="fw-bold">Mapping intent signals...</span></div>;
 
   return (
-    <div className="admin-content" style={{ padding: '25px 30px' }}>
-      <style>{`
-        .analytics-card { background: var(--bg-card); border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); margin-bottom: 25px; }
-        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
-        .query-tag { background: rgba(255, 215, 0, 0.1); padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; color: var(--accent); }
-        .query-count { color: var(--text-secondary); font-size: 12px; margin-left: 8px; }
-        .zero-badge { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; border: 1px solid rgba(239, 68, 68, 0.2); }
-        .search-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
-        .search-item:last-child { border-bottom: none; }
-      `}</style>
-
-      <div className="card-header" style={{ marginBottom: '25px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>
-            <i className="fa-solid fa-magnifying-glass-chart" style={{ color: 'var(--accent)', marginRight: '10px' }}></i> 
+    <div className="container-fluid p-0">
+      <div className="mb-4 pb-3 border-bottom">
+        <h2 className="fs-4 fw-bold text-dark d-flex align-items-center gap-2 mb-1">
+            <i className="fa-solid fa-magnifying-glass-chart text-primary"></i> 
             Search & Intent Analytics
         </h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Analyze user intent signals to optimize inventory and metadata.</p>
+        <p className="text-muted small mb-0">Analyze user intent signals to optimize inventory and metadata.</p>
       </div>
 
-      <div className="analytics-grid">
+      <div className="row g-4 mb-4">
         {/* Top Searches */}
-        <div className="analytics-card">
-          <h3 style={{ marginBottom: '20px', fontSize: '16px', color: 'var(--text-primary)' }}>
-            <i className="fa-solid fa-fire" style={{ color: '#f97316', marginRight: '10px' }}></i> 
-            Top Search Queries
-          </h3>
-          {topSearches.length > 0 ? topSearches.map((search: any, i) => (
-            <div key={i} className="search-item">
-              <div>
-                <span className="query-tag">#{search._id}</span>
-                <span className="query-count">{search.count} searches</span>
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                Avg. {Math.round(search.avgResults)} results
+        <div className="col-lg-6">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body p-4">
+              <h3 className="fs-6 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <i className="fa-solid fa-fire text-warning"></i> 
+                Top Search Queries
+              </h3>
+              <div className="d-flex flex-column">
+                {topSearches.length > 0 ? topSearches.map((search: any, i) => (
+                  <div key={i} className={`d-flex justify-content-between align-items-center py-3 ${i !== topSearches.length - 1 ? 'border-bottom' : ''}`}>
+                    <div className="d-flex align-items-center gap-2">
+                      <span className="badge bg-warning bg-opacity-10 text-warning px-2 py-1 fs-6">#{search._id}</span>
+                      <span className="text-muted small">{search.count} searches</span>
+                    </div>
+                    <div className="text-muted small">
+                      Avg. {Math.round(search.avgResults)} results
+                    </div>
+                  </div>
+                )) : (
+                  <p className="text-muted text-center py-4 mb-0">No search trends detected.</p>
+                )}
               </div>
             </div>
-          )) : (
-            <p style={{ color: '#64748b', textAlign: 'center', padding: '30px' }}>No search trends detected.</p>
-          )}
+          </div>
         </div>
 
         {/* Zero Results */}
-        <div className="analytics-card" style={{ borderTop: '4px solid #ef4444' }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '16px', color: 'var(--text-primary)' }}>
-            <i className="fa-solid fa-triangle-exclamation" style={{ color: '#ef4444', marginRight: '10px' }}></i> 
-            Zero Results (Missed Opportunities)
-          </h3>
-          {zeroResults.length > 0 ? zeroResults.map((search: any, i) => (
-            <div key={i} className="search-item">
-              <div>
-                <span className="query-tag" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)' }}>#{search._id}</span>
-                <span className="query-count">{search.count} failed searches</span>
+        <div className="col-lg-6">
+          <div className="card shadow-sm border-0 h-100" style={{ borderTop: '4px solid var(--bs-danger) !important' }}>
+            <div className="card-body p-4">
+              <h3 className="fs-6 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <i className="fa-solid fa-triangle-exclamation text-danger"></i> 
+                Zero Results (Missed Opportunities)
+              </h3>
+              <div className="d-flex flex-column">
+                {zeroResults.length > 0 ? zeroResults.map((search: any, i) => (
+                  <div key={i} className={`d-flex justify-content-between align-items-center py-3 ${i !== zeroResults.length - 1 ? 'border-bottom' : ''}`}>
+                    <div className="d-flex align-items-center gap-2">
+                      <span className="badge bg-danger bg-opacity-10 text-danger px-2 py-1 fs-6">#{search._id}</span>
+                      <span className="text-muted small">{search.count} failed searches</span>
+                    </div>
+                    <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">Potential Gap</span>
+                  </div>
+                )) : (
+                  <div className="text-success text-center py-4 d-flex align-items-center justify-content-center gap-2 fw-bold">
+                    <i className="fa-solid fa-circle-check"></i> Great! Everyone is finding what they need.
+                  </div>
+                )}
               </div>
-              <span className="zero-badge">Potential Gap</span>
             </div>
-          )) : (
-            <div style={{ textAlign: 'center', color: '#22c55e', padding: '30px', fontSize: '14px' }}>
-              <i className="fa-solid fa-circle-check"></i> Great! Everyone is finding what they need.
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
       {/* Recent Search Log */}
-      <div className="admin-card">
-        <div className="card-header">
-          <h3>Real-time Search Log</h3>
+      <div className="card shadow-sm border-0 mb-4">
+        <div className="card-header bg-white border-bottom-0 pt-4 pb-3">
+          <h3 className="fs-6 fw-bold text-dark mb-0">Real-time Search Log</h3>
         </div>
-        <div className="table-responsive">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Query Intent</th>
-                <th>Results Found</th>
-                <th>Node Authority</th>
-                <th>Timestamp</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentLog.length > 0 ? recentLog.map((log: any, i) => (
-                <tr key={i}>
-                  <td><strong style={{ color: 'var(--accent)' }}>{log.query}</strong></td>
-                  <td>
-                    <span className={`badge ${log.resultsCount > 0 ? 'badge-delivered' : 'badge-cancelled'}`}>
-                      {log.resultsCount} items found
-                    </span>
-                  </td>
-                  <td>
-                    <span style={{ fontSize: '12px', color: log.userId ? 'var(--accent)' : 'var(--text-secondary)' }}>
-                        {log.userId ? 'Authenticated User' : 'Anonymous Guest'}
-                    </span>
-                  </td>
-                  <td><small style={{ color: '#64748b' }}>{new Date(log.timestamp).toLocaleString()}</small></td>
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light text-muted small">
+                <tr>
+                  <th className="ps-4">Query Intent</th>
+                  <th>Results Found</th>
+                  <th>Node Authority</th>
+                  <th className="text-end pe-4">Timestamp</th>
                 </tr>
-              )) : (
-                <tr><td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Search log is currently silent.</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recentLog.length > 0 ? recentLog.map((log: any, i) => (
+                  <tr key={i}>
+                    <td className="ps-4"><strong className="text-primary">{log.query}</strong></td>
+                    <td>
+                      <span className={`badge px-2 py-1 border ${log.resultsCount > 0 ? 'bg-success bg-opacity-10 text-success border-success border-opacity-25' : 'bg-danger bg-opacity-10 text-danger border-danger border-opacity-25'}`}>
+                        {log.resultsCount} items found
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`small ${log.userId ? 'text-primary fw-bold' : 'text-muted'}`}>
+                          {log.userId ? 'Authenticated User' : 'Anonymous Guest'}
+                      </span>
+                    </td>
+                    <td className="text-end pe-4"><small className="text-muted">{new Date(log.timestamp).toLocaleString()}</small></td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={4} className="text-center py-5 text-muted">Search log is currently silent.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

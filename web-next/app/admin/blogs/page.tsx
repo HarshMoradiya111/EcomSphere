@@ -91,103 +91,108 @@ export default function AdminBlogs() {
     setShowModal(true);
   };
 
-  if (loading) return <div className="p-10 font-black text-[#64748b] tracking-widest uppercase text-[12px]">Decrypting Article Cluster...</div>;
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Decrypting Article Cluster...</div>;
 
   return (
-    <div className="admin-content" style={{ padding: '25px 30px' }}>
-      <div className="flex justify-between items-end mb-8 pb-6 border-b border-[var(--border)]">
+    <div className="container-fluid p-0">
+      <div className="d-flex justify-content-between align-items-end mb-4 pb-3 border-bottom">
         <div>
-          <h2 className="text-xl font-black text-white uppercase tracking-tighter">Article Governance</h2>
-          <p className="text-[11px] text-[var(--text-muted)] mt-1 font-bold uppercase tracking-[0.2em]">Curate the Editorial Nexus</p>
+          <h2 className="fs-4 fw-bold text-dark text-uppercase tracking-tight mb-0">Article Governance</h2>
+          <p className="text-muted small fw-bold tracking-widest flex items-center gap-2 text-uppercase mb-0 mt-1" style={{ letterSpacing: '0.1em' }}>Curate the Editorial Nexus</p>
         </div>
         <button 
             onClick={() => { setEditingBlog(null); setShowModal(true); }}
-            className="btn-core btn-primary"
+            className="btn btn-sm btn-primary d-flex align-items-center gap-2 shadow-sm"
         >
-          <i className="fa-solid fa-plus mr-2"></i> Deploy Article
+          <i className="fa-solid fa-plus"></i> Deploy Article
         </button>
       </div>
 
-      <div className="admin-card overflow-hidden">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th style={{ width: '100px' }}>Visual</th>
-              <th>Identity & Timestamp</th>
-              <th>Sector</th>
-              <th className="text-right">Linkages</th>
-            </tr>
-          </thead>
-          <tbody>
-            {blogs.length > 0 ? blogs.map((blog: any) => (
-              <tr key={blog._id}>
-                <td className="py-4">
-                  <img src={getImageUrl(blog.image)} className="w-[60px] h-[60px] object-cover rounded-md border border-[var(--border)]" alt="" />
-                </td>
-                <td className="py-4">
-                  <p className="font-bold text-white text-[15px] mb-1">{blog.title}</p>
-                  <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">{new Date(blog.date).toLocaleDateString()}</p>
-                </td>
-                <td><span className="badge-pill">{blog.category || 'General'}</span></td>
-                <td className="text-right">
-                    <div className="flex justify-end gap-2">
-                        <button onClick={() => openEditModal(blog)} className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors p-2">
-                            <i className="fa-solid fa-pen-nib text-[14px]"></i>
-                        </button>
-                        <button onClick={() => handleDelete(blog._id)} className="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors p-2">
-                            <i className="fa-solid fa-square-minus text-[14px]"></i>
-                        </button>
-                    </div>
-                </td>
-              </tr>
-            )) : (
-              <tr>
-                 <td colSpan={4} className="py-20 text-center text-[var(--text-muted)] font-bold uppercase tracking-widest text-[11px]">
-                    Article cluster is offline.
-                 </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="card shadow-sm border-0 mb-4">
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light text-muted text-uppercase" style={{ fontSize: '12px' }}>
+                <tr>
+                  <th className="ps-4" style={{ width: '100px' }}>Visual</th>
+                  <th>Identity & Timestamp</th>
+                  <th>Sector</th>
+                  <th className="text-end pe-4">Linkages</th>
+                </tr>
+              </thead>
+              <tbody>
+                {blogs.length > 0 ? blogs.map((blog: any) => (
+                  <tr key={blog._id}>
+                    <td className="ps-4 py-3">
+                      <img src={getImageUrl(blog.image)} className="img-thumbnail rounded" style={{ width: '60px', height: '60px', objectFit: 'cover' }} alt="" />
+                    </td>
+                    <td>
+                      <p className="fw-bold text-dark mb-0" style={{ fontSize: '15px' }}>{blog.title}</p>
+                      <p className="text-muted small fw-bold text-uppercase mb-0" style={{ fontSize: '10px', letterSpacing: '1px' }}>{new Date(blog.date).toLocaleDateString()}</p>
+                    </td>
+                    <td><span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">{blog.category || 'General'}</span></td>
+                    <td className="text-end pe-4">
+                        <div className="d-flex justify-content-end gap-1">
+                            <button onClick={() => openEditModal(blog)} className="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                                <i className="fa-solid fa-pen-nib"></i>
+                            </button>
+                            <button onClick={() => handleDelete(blog._id)} className="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                                <i className="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                     <td colSpan={4} className="py-5 text-center text-muted fw-bold text-uppercase" style={{ fontSize: '11px', letterSpacing: '2px' }}>
+                        Article cluster is offline.
+                     </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       {/* MODAL SYSTEM */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
-            <div className="relative bg-[var(--surface)] border border-[var(--border)] w-full max-w-lg rounded-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface-header)] flex justify-between items-center">
-                    <h3 className="text-[13px] font-black text-white uppercase tracking-widest">
-                        {editingBlog ? 'Modify Article Slot' : 'New Article injection'}
-                    </h3>
-                    <button onClick={() => setShowModal(false)} className="text-[var(--text-muted)] hover:text-white transition-colors">
-                        <i className="fa-solid fa-xmark text-lg"></i>
-                    </button>
+        <>
+          <div className="modal-backdrop fade show"></div>
+          <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-hidden="true" onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content border-0 shadow-lg">
+                <div className="modal-header bg-light border-bottom px-4 py-3">
+                  <h5 className="modal-title fs-6 fw-bold text-dark text-uppercase tracking-widest m-0">
+                    {editingBlog ? 'Modify Article Slot' : 'New Article Injection'}
+                  </h5>
+                  <button type="button" className="btn-close" onClick={() => setShowModal(false)} aria-label="Close"></button>
                 </div>
-                <form onSubmit={handleSubmit} className="p-8 space-y-2">
-                    <div className="form-group">
-                        <label>Asset Title</label>
+                <div className="modal-body p-4">
+                  <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Asset Title</label>
                         <input 
                             type="text" 
                             required 
-                            className="admin-input" 
+                            className="form-control" 
                             placeholder="ARTICLE HEADLINE"
                             value={formData.title}
                             onChange={(e) => setFormData({...formData, title: e.target.value})}
                         />
                     </div>
-                    <div className="form-group">
-                        <label>Thumbnail Vector</label>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Thumbnail Vector</label>
                         <input 
                             type="file" 
-                            className="admin-input" 
+                            className="form-control" 
                             onChange={(e) => setFormData({...formData, image: e.target.files?.[0] || null})}
                         />
                     </div>
-                    <div className="form-group">
-                        <label>Sector</label>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Sector</label>
                         <select 
-                            className="admin-input"
+                            className="form-select"
                             value={formData.category}
                             onChange={(e) => setFormData({...formData, category: e.target.value})}
                         >
@@ -197,26 +202,29 @@ export default function AdminBlogs() {
                             <option>General</option>
                         </select>
                     </div>
-                    <div className="form-group">
-                        <label>Metadata Description</label>
+                    <div className="mb-4">
+                        <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Metadata Description</label>
                         <textarea 
                             required 
                             rows={4}
-                            className="admin-input min-h-[100px] resize-none" 
+                            className="form-control resize-none" 
                             placeholder="BODY DATA..."
                             value={formData.description}
                             onChange={(e) => setFormData({...formData, description: e.target.value})}
                         ></textarea>
                     </div>
-                    <div className="pt-6 flex gap-4">
-                        <button type="button" onClick={() => setShowModal(false)} className="flex-1 btn-core btn-secondary !h-12">Abort</button>
-                        <button type="submit" className="flex-1 btn-core btn-primary !h-12 !text-[13px]">
+                    <div className="d-flex gap-2">
+                        <button type="button" onClick={() => setShowModal(false)} className="btn btn-light border flex-grow-1 fw-bold text-uppercase" style={{ fontSize: '13px', letterSpacing: '1px' }}>Abort</button>
+                        <button type="submit" className="btn btn-primary flex-grow-1 fw-bold text-uppercase" style={{ fontSize: '13px', letterSpacing: '1px' }}>
                             {editingBlog ? 'Sync Article' : 'Initialize'}
                         </button>
                     </div>
-                </form>
+                  </form>
+                </div>
+              </div>
             </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

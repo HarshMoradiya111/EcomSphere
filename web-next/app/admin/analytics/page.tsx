@@ -38,80 +38,99 @@ export default function AdminAnalytics() {
     fetchMatrix();
   }, []);
 
-  if (loading) return <div className="p-20 text-center animate-pulse text-cyan-400 font-black uppercase tracking-widest text-xs">Calibrating Market Sensors...</div>;
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm text-primary" role="status"></div><span className="text-uppercase fw-bold small tracking-widest text-primary">Calibrating Market Sensors...</span></div>;
 
   return (
-    <div className="p-12 max-w-[1700px] mx-auto animate-in fade-in duration-700">
-      <header className="mb-16">
-          <div className="flex items-center gap-3 mb-2 uppercase tracking-widest text-[10px] font-black text-cyan-400">
-             <span className="w-2 h-2 rounded-full bg-cyan-400"></span> Sensor Intelligence
+    <div className="container-fluid p-0">
+      <header className="mb-5 pb-3 border-bottom">
+          <div className="d-flex align-items-center gap-2 mb-2 text-primary text-uppercase fw-bold" style={{ fontSize: '10px', letterSpacing: '1px' }}>
+             <span className="bg-primary rounded-circle" style={{ width: '8px', height: '8px' }}></span> Sensor Intelligence
           </div>
-          <h1 className="text-6xl font-black text-white tracking-tighter italic">Market <span className="text-cyan-400 not-italic">Velocity</span></h1>
-          <p className="text-slate-500 font-medium text-lg mt-2 uppercase tracking-[0.2em] text-xs">Sentiment Analysis & Marketing Penetration</p>
+          <h1 className="display-6 fw-bold text-dark mb-0">Market <span className="text-primary">Velocity</span></h1>
+          <p className="text-muted text-uppercase fw-bold mb-0 mt-2" style={{ fontSize: '11px', letterSpacing: '0.1em' }}>Sentiment Analysis & Marketing Penetration</p>
       </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+      <div className="row g-4 mb-4">
           {/* Top Searches */}
-          <div className="bg-slate-800/10 backdrop-blur-3xl p-10 rounded-[4rem] border border-slate-700/30 shadow-2xl">
-              <h2 className="text-xl font-black text-white mb-10 flex items-center gap-3 uppercase tracking-tighter">
-                  <span className="w-1.5 h-6 bg-cyan-500 rounded-full"></span>
-                  Consumer Intent
-              </h2>
-              <div className="space-y-6">
-                  {topSearches.map((s, idx) => (
-                      <div key={idx} className="flex justify-between items-center group">
-                          <p className="text-slate-200 font-bold uppercase tracking-widest text-[11px] group-hover:text-cyan-400 transition-colors">"{s._id}"</p>
-                          <div className="flex items-center gap-3">
-                              <div className="h-1.5 w-24 bg-slate-800 rounded-full overflow-hidden">
-                                  <div className="h-full bg-cyan-500" style={{ width: `${Math.min(100, s.count * 10)}%` }}></div>
+          <div className="col-xl-4">
+              <div className="card shadow-sm border-0 h-100">
+                  <div className="card-body p-4">
+                      <h2 className="fs-6 fw-bold text-dark mb-4 d-flex align-items-center gap-2 text-uppercase tracking-widest">
+                          <span className="bg-info rounded-pill" style={{ width: '6px', height: '24px' }}></span>
+                          Consumer Intent
+                      </h2>
+                      <div className="d-flex flex-column gap-3">
+                          {topSearches.map((s, idx) => (
+                              <div key={idx} className="d-flex justify-content-between align-items-center">
+                                  <p className="mb-0 text-dark fw-bold text-uppercase" style={{ fontSize: '12px' }}>"{s._id}"</p>
+                                  <div className="d-flex align-items-center gap-2">
+                                      <div className="progress" style={{ width: '80px', height: '6px' }}>
+                                          <div className="progress-bar bg-info" role="progressbar" style={{ width: `${Math.min(100, s.count * 10)}%` }} aria-valuenow={s.count * 10} aria-valuemin={0} aria-valuemax={100}></div>
+                                      </div>
+                                      <span className="text-muted fw-bold" style={{ fontSize: '11px' }}>{s.count} Hits</span>
+                                  </div>
                               </div>
-                              <span className="text-[10px] font-black text-slate-500">{s.count} Hits</span>
-                          </div>
+                          ))}
+                          {topSearches.length === 0 && <p className="text-muted small fst-italic mb-0">No search data decoded yet.</p>}
                       </div>
-                  ))}
-                  {topSearches.length === 0 && <p className="text-slate-600 italic text-sm">No search data decoded yet.</p>}
+                  </div>
               </div>
           </div>
 
           {/* Active Campaigns - Banners */}
-          <div className="xl:col-span-2 bg-slate-800/10 backdrop-blur-3xl p-10 rounded-[4rem] border border-slate-700/30 shadow-2xl overflow-hidden relative">
-              <h2 className="text-xl font-black text-white mb-10 flex items-center gap-3 uppercase tracking-tighter">
-                  <span className="w-1.5 h-6 bg-purple-500 rounded-full"></span>
-                  Marketing Deployment (Hero)
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   {banners.map((b, idx) => (
-                       <div key={idx} className="relative aspect-video rounded-[2rem] overflow-hidden border border-slate-800 group">
-                           <img src={`${API_URL}${b.image}`} alt="Banner" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
-                           <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-slate-950 to-transparent">
-                               <p className="text-white font-black text-xs uppercase tracking-widest">{b.title || 'Untitled Campaign'}</p>
-                           </div>
-                       </div>
-                   ))}
-                   {banners.length === 0 && (
-                       <div className="aspect-video rounded-[2rem] bg-slate-900/50 border-2 border-dashed border-slate-800 flex items-center justify-center text-slate-700 font-black uppercase text-[10px] tracking-widest">
-                           No Active Hero Assets
-                       </div>
-                   )}
+          <div className="col-xl-8">
+              <div className="card shadow-sm border-0 h-100">
+                  <div className="card-body p-4">
+                      <h2 className="fs-6 fw-bold text-dark mb-4 d-flex align-items-center gap-2 text-uppercase tracking-widest">
+                          <span className="bg-primary rounded-pill" style={{ width: '6px', height: '24px' }}></span>
+                          Marketing Deployment (Hero)
+                      </h2>
+                      <div className="row g-3">
+                           {banners.map((b, idx) => (
+                               <div key={idx} className="col-md-6">
+                                   <div className="position-relative overflow-hidden rounded border shadow-sm" style={{ aspectRatio: '16/9' }}>
+                                       <img src={`${API_URL}${b.image}`} alt="Banner" className="w-100 h-100 object-fit-cover" />
+                                       <div className="position-absolute bottom-0 start-0 w-100 p-3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
+                                           <p className="text-white fw-bold text-uppercase mb-0" style={{ fontSize: '11px', letterSpacing: '1px' }}>{b.title || 'Untitled Campaign'}</p>
+                                       </div>
+                                   </div>
+                               </div>
+                           ))}
+                           {banners.length === 0 && (
+                               <div className="col-12">
+                                   <div className="d-flex align-items-center justify-content-center bg-light border border-secondary border-dashed rounded" style={{ aspectRatio: '16/9' }}>
+                                       <span className="text-muted fw-bold text-uppercase" style={{ fontSize: '11px', letterSpacing: '1px' }}>No Active Hero Assets</span>
+                                   </div>
+                               </div>
+                           )}
+                      </div>
+                  </div>
               </div>
           </div>
       </div>
 
       {/* Coupons Matrix */}
-      <div className="mt-10 bg-slate-800/10 backdrop-blur-3xl p-10 rounded-[4rem] border border-slate-700/30 shadow-2xl relative">
-          <h2 className="text-xl font-black text-white mb-10 flex items-center gap-3 uppercase tracking-tighter">
-              <span className="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
-              Revenue Booster: Coupons
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {coupons.map((c, idx) => (
-                  <div key={idx} className="p-8 rounded-[2.5rem] bg-slate-900/40 border border-slate-800 relative group overflow-hidden">
-                      <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/5 blur-[40px] group-hover:bg-emerald-500/20 transition-all duration-1000"></div>
-                      <p className="text-emerald-400 font-black text-xl tracking-tighter mb-1">{c.code}</p>
-                      <p className="text-slate-600 text-[10px] font-black uppercase">-{c.discount}% OFF</p>
-                  </div>
-              ))}
-              {coupons.length === 0 && <p className="text-slate-600 col-span-full py-10 text-center uppercase font-black text-xs tracking-widest">No Active Discount Codes</p>}
+      <div className="card shadow-sm border-0 mb-4">
+          <div className="card-body p-4">
+              <h2 className="fs-6 fw-bold text-dark mb-4 d-flex align-items-center gap-2 text-uppercase tracking-widest">
+                  <span className="bg-success rounded-pill" style={{ width: '6px', height: '24px' }}></span>
+                  Revenue Booster: Coupons
+              </h2>
+              <div className="row g-3">
+                  {coupons.map((c, idx) => (
+                      <div key={idx} className="col-6 col-md-3 col-lg-2">
+                          <div className="p-3 rounded bg-light border text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                              <p className="text-success fw-bold fs-5 mb-1 text-break">{c.code}</p>
+                              <p className="text-muted fw-bold text-uppercase mb-0" style={{ fontSize: '10px' }}>-{c.discount}% OFF</p>
+                          </div>
+                      </div>
+                  ))}
+                  {coupons.length === 0 && (
+                      <div className="col-12">
+                          <p className="text-muted text-center py-4 fw-bold text-uppercase mb-0" style={{ fontSize: '11px', letterSpacing: '2px' }}>No Active Discount Codes</p>
+                      </div>
+                  )}
+              </div>
           </div>
       </div>
     </div>
