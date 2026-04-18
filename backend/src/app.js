@@ -79,6 +79,22 @@ app.use(express.urlencoded({ extended: true }));
 // 4. API ROUTES
 app.use('/api/v1', routesV1.apiRouter);
 
+// 4b. ROOT-LEVEL GOOGLE AUTH ROUTES
+// Google Console has callback registered at /auth/google/callback (without /api/v1)
+// So we mount the same handlers at both paths for compatibility
+const jwt = require('jsonwebtoken');
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL}/auth/login?error=Google auth failed`, session: false }),
+  (req, res) => {
+    const payload = { id: req.user._id.toString(), role: 'user' };
+    const secret = process.env.JWT_SECRET || 'ecomsphere_super_secret_jwt';
+    const token = jwt.sign(payload, secret, { expiresIn: '7d' });
+    const clientUrl = (process.env.CLIENT_URL || '').replace(/\/$/, '');
+    res.redirect(`${clientUrl}/auth/login?token=${token}`);
+  }
+);
+
 // 5. ROOT ROUTE & HEALTH CHECK
 app.get('/', (req, res) => {
   res.json({ 

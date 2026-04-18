@@ -2,20 +2,10 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
-// Fix: ensure callbackURL always includes /api/v1
-function resolveCallbackURL() {
-  const raw = process.env.CALLBACK_URL || '';
-  // If the env var is missing the /api/v1 prefix, fix it
-  if (raw && !raw.includes('/api/v1/')) {
-    return raw.replace('/auth/google/callback', '/api/v1/auth/google/callback');
-  }
-  return raw;
-}
-
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: resolveCallbackURL(),
+    callbackURL: process.env.CALLBACK_URL,
     proxy: true
   },
   async (accessToken, refreshToken, profile, done) => {
