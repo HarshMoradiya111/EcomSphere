@@ -69,13 +69,14 @@ export default function HeaderPartial({
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between', 
-        padding: '20px 80px', 
+        padding: '15px 80px', 
         background: '#E3E6F3', 
         boxShadow: '0 5px 15px rgba(0, 0, 0, 0.06)',
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 999
+        width: '100%',
+        zIndex: 1000
       }}>
         <a href="/">
           <img src={logoSrc} className="logo" alt="EcomSphere" height={45} />
@@ -107,6 +108,9 @@ export default function HeaderPartial({
         </div>
       </section>
 
+      {/* Spacer to prevent content from going under the fixed header */}
+      <div style={{ height: '85px' }}></div>
+
       {/* Mobile Menu Drawer */}
       <nav id="navbar" className={drawerOpen ? 'active' : ''} style={{
         display: 'flex',
@@ -122,7 +126,7 @@ export default function HeaderPartial({
         boxShadow: '0 40px 60px rgba(0,0,0,0.1)',
         padding: '80px 0 0 10px',
         transition: '0.3s',
-        zIndex: 1000
+        zIndex: 1001
       }}>
         <ul style={{ listStyle: 'none' }}>
             <li onClick={() => setDrawerOpen(false)} style={{ position: 'absolute', top: '30px', left: '30px', cursor: 'pointer' }}><i className="fas fa-times"></i></li>
