@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import SafeImage from '@/components/SafeImage';
 import { getProductImageSrc, getProductImageFallbackSrc } from '@/utils/imagePaths';
 import { API_URL } from '@/config';
@@ -16,19 +17,29 @@ interface Product {
   numReviews?: number;
 }
 
-export default function ProductList() {
+function ProductListContent() {
+  const searchParams = useSearchParams();
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   
-  // Filter States
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('All');
+  // Filter States - initialized from URL
+  const [search, setSearch] = useState(searchParams.get('search') || '');
+  const [category, setCategory] = useState(searchParams.get('category') || 'All');
   const [sort, setSort] = useState('newest');
   const [allCategories, setAllCategories] = useState<string[]>([]);
   
   const limit = 20;
+
+  // Sync state with URL changes (e.g. from header search)
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    const urlCategory = searchParams.get('category') || 'All';
+    setSearch(urlSearch);
+    setCategory(urlCategory);
+  }, [searchParams]);
 
   const fetchProducts = useCallback(async (pageNum: number, isNewFilter: boolean = false) => {
     setLoading(true);
@@ -92,7 +103,7 @@ export default function ProductList() {
 
   return (
     <div className="section-p1">
-      {/* Filter Bar */}
+      {/* Local Filter Bar (Can be kept or styled as "In-page results controls") */}
       <div className="filter-bar" style={{ 
         display: 'flex', 
         flexWrap: 'wrap', 
@@ -108,7 +119,7 @@ export default function ProductList() {
           <i className="fa-solid fa-magnifying-glass" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}></i>
           <input 
             type="text" 
-            placeholder="Search products..." 
+            placeholder="Search within results..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
@@ -210,5 +221,13 @@ export default function ProductList() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductList() {
+  return (
+    <Suspense fallback={<div className="section-p1">Loading products...</div>}>
+      <ProductListContent />
+    </Suspense>
   );
 }

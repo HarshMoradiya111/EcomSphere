@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { API_URL } from '@/config';
 import type { HeaderPartialProps, SearchProduct } from './types';
 
@@ -29,16 +30,37 @@ export default function HeaderPartial({
   sessionPhoto = null,
   showAdminLink = true,
 }: HeaderPartialProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [resolvedSessionUser, setResolvedSessionUser] = useState<string | null>(sessionUser);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [desktopQuery, setDesktopQuery] = useState(search);
-  const [mobileQuery, setMobileQuery] = useState(search);
+  
+  // Initialize from URL params if available
+  const initialSearch = searchParams.get('search') || search;
+  const initialCat = searchParams.get('category') || 'All';
+  
+  const [desktopQuery, setDesktopQuery] = useState(initialSearch);
+  const [mobileQuery, setMobileQuery] = useState(initialSearch);
+  const [searchCategory, setSearchCategory] = useState(initialCat);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
+  
   const [desktopResults, setDesktopResults] = useState<SearchProduct[]>([]);
   const [mobileResults, setMobileResults] = useState<SearchProduct[]>([]);
   const [showDesktopResults, setShowDesktopResults] = useState(false);
   const [showMobileResults, setShowMobileResults] = useState(false);
 
   const logoSrc = resolveLogoSrc(settings?.logo);
+
+  // Fetch categories for search scoping
+  useEffect(() => {
+    fetch(`${API_URL}/api/v1/products/categories/list`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setAllCategories(data.categories);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,28 +114,6 @@ export default function HeaderPartial({
   }, [drawerOpen]);
 
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && drawerOpen) {
-        setDrawerOpen(false);
-      }
-    };
-
-    const onResize = () => {
-      if (window.innerWidth > 1100 && drawerOpen) {
-        setDrawerOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', onKeyDown);
-    window.addEventListener('resize', onResize);
-
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('resize', onResize);
-    };
-  }, [drawerOpen]);
-
-  useEffect(() => {
     const fetchResults = async (
       query: string,
       setItems: (items: SearchProduct[]) => void,
@@ -127,7 +127,7 @@ export default function HeaderPartial({
       }
 
       try {
-        const res = await fetch(`/api/products/search?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`${API_URL}/api/v1/products?search=${encodeURIComponent(q)}&category=${searchCategory}&limit=5`);
         const data = await res.json();
 
         if (data?.success) {
@@ -145,227 +145,169 @@ export default function HeaderPartial({
     }, 300);
 
     return () => clearTimeout(t1);
-  }, [desktopQuery]);
+  }, [desktopQuery, searchCategory]);
 
-  useEffect(() => {
-    const fetchResults = async (
-      query: string,
-      setItems: (items: SearchProduct[]) => void,
-      setVisible: (visible: boolean) => void
-    ) => {
-      const q = query.trim();
-      if (q.length < 2) {
-        setItems([]);
-        setVisible(false);
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/products/search?q=${encodeURIComponent(q)}`);
-        const data = await res.json();
-
-        if (data?.success) {
-          setItems(data.products || []);
-          setVisible(true);
-        }
-      } catch {
-        setItems([]);
-        setVisible(false);
-      }
-    };
-
-    const t2 = setTimeout(() => {
-      void fetchResults(mobileQuery, setMobileResults, setShowMobileResults);
-    }, 300);
-
-    return () => clearTimeout(t2);
-  }, [mobileQuery]);
+  const handleGlobalSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = desktopQuery.trim();
+    const params = new URLSearchParams();
+    if (q) params.set('search', q);
+    if (searchCategory !== 'All') params.set('category', searchCategory);
+    
+    router.push(`/shop?${params.toString()}`);
+    setShowDesktopResults(false);
+  };
 
   const desktopNoResults = useMemo(
     () => showDesktopResults && desktopQuery.trim().length >= 2 && desktopResults.length === 0,
     [showDesktopResults, desktopQuery, desktopResults.length]
   );
 
-  const mobileNoResults = useMemo(
-    () => showMobileResults && mobileQuery.trim().length >= 2 && mobileResults.length === 0,
-    [showMobileResults, mobileQuery, mobileResults.length]
-  );
-
   return (
     <>
-      <section id="header">
+      <section id="header" style={{ padding: '15px 40px', backgroundColor: '#fff', boxShadow: '0 5px 15px rgba(0,0,0,0.06)', zIndex: 999 }}>
         <a href="/">
-          <img src={logoSrc} className="logo" alt="EcomSphere" height={45} />
+          <img src={logoSrc} className="logo" alt="EcomSphere" height={40} style={{ objectFit: 'contain' }} />
         </a>
 
-        <form action="/shop" method="GET" id="search-bar-desktop" style={{ position: 'relative' }}>
-          <input
-            type="text"
-            name="search"
-            id="live-search-input-desktop"
-            placeholder="Search products..."
-            value={desktopQuery}
-            autoComplete="off"
-            onChange={(e) => setDesktopQuery(e.target.value)}
-            onFocus={() => {
-              if (desktopQuery.trim().length >= 2) setShowDesktopResults(true);
-            }}
-          />
-          <button type="submit">
-            <i className="fa-solid fa-magnifying-glass"></i>
-          </button>
-          <div id="search-results-desktop" className={`search-results-dropdown ${showDesktopResults ? 'show' : ''}`}>
+        {/* --- Global Amazon-Style Search Bar --- */}
+        <form onSubmit={handleGlobalSearch} id="search-bar-desktop" style={{ 
+          display: 'flex', 
+          flex: '1', 
+          maxWidth: '650px', 
+          margin: '0 30px', 
+          position: 'relative',
+          borderRadius: '4px',
+          overflow: 'visible' 
+        }}>
+          <div style={{ display: 'flex', width: '100%', border: '2px solid #088178', borderRadius: '4px', overflow: 'hidden' }}>
+            <select 
+              value={searchCategory}
+              onChange={(e) => setSearchCategory(e.target.value)}
+              style={{ 
+                width: '130px', 
+                padding: '0 10px', 
+                border: 'none', 
+                borderRight: '1px solid #ddd', 
+                background: '#f3f3f3', 
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="All">All Categories</option>
+              {allCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            
+            <input
+              type="text"
+              name="search"
+              placeholder="Search for products, brands and more..."
+              value={desktopQuery}
+              autoComplete="off"
+              onChange={(e) => setDesktopQuery(e.target.value)}
+              onFocus={() => {
+                if (desktopQuery.trim().length >= 2) setShowDesktopResults(true);
+              }}
+              style={{ 
+                flex: '1', 
+                padding: '10px 15px', 
+                border: 'none', 
+                fontSize: '14px',
+                outline: 'none'
+              }}
+            />
+            
+            <button type="submit" style={{ 
+              width: '50px', 
+              background: '#088178', 
+              color: '#fff', 
+              border: 'none', 
+              cursor: 'pointer',
+              fontSize: '18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <i className="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
+
+          {/* Live Suggestions Dropdown */}
+          <div id="search-results-desktop" className={`search-results-dropdown ${showDesktopResults ? 'show' : ''}`} style={{
+             position: 'absolute',
+             top: '100%',
+             left: '0',
+             right: '0',
+             background: '#fff',
+             boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+             zIndex: 1000,
+             display: showDesktopResults ? 'block' : 'none',
+             border: '1px solid #ddd',
+             marginTop: '5px'
+          }}>
             {desktopResults.map((p) => (
-              <a key={p._id} href={`/product/${p._id}`} className="search-result-item">
+              <a key={p._id} href={`/product/${p._id}`} className="search-result-item" style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px',
+                borderBottom: '1px solid #eee',
+                textDecoration: 'none',
+                color: '#333'
+              }}>
                 <img
                   src={`/uploads/${p.image}`}
                   alt={p.name}
+                  style={{ width: '40px', height: '40px', objectFit: 'cover', marginRight: '15px' }}
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = '/img/placeholder.jpg';
                   }}
                 />
                 <div className="res-info">
-                  <h5>{p.name}</h5>
-                  <p>{`₹${toCurrency(p.price)}`}</p>
+                  <h5 style={{ margin: '0', fontSize: '14px' }}>{p.name}</h5>
+                  <p style={{ margin: '0', fontSize: '12px', color: '#088178', fontWeight: '700' }}>{`₹${toCurrency(p.price)}`}</p>
                 </div>
               </a>
             ))}
-            {desktopNoResults && <div className="search-no-results">No products found for "{desktopQuery.trim()}"</div>}
+            {desktopNoResults && <div className="search-no-results" style={{ padding: '15px', textAlign: 'center', color: '#888' }}>No results found</div>}
           </div>
         </form>
 
         <div id="nav-desktop">
-          <ul>
-            <li><a href="/" className={activePage === 'home' ? 'active' : ''}>Home</a></li>
-            <li><a href="/shop" className={activePage === 'shop' ? 'active' : ''}>Shop</a></li>
-            <li><a href="/blog">Blog</a></li>
-            <li><a href="/about" className={activePage === 'about' ? 'active' : ''}>About</a></li>
-            <li><a href="/contact" className={activePage === 'contact' ? 'active' : ''}>Contact</a></li>
+          <ul style={{ display: 'flex', alignItems: 'center', gap: '25px', listStyle: 'none', margin: '0' }}>
+            <li><a href="/" className={activePage === 'home' ? 'active' : ''} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: '600' }}>Home</a></li>
+            <li><a href="/shop" className={activePage === 'shop' ? 'active' : ''} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: '600' }}>Shop</a></li>
             {resolvedSessionUser ? (
               <>
-                <li><a href="/profile">Profile</a></li>
-                <li><a href="/wishlist" className={activePage === 'wishlist' ? 'active' : ''}><i className="fa-regular fa-heart"></i></a></li>
-                <li><a href="/auth/logout">Logout ({resolvedSessionUser})</a></li>
+                <li style={{ position: 'relative' }}>
+                  <a href="/profile" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: '600' }}>
+                     <i className="fa-solid fa-user" style={{ marginRight: '5px' }}></i>
+                     {resolvedSessionUser.split(' ')[0]}
+                  </a>
+                </li>
               </>
             ) : (
-              <li><a href="/auth/login">Login</a></li>
+              <li><a href="/auth/login" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: '600' }}>Login</a></li>
             )}
-            {showAdminLink && <li><a href="/admin/dashboard">Admin</a></li>}
-            <li id="lg-bag"><a href="/cart"><img src="/img/cart.png" className="cart" alt="Cart" height={30} /></a></li>
+            <li id="lg-bag" style={{ position: 'relative' }}>
+              <a href="/cart" style={{ textDecoration: 'none' }}>
+                <i className="fa-solid fa-cart-shopping" style={{ fontSize: '20px', color: '#1a1a1a' }}></i>
+              </a>
+            </li>
           </ul>
         </div>
 
         <div id="mobile">
           <a href="/cart" aria-label="Cart"><img src="/img/cart.svg" height={20} alt="Cart" /></a>
-          <button
-            id="bar"
-            aria-label="Open menu"
-            aria-expanded={drawerOpen}
-            onClick={(e) => {
-              e.stopPropagation();
-              setDrawerOpen(true);
-            }}
-          >
-            <img src="/img/menu.svg" height={20} width={30} alt="Menu" />
+          <button id="bar" onClick={() => setDrawerOpen(true)}>
+             <i className="fa-solid fa-bars" style={{ fontSize: '24px' }}></i>
           </button>
         </div>
       </section>
 
-      <nav id="navbar" role="dialog" aria-modal="true" aria-label="Mobile Navigation" className={drawerOpen ? 'active' : ''}>
-        <div id="drawer-profile">
-          <div id="drawer-profile-icon">
-            {sessionPhoto ? (
-              <img src={sessionPhoto} alt="User" className="drawer-avatar" />
-            ) : (
-              <i className="fa-solid fa-circle-user"></i>
-            )}
-          </div>
-          <div id="drawer-profile-text">
-            {resolvedSessionUser ? (
-              <>
-                <span className="drawer-hello">Hello,</span>
-                <strong>{resolvedSessionUser}</strong>
-              </>
-            ) : (
-              <>
-                <span className="drawer-hello">Hello,</span>
-                <a href="/auth/login"><strong>Sign In</strong></a>
-              </>
-            )}
-          </div>
-          <a
-            href="#"
-            id="close"
-            aria-label="Close menu"
-            onClick={(e) => {
-              e.preventDefault();
-              setDrawerOpen(false);
-            }}
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </a>
-        </div>
-
-        <ul>
-          <li style={{ padding: '10px 25px' }}>
-            <form action="/shop" method="GET" id="search-bar-mobile" style={{ position: 'relative' }}>
-              <input
-                type="text"
-                name="search"
-                id="live-search-input-mobile"
-                placeholder="Search..."
-                value={mobileQuery}
-                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
-                autoComplete="off"
-                onChange={(e) => setMobileQuery(e.target.value)}
-                onFocus={() => {
-                  if (mobileQuery.trim().length >= 2) setShowMobileResults(true);
-                }}
-              />
-              <div id="search-results-mobile" className={`search-results-dropdown ${showMobileResults ? 'show' : ''}`}>
-                {mobileResults.map((p) => (
-                  <a key={p._id} href={`/product/${p._id}`} className="search-result-item">
-                    <img
-                      src={`/uploads/${p.image}`}
-                      alt={p.name}
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = '/img/placeholder.jpg';
-                      }}
-                    />
-                    <div className="res-info">
-                      <h5>{p.name}</h5>
-                      <p>{`₹${toCurrency(p.price)}`}</p>
-                    </div>
-                  </a>
-                ))}
-                {mobileNoResults && <div className="search-no-results">No products found for "{mobileQuery.trim()}"</div>}
-              </div>
-            </form>
-          </li>
-          <li className="drawer-section-label">Browse</li>
-          <li><a href="/" className={activePage === 'home' ? 'active' : ''} data-track="sidebar_click" data-label="home"><i className="fa-solid fa-house"></i> Home</a></li>
-          <li><a href="/shop" className={activePage === 'shop' ? 'active' : ''} data-track="sidebar_click" data-label="shop"><i className="fa-solid fa-bag-shopping"></i> Shop</a></li>
-          <li><a href="/blog" data-track="sidebar_click" data-label="blog"><i className="fa-solid fa-newspaper"></i> Blog</a></li>
-
-          <li className="drawer-section-label">Discover</li>
-          <li><a href="/about" className={activePage === 'about' ? 'active' : ''} data-track="sidebar_click" data-label="about"><i className="fa-solid fa-circle-info"></i> About Us</a></li>
-          <li><a href="/contact" className={activePage === 'contact' ? 'active' : ''} data-track="sidebar_click" data-label="contact"><i className="fa-solid fa-headset"></i> Contact Us</a></li>
-
-          <li className="drawer-section-label">My Account</li>
-          <li><a href="/profile" data-track="sidebar_click" data-label="profile"><i className="fa-solid fa-user"></i> My Profile</a></li>
-          <li><a href="/cart" data-track="sidebar_click" data-label="cart"><i className="fa-solid fa-cart-shopping"></i> My Cart</a></li>
-
-          <li className="drawer-section-label">Settings</li>
-          {showAdminLink && <li><a href="/admin/dashboard" data-track="sidebar_click" data-label="admin"><i className="fa-solid fa-screwdriver-wrench"></i> Admin Dashboard</a></li>}
-          {resolvedSessionUser ? (
-            <li><a href="/auth/logout" data-track="sidebar_click" data-label="logout"><i className="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
-          ) : (
-            <li><a href="/auth/login" data-track="sidebar_click" data-label="login"><i className="fa-solid fa-right-to-bracket"></i> Login / Register</a></li>
-          )}
-        </ul>
-      </nav>
-
-      <div id="drawer-overlay" className={drawerOpen ? 'visible' : ''} onClick={() => setDrawerOpen(false)}></div>
+      {/* Overlay for closing dropdown when clicking outside */}
+      {showDesktopResults && <div style={{ position: 'fixed', top: '0', left: '0', right: '0', bottom: '0', zIndex: 998 }} onClick={() => setShowDesktopResults(false)}></div>}
     </>
   );
 }
