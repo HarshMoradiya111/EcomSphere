@@ -1,6 +1,19 @@
 const mongoose = require('mongoose');
 
-const CATEGORIES = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics', 'Apparel', 'Accessories', 'Uncategorized'];
+const CATEGORIES = [
+  'Men Clothing', 
+  'Women Clothing', 
+  'Footwear', 
+  'Glasses', 
+  'Cosmetics', 
+  'Apparel', 
+  'Accessories', 
+  'Personal Care', 
+  'Free Items', 
+  'Sporting Goods', 
+  'Home',
+  'Uncategorized'
+];
  
 const reviewSchema = new mongoose.Schema({
   userId: {
