@@ -1,54 +1,29 @@
 import StorefrontShell from '@/components/ejs-partials/StorefrontShell';
-import SafeImage from '@/components/SafeImage';
 import { API_URL } from '@/config';
 import { getSessionUsername } from '@/server/sessionUser';
 import { getSiteSettings } from '@/server/siteSettings';
-import { getProductImageSrc, getProductImageFallbackSrc } from '@/utils/imagePaths';
-
-type Product = {
-  _id: string;
-  name: string;
-  description?: string;
-  price: number;
-  image: string;
-  category: string;
-  averageRating?: number;
-  numReviews?: number;
-};
+import ProductList from '@/features/shop/ProductList';
 
 type MarketingAssets = {
   banners?: Array<{ image: string; subtitle?: string; title?: string; buttonLink?: string; buttonText?: string }>;
   flashSale?: { isActive?: boolean; title?: string; discountText?: string } | null;
 };
 
-async function fetchHomeData() {
+async function fetchMarketingData() {
   try {
-    const [productsRes, marketingRes] = await Promise.all([
-      fetch(`${API_URL}/api/v1/products`, { cache: 'no-store' }),
-      fetch(`${API_URL}/api/v1/products/marketing/assets`, { cache: 'no-store' }),
-    ]);
-
-    const productsJson = productsRes.ok ? await productsRes.json() : { grouped: {} };
-    const marketingJson = marketingRes.ok ? await marketingRes.json() : {};
-
-    return {
-      grouped: (productsJson.grouped || {}) as Record<string, Product[]>,
-      marketing: marketingJson as MarketingAssets,
-    };
+    const res = await fetch(`${API_URL}/api/v1/products/marketing/assets`, { cache: 'no-store' });
+    return res.ok ? await res.json() : {};
   } catch {
-    return {
-      grouped: {} as Record<string, Product[]>,
-      marketing: {} as MarketingAssets,
-    };
+    return {};
   }
 }
 
 export default async function HomePage() {
-  const { grouped, marketing } = await fetchHomeData();
+  const marketingJson = await fetchMarketingData();
+  const marketing = marketingJson as MarketingAssets;
   const sessionUser = await getSessionUsername();
   const settings = await getSiteSettings();
   const banner = marketing?.banners?.[0];
-  const categoryEntries = Object.entries(grouped || {});
 
   return (
     <StorefrontShell
@@ -85,107 +60,12 @@ export default async function HomePage() {
         ))}
       </section>
 
-      {categoryEntries.map(([category, products]) => {
-        if (!products || products.length === 0) return null;
-
-        return (
-          <section key={category} id={category.toLowerCase().replace(/ /g, '-')} className="section-p1 product-section">
-            <style>{`
-              .pro .action-btn {
-                position: absolute;
-                right: 15px;
-                background: rgba(255, 255, 255, 0.92);
-                border: none;
-                border-radius: 50%;
-                width: 35px;
-                height: 35px;
-                cursor: pointer;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                z-index: 10;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: 0.3s;
-              }
-              .pro .toggle-wishlist {
-                top: 15px;
-                color: #ccc;
-              }
-              .pro .toggle-wishlist.active {
-                color: #ff4d4d;
-              }
-              .pro .compare-btn {
-                top: 60px;
-                color: #088178;
-              }
-              .pro .action-btn:hover {
-                transform: scale(1.1);
-                background: #fff;
-              }
-            `}</style>
-            <h2>{category}</h2>
-            <p>Explore our {category} collection</p>
-            <div className="pro-container">
-              {products.map((product) => {
-                const avg = Math.round(product.averageRating || 0);
-                return (
-                  <div className="pro" key={product._id}>
-                    <a href={`/product/${product._id}`}>
-                      <SafeImage
-                        src={getProductImageSrc(product.image)}
-                        fallbackSrc={getProductImageFallbackSrc(product.image)}
-                        alt={product.name}
-                      />
-                    </a>
-                    <div className="des">
-                      <span>{product.category}</span>
-                      <div className="star" style={{ margin: '5px 0' }}>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <i
-                            key={`${product._id}-star-${i}`}
-                            className={`fa-${i + 1 <= avg ? 'solid' : 'regular'} fa-star`}
-                            style={{ color: '#ffbd27', fontSize: '12px' }}
-                          ></i>
-                        ))}
-                        <small style={{ color: '#888', marginLeft: '5px' }}>({product.numReviews || 0})</small>
-                      </div>
-                      <h5>{product.name}</h5>
-                      <p>{(product.description || '').substring(0, 60)}...</p>
-                      <h4>₹{Number(product.price).toLocaleString('en-IN')}</h4>
-                    </div>
-                    <a
-                      href="#"
-                      className="action-btn toggle-wishlist"
-                      data-product-id={product._id}
-                      title="Wishlist"
-                    >
-                      <i className="fa-regular fa-heart"></i>
-                    </a>
-                    <a
-                      className="action-btn compare-btn"
-                      href={`/compare?ids=${encodeURIComponent(product._id)}`}
-                      title="Compare"
-                    >
-                      <i className="fa-solid fa-scale-unbalanced-flip"></i>
-                    </a>
-                    <a
-                      href="#"
-                      className="add-to-cart cart1"
-                      data-product-id={product._id}
-                      data-name={product.name}
-                      data-price={product.price}
-                      data-image={product.image}
-                      title="Add to Cart"
-                    >
-                      <i className="fa-solid fa-cart-shopping"></i>
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        );
-      })}
+      <section id="product1" className="section-p1">
+        <h2>Featured Products</h2>
+        <p>Summer Collection New Modern Design</p>
+        {/* Unified paginated product list with Load More */}
+        <ProductList />
+      </section>
 
       <section id="banner" className="section-m1">
         {marketing?.flashSale?.isActive ? (
@@ -201,6 +81,17 @@ export default async function HomePage() {
             <a href="/shop"><button className="normal">Explore More</button></a>
           </>
         )}
+      </section>
+
+      <section id="newsletter" className="section-p1 section-m1">
+        <div className="newstext">
+          <h4>Sign Up For Newsletters</h4>
+          <p>Get E-mail updates about our latest shop and <span>special offers.</span></p>
+        </div>
+        <div className="form">
+          <input type="text" placeholder="Your email address" />
+          <button className="normal">Sign Up</button>
+        </div>
       </section>
     </StorefrontShell>
   );
