@@ -2,9 +2,6 @@
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const nextConfig = {
-  turbopack: {
-    root: __dirname,
-  },
   images: {
     remotePatterns: [
       {

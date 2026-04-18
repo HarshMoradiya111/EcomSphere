@@ -35,17 +35,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     }
 
-    // Dynamic style loading for Admin panel
+    // Dynamic style loading for Admin panel (Bootstrap 5)
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/css/admin.css';
-    link.id = 'admin-legacy-theme';
+    link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';
+    link.id = 'bootstrap-admin-theme';
     document.head.appendChild(link);
 
+    // Dynamic JS loading for Bootstrap
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+    script.id = 'bootstrap-admin-script';
+    document.body.appendChild(script);
 
     return () => {
-      const existingLink = document.getElementById('admin-legacy-theme');
-    if (existingLink) document.head.removeChild(existingLink);
+      const existingLink = document.getElementById('bootstrap-admin-theme');
+      if (existingLink) document.head.removeChild(existingLink);
+      const existingScript = document.getElementById('bootstrap-admin-script');
+      if (existingScript) document.body.removeChild(existingScript);
     };
   }, [router, pathname]);
 
@@ -58,25 +65,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="admin-layout">
-      <AdminSidebar />
-      <main className="admin-main">
-        <header className="admin-topbar">
-          <div className="flex items-center gap-4">
-            <h1 className="text-white text-[12px] font-[900] tracking-[0.3em] uppercase opacity-40">Administrative Terminal</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="badge-pill flex items-center gap-2">
-              <i className="fa-solid fa-user-shield text-[var(--accent)]"></i>
-              <span className="text-white tracking-widest">{adminUser}</span>
+    <div className="container-fluid p-0 bg-light min-vh-100">
+      <div className="row g-0 h-100">
+        <div className="col-auto bg-dark border-end" style={{ minWidth: '250px' }}>
+          <AdminSidebar />
+        </div>
+        <div className="col d-flex flex-column" style={{ height: '100vh', overflowY: 'auto' }}>
+          <header className="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-3 shadow-sm sticky-top">
+            <div className="container-fluid">
+              <h1 className="navbar-brand text-uppercase mb-0 fs-6 fw-bold tracking-widest text-muted">Administrative Terminal</h1>
+              <div className="d-flex align-items-center gap-3">
+                <span className="badge bg-primary text-white p-2 d-flex align-items-center gap-2">
+                  <i className="fa-solid fa-user-shield"></i>
+                  {adminUser}
+                </span>
+              </div>
             </div>
-          </div>
-        </header>
-        
-        <section className="admin-viewport">
-          {children}
-        </section>
-      </main>
+          </header>
+          
+          <main className="p-4 bg-light flex-grow-1">
+            {children}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

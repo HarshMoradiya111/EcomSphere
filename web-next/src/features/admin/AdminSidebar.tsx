@@ -62,54 +62,61 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="admin-sidebar">
-      <div className="sidebar-brand">
-        <h2>🛍️ EcomSphere</h2>
-        <p>Administrative Node</p>
+    <aside className="d-flex flex-column h-100 bg-dark text-white p-3">
+      <div className="mb-4 text-center">
+        <h4 className="fw-bold mb-1">🛍️ EcomSphere</h4>
+        <small className="text-muted text-uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Admin Node</small>
       </div>
 
-      <nav className="sidebar-nav">
+      <ul className="nav nav-pills flex-column mb-auto gap-1">
         {menuItems.map((item) => {
           const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
           return (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={`nav-item ${isActive ? 'active' : ''}`}
-            >
-              <i className={item.icon}></i>
-              <span className="flex-1">{item.name}</span>
-              {item.id === 'inventory' && lowStockCount > 0 && (
-                <span className="badge-pill !bg-[var(--danger)] !text-white !border-none !text-[9px] !px-1.5 !py-0.5">
-                  {lowStockCount}
-                </span>
-              )}
-            </Link>
+            <li className="nav-item" key={item.path}>
+              <Link
+                href={item.path}
+                className={`nav-link d-flex align-items-center gap-3 text-white ${isActive ? 'active bg-primary' : ''}`}
+                style={{ borderRadius: '8px' }}
+              >
+                <i className={`${item.icon} fa-fw`}></i>
+                <span className="flex-grow-1">{item.name}</span>
+                {item.id === 'inventory' && lowStockCount > 0 && (
+                  <span className="badge bg-danger rounded-pill">
+                    {lowStockCount}
+                  </span>
+                )}
+              </Link>
+            </li>
           );
         })}
         
-        <div className="h-[1px] bg-[var(--border)] my-4 mx-4"></div>
+        <hr className="my-3 text-secondary" />
         
-        <Link 
-          href="/" 
-          target="_blank"
-          className="nav-item"
-        >
-          <i className="fa-solid fa-globe"></i>
-          <span className="flex-1">View Public Site</span>
-        </Link>
+        <li className="nav-item">
+          <Link 
+            href="/" 
+            target="_blank"
+            className="nav-link d-flex align-items-center gap-3 text-white"
+          >
+            <i className="fa-solid fa-globe fa-fw"></i>
+            <span>View Public Site</span>
+          </Link>
+        </li>
         
-        <button
-          onClick={handleLogout}
-          className="nav-item nav-logout"
-        >
-          <i className="fa-solid fa-right-from-bracket"></i>
-          <span className="flex-1">Terminate Session</span>
-        </button>
-      </nav>
+        <li className="nav-item mt-2">
+          <button
+            onClick={handleLogout}
+            className="nav-link w-100 text-start d-flex align-items-center gap-3 text-danger border-0 bg-transparent"
+          >
+            <i className="fa-solid fa-right-from-bracket fa-fw"></i>
+            <span>Terminate Session</span>
+          </button>
+        </li>
+      </ul>
 
-      <div className="sidebar-footer">
-        <p>Operational Agent: <strong>{adminUser}</strong></p>
+      <div className="mt-auto pt-3 border-top border-secondary text-center">
+        <small className="text-muted">Operational Agent:</small>
+        <div className="fw-bold text-white">{adminUser}</div>
       </div>
     </aside>
   );
