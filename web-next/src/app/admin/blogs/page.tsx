@@ -1,97 +1,231 @@
 'use client';
-
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { API_URL } from '@/config';
-import { getImageUrl } from '@/utils/imagePaths';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/src/config';
+import { getImageUrl } from '@/src/utils/imagePaths';
 
 export default function AdminBlogs() {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<any>(null);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: 'Style',
+    image: null as File | null
+  });
 
   const fetchBlogs = async () => {
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/blogs`);
+      const res = await fetch(`${API_URL}/api/v1/admin/blogs`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
-      if (data.success) {
-        setBlogs(data.blogs);
-      }
-    } catch (err) {
-      console.error('Core sync failed');
+      if (data.success) setBlogs(data.blogs);
+    } catch (e) {
+      console.error('Failed to load blogs');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { fetchBlogs(); }, []);
+
   const handleDelete = async (id: string) => {
-    if (!confirm('🚨 Decommission this bulletin? This cannot be undone.')) return;
+    if (!confirm('Purge this article from the network?')) return;
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/blogs/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/v1/admin/blogs/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) fetchBlogs();
-    } catch (err) {
-      console.error('Core purge failure');
+    } catch (e) {
+      alert('Deactivation failure.');
     }
   };
 
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('adminToken');
+    const method = editingBlog ? 'PUT' : 'POST';
+    const url = editingBlog 
+      ? `${API_URL}/api/v1/admin/blogs/${editingBlog._id}` 
+      : `${API_URL}/api/v1/admin/blogs`;
 
-  if (loading) return <div className="p-20 text-center animate-pulse text-indigo-400 font-black uppercase tracking-widest text-xs">Accessing Information Core...</div>;
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('description', formData.description);
+    data.append('category', formData.category);
+    if (formData.image) data.append('image', formData.image);
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: data
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        setShowModal(false);
+        setEditingBlog(null);
+        setFormData({ title: '', description: '', category: 'Style', image: null });
+        fetchBlogs();
+      }
+    } catch (e) {
+      alert('Sync failure: Storage buffer overflow.');
+    }
+  };
+
+  const openEditModal = (blog: any) => {
+    setEditingBlog(blog);
+    setFormData({
+      title: blog.title,
+      description: blog.description,
+      category: blog.category || 'Style',
+      image: null
+    });
+    setShowModal(true);
+  };
+
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Decrypting Article Cluster...</div>;
 
   return (
-    <div className="p-12 max-w-[1700px] mx-auto animate-in fade-in duration-700">
-      <header className="flex justify-between items-center mb-16">
+    <div className="container-fluid p-0">
+      <div className="d-flex justify-content-between align-items-end mb-4 pb-3 border-bottom">
         <div>
-          <div className="flex items-center gap-3 mb-2 uppercase tracking-widest text-[10px] font-black text-indigo-400">
-             <span className="w-2 h-2 rounded-full bg-indigo-400"></span> Content Distribution
-          </div>
-          <h1 className="text-6xl font-black text-white tracking-tighter italic">News <span className="text-indigo-400 not-italic">Engine</span></h1>
-          <p className="text-slate-500 font-medium text-lg mt-2">Manage global communication and blog publications</p>
+          <h2 className="fs-4 fw-bold text-dark text-uppercase tracking-tight mb-0">Article Governance</h2>
+          <p className="text-muted small fw-bold tracking-widest flex items-center gap-2 text-uppercase mb-0 mt-1" style={{ letterSpacing: '0.1em' }}>Curate the Editorial Nexus</p>
         </div>
-        <Link 
-            href="/admin/blogs/new" 
-            className="px-8 py-5 bg-indigo-500 text-white font-black rounded-3xl hover:bg-indigo-400 shadow-xl shadow-indigo-500/20 transition-all uppercase tracking-tighter"
+        <button 
+            onClick={() => { setEditingBlog(null); setShowModal(true); }}
+            className="btn btn-sm btn-primary d-flex align-items-center gap-2 shadow-sm"
         >
-            ➕ Dispatch Bulletin
-        </Link>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {blogs.map((b, idx) => (
-              <div key={idx} className="bg-slate-800/20 backdrop-blur-3xl border border-slate-700/30 rounded-[3.5rem] overflow-hidden group shadow-2xl relative">
-                  <div className="aspect-video bg-slate-900 relative overflow-hidden">
-                      <img 
-                        src={getImageUrl(b.image)} 
-                        alt="Blog" 
-                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" 
-                      />
-                      <div className="absolute top-6 left-6 px-4 py-2 rounded-2xl bg-indigo-500 text-white font-black text-[10px] uppercase tracking-widest shadow-xl">
-                          {new Date(b.date).toLocaleDateString()}
-                      </div>
-                  </div>
-                  <div className="p-10">
-                      <h3 className="text-xl font-black text-white mb-4 line-clamp-2 uppercase tracking-tighter leading-snug group-hover:text-indigo-400 transition-colors">{b.title}</h3>
-                      <p className="text-slate-500 font-medium line-clamp-3 mb-8 text-sm leading-relaxed">{b.content.replace(/<[^>]*>/g, '').slice(0, 150)}...</p>
-                      <div className="flex gap-4">
-                          <Link 
-                            href={`/admin/blogs/edit/${b._id}`}
-                            className="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest transition-all text-center"
-                          >
-                            Modify
-                          </Link>
-                          <button 
-                            onClick={() => handleDelete(b._id)}
-                            className="flex-1 py-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white font-black text-[10px] uppercase tracking-widest transition-all"
-                          >
-                            Decommission
-                          </button>
-                      </div>
-                  </div>
-              </div>
-          ))}
-          {blogs.length === 0 && <p className="col-span-full py-20 text-center text-slate-600 uppercase font-black tracking-widest">No Bulletins Dispatched</p>}
+          <i className="fa-solid fa-plus"></i> Deploy Article
+        </button>
       </div>
+
+      <div className="card shadow-sm border-0 mb-4">
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light text-muted text-uppercase" style={{ fontSize: '12px' }}>
+                <tr>
+                  <th className="ps-4" style={{ width: '100px' }}>Visual</th>
+                  <th>Identity & Timestamp</th>
+                  <th>Sector</th>
+                  <th className="text-end pe-4">Linkages</th>
+                </tr>
+              </thead>
+              <tbody>
+                {blogs.length > 0 ? blogs.map((blog: any) => (
+                  <tr key={blog._id}>
+                    <td className="ps-4 py-3">
+                      <img src={getImageUrl(blog.image)} className="img-thumbnail rounded" style={{ width: '60px', height: '60px', objectFit: 'cover' }} alt="" />
+                    </td>
+                    <td>
+                      <p className="fw-bold text-dark mb-0" style={{ fontSize: '15px' }}>{blog.title}</p>
+                      <p className="text-muted small fw-bold text-uppercase mb-0" style={{ fontSize: '10px', letterSpacing: '1px' }}>{new Date(blog.date).toLocaleDateString()}</p>
+                    </td>
+                    <td><span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">{blog.category || 'General'}</span></td>
+                    <td className="text-end pe-4">
+                        <div className="d-flex justify-content-end gap-1">
+                            <button onClick={() => openEditModal(blog)} className="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                                <i className="fa-solid fa-pen-nib"></i>
+                            </button>
+                            <button onClick={() => handleDelete(blog._id)} className="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                                <i className="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                     <td colSpan={4} className="py-5 text-center text-muted fw-bold text-uppercase" style={{ fontSize: '11px', letterSpacing: '2px' }}>
+                        Article cluster is offline.
+                     </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL SYSTEM */}
+      {showModal && (
+        <>
+          <div className="modal-backdrop fade show"></div>
+          <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-hidden="true" onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content border-0 shadow-lg">
+                <div className="modal-header bg-light border-bottom px-4 py-3">
+                  <h5 className="modal-title fs-6 fw-bold text-dark text-uppercase tracking-widest m-0">
+                    {editingBlog ? 'Modify Article Slot' : 'New Article Injection'}
+                  </h5>
+                  <button type="button" className="btn-close" onClick={() => setShowModal(false)} aria-label="Close"></button>
+                </div>
+                <div className="modal-body p-4">
+                  <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Asset Title</label>
+                        <input 
+                            type="text" 
+                            required 
+                            className="form-control" 
+                            placeholder="ARTICLE HEADLINE"
+                            value={formData.title}
+                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Thumbnail Vector</label>
+                        <input 
+                            type="file" 
+                            className="form-control" 
+                            onChange={(e) => setFormData({...formData, image: e.target.files?.[0] || null})}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Sector</label>
+                        <select 
+                            className="form-select"
+                            value={formData.category}
+                            onChange={(e) => setFormData({...formData, category: e.target.value})}
+                        >
+                            <option>Style</option>
+                            <option>Tech</option>
+                            <option>Finance</option>
+                            <option>General</option>
+                        </select>
+                    </div>
+                    <div className="mb-4">
+                        <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Metadata Description</label>
+                        <textarea 
+                            required 
+                            rows={4}
+                            className="form-control resize-none" 
+                            placeholder="BODY DATA..."
+                            value={formData.description}
+                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        ></textarea>
+                    </div>
+                    <div className="d-flex gap-2">
+                        <button type="button" onClick={() => setShowModal(false)} className="btn btn-light border flex-grow-1 fw-bold text-uppercase" style={{ fontSize: '13px', letterSpacing: '1px' }}>Abort</button>
+                        <button type="submit" className="btn btn-primary flex-grow-1 fw-bold text-uppercase" style={{ fontSize: '13px', letterSpacing: '1px' }}>
+                            {editingBlog ? 'Sync Article' : 'Initialize'}
+                        </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

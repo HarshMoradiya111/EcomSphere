@@ -1,73 +1,85 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { API_URL } from '@/src/config';
 
-export default function NewProduct() {
+export default function EditProduct() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const { id } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
     price: 0,
-    category: 'Men Clothing',
+    category: '',
     countInStock: 0,
     description: '',
-    brand: 'EcomSphere',
-    image: null as File | null
+    brand: '',
+    image: [] as string[]
   });
 
   const categories = ['Men Clothing', 'Women Clothing', 'Footwear', 'Glasses', 'Cosmetics', 'Accessories'];
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const token = localStorage.getItem('adminToken');
+      try {
+        const res = await fetch(`${API_URL}/api/v1/admin/products/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setFormData(data.product);
+        } else {
+          setError(data.error || 'Product not found');
+        }
+      } catch (err) {
+        setError('Network link failure.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchProduct();
+  }, [id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    setUpdating(true);
     const token = localStorage.getItem('adminToken');
-    
     try {
-      const data = new FormData();
-      data.append('name', formData.name);
-      data.append('price', formData.price.toString());
-      data.append('category', formData.category);
-      data.append('countInStock', formData.countInStock.toString());
-      data.append('description', formData.description);
-      data.append('brand', formData.brand);
-      if (formData.image) {
-        data.append('image', formData.image);
-      }
-
-      const res = await fetch(`${API_URL}/api/v1/admin/products`, {
-        method: 'POST',
+      const res = await fetch(`${API_URL}/api/v1/admin/products/${id}`, {
+        method: 'PUT',
         headers: { 
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: data,
+        body: JSON.stringify(formData),
       });
-      
-      const resData = await res.json();
-      
-      if (res.ok && resData.success) {
+      if (res.ok) {
         router.push('/admin/products');
       } else {
-        setError(resData.error || 'Identity conflict detected.');
+        const data = await res.json();
+        setError(data.error || 'Update failed');
       }
-    } catch (err: any) {
-      setError('Connection failure to central node.');
+    } catch (err) {
+      setError('Connection failure.');
     } finally {
-      setLoading(false);
+      setUpdating(false);
     }
   };
+
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Synchronizing metadata...</div>;
 
   return (
     <div className="container-fluid p-0">
       <div className="d-flex justify-content-between align-items-end mb-4 pb-3 border-bottom">
         <div>
-          <h2 className="fs-4 fw-bold text-dark text-uppercase tracking-tight mb-0">Initialize New Asset</h2>
-          <p className="text-muted small fw-bold tracking-widest text-uppercase mb-0 mt-1" style={{ letterSpacing: '0.1em' }}>Create a New Inventory Node</p>
+          <h2 className="fs-4 fw-bold text-dark text-uppercase tracking-tight mb-0">Modify Asset</h2>
+          <p className="text-muted small fw-bold tracking-widest text-uppercase mb-0 mt-1" style={{ letterSpacing: '0.1em' }}>ID://{id}</p>
         </div>
         <Link href="/admin/products" className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2 shadow-sm">
           <i className="fa-solid fa-arrow-left"></i> Back to Inventory
@@ -76,7 +88,7 @@ export default function NewProduct() {
 
       <div className="card shadow-sm border-0 mb-4" style={{ maxWidth: '900px' }}>
         <div className="card-header bg-white border-bottom-0 pt-4 pb-0">
-           <h3 className="fs-6 fw-bold text-dark text-uppercase tracking-widest mb-0">Asset Specifications</h3>
+           <h3 className="fs-6 fw-bold text-dark text-uppercase tracking-widest mb-0">Specification Payload</h3>
         </div>
         <div className="card-body p-4">
           <form onSubmit={handleSubmit}>
@@ -87,20 +99,20 @@ export default function NewProduct() {
             )}
 
             <div className="row g-4 mb-4">
-              <div className="col-md-12">
-                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Asset Identity (Name) <span className="text-danger">*</span></label>
+              <div className="col-md-6">
+                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Asset Identity</label>
                 <input 
                   required
                   type="text" 
                   className="form-control"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="e.g. Spectral Cotton T-Shirt"
+                  placeholder="Name of asset..."
                 />
               </div>
 
               <div className="col-md-6">
-                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Market Vertical <span className="text-danger">*</span></label>
+                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Market Vertical</label>
                 <select 
                   className="form-select"
                   value={formData.category}
@@ -113,17 +125,7 @@ export default function NewProduct() {
               </div>
 
               <div className="col-md-6">
-                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Spectral Brand</label>
-                <input 
-                  type="text" 
-                  className="form-control"
-                  value={formData.brand}
-                  onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                />
-              </div>
-
-              <div className="col-md-6">
-                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Valuation (₹) <span className="text-danger">*</span></label>
+                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Valuation (₹)</label>
                 <input 
                   required
                   type="number" 
@@ -134,7 +136,7 @@ export default function NewProduct() {
               </div>
 
               <div className="col-md-6">
-                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Cluster Capacity (Stock) <span className="text-danger">*</span></label>
+                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Inventory Reservoir</label>
                 <input 
                   required
                   type="number" 
@@ -145,25 +147,24 @@ export default function NewProduct() {
               </div>
 
               <div className="col-12">
-                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Visual Asset (Image) <span className="text-danger">*</span></label>
+                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Spectral Brand</label>
                 <input 
-                  required={!formData.image}
-                  type="file" 
-                  accept="image/*"
+                  type="text" 
                   className="form-control"
-                  onChange={(e) => setFormData({...formData, image: e.target.files ? e.target.files[0] : null})}
+                  value={formData.brand}
+                  onChange={(e) => setFormData({...formData, brand: e.target.value})}
                 />
               </div>
 
               <div className="col-12">
-                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Deconstruction (Description) <span className="text-danger">*</span></label>
+                <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Deconstruction (Description)</label>
                 <textarea 
                   required
                   rows={5}
                   className="form-control"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Detailed asset metadata..."
+                  placeholder="Enter product deconstruction details..."
                 />
               </div>
             </div>
@@ -178,11 +179,11 @@ export default function NewProduct() {
               </Link>
               <button 
                 type="submit"
-                disabled={loading}
+                disabled={updating}
                 className="btn btn-primary fw-bold text-uppercase px-4 flex-grow-1"
                 style={{ fontSize: '12px', letterSpacing: '1px' }}
               >
-                {loading ? 'Initializing...' : 'Initialize Asset'}
+                {updating ? 'Committing Synchronization...' : 'Commit Changes'}
               </button>
             </div>
           </form>

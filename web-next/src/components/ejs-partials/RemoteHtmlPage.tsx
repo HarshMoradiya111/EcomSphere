@@ -53,7 +53,7 @@ function parseRemoteDocument(html: string) {
 export default function RemoteHtmlPage({ path, credentials = 'include', initialPayload, executeScripts = true }: Props) {
   const [html, setHtml] = useState<string>(initialPayload?.bodyHtml || '');
   const [styles, setStyles] = useState<string[]>(initialPayload?.styles || []);
-  const [scripts, setScripts] = useState<Array<{ src?: string; text?: string }>>(initialPayload?.scripts || []);
+  const [scripts, setScripts] = useState<Array<{ src?: string; text?: string; type?: string }>>(initialPayload?.scripts || []);
 
   useEffect(() => {
     if (initialPayload) {

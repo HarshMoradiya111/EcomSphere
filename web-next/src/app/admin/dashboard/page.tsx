@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { API_URL } from '@/config';
+import { API_URL } from '@/src/config';
 
 interface DashboardStats {
   productCount: number;
@@ -23,23 +21,14 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     const token = localStorage.getItem('adminToken');
     setLoading(true);
-    setError(null);
     try {
       const res = await fetch(`${API_URL}/api/v1/admin/stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
       const data = await res.json();
-      if (data.success) {
-        setStats(data.stats);
-      } else {
-        setError(data.error || 'Failed to fetch statistics');
-      }
-    } catch (err: any) {
-      console.error('Fetch Error:', err);
-      setError('System could not connect to the Backend on Port 3000. Please ensure the Express server is running.');
+      if (data.success) setStats(data.stats);
+    } catch (err) {
+      setError('Connection failure');
     } finally {
       setLoading(false);
     }
@@ -49,147 +38,149 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-[#0f172a]">
-        <div className="relative w-24 h-24">
-          <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-cyan-500 rounded-full border-t-transparent animate-spin"></div>
-        </div>
-        <p className="text-cyan-400 font-bold mt-8 animate-pulse tracking-widest uppercase text-xs">Synchronizing Data...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-6">
-        <div className="bg-red-500/10 border border-red-500/30 p-12 rounded-[3rem] max-w-xl text-center backdrop-blur-2xl">
-          <div className="text-6xl mb-6">⚠️</div>
-          <h2 className="text-2xl font-black text-white mb-4">Network Connectivity Error</h2>
-          <p className="text-slate-400 mb-8 leading-relaxed">
-            {error}
-          </p>
-          <button 
-            onClick={fetchStats}
-            className="w-full py-4 bg-white text-black font-black rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-tighter"
-          >
-            Retry Connection
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Loading statistics...</div>;
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <header className="flex justify-between items-center mb-12">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-black uppercase tracking-widest italic">Live Feed</span>
-            <h1 className="text-5xl font-black tracking-tight text-white">System Intelligence</h1>
-          </div>
-          <p className="text-slate-500 font-medium text-lg">Real-time performance analytics for EcomSphere v2.0</p>
-        </div>
-        <button 
-            onClick={fetchStats}
-            className="w-12 h-12 flex items-center justify-center rounded-2xl border border-slate-700 hover:border-cyan-500 hover:text-cyan-400 transition-all"
-            title="Refresh Data"
-        >
-          🔄
-        </button>
-      </header>
-
-      {/* Global Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-        <StatCard title="Total Inventory" value={stats?.productCount ?? 0} color="from-blue-600 to-cyan-500" suffix="Items" />
-        <StatCard title="Verified Users" value={stats?.userCount ?? 0} color="from-indigo-600 to-purple-500" suffix="Profiles" />
-        <StatCard title="Active Orders" value={stats?.orderCount ?? 0} color="from-emerald-600 to-teal-500" suffix="Processed" />
-        <StatCard title="Inventory Alerts" value={stats?.zeroStockCount ?? 0} color="from-rose-600 to-orange-500" suffix="Out of Stock" />
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Revenue Analysis */}
-        <div className="xl:col-span-2 bg-slate-800/20 backdrop-blur-3xl p-12 rounded-[3.5rem] border border-slate-700/40 shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 blur-[120px] -z-10 group-hover:bg-cyan-500/10 transition-all duration-1000"></div>
-          <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
-             <div className="w-1.5 h-6 bg-cyan-500 rounded-full animate-pulse"></div>
-             Financial Health Pipeline
-          </h2>
-          <div className="flex items-center gap-6">
-             <span className="text-8xl font-black text-white tracking-tighter drop-shadow-2xl">₹{stats?.pipelineRevenue.toLocaleString() ?? '0'}</span>
-             <div className="flex flex-col gap-1">
-                <div className="px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-black flex items-center gap-2">
-                    <span className="text-xs">▲</span> +12.4%
-                </div>
-                <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Daily Surge</span>
-             </div>
-          </div>
-          <p className="text-slate-500 mt-10 font-medium text-lg leading-relaxed max-w-xl">
-            This metric calculates revenue from all <span className="text-white font-bold">Shipped</span> and <span className="text-white font-bold">Delivered</span> inventory. Cancelled orders are automatically excluded from the logic.
-          </p>
-        </div>
-
-        {/* Top Selling Velocity */}
-        <div className="bg-slate-800/20 backdrop-blur-3xl p-10 rounded-[3.5rem] border border-slate-700/40 shadow-xl overflow-hidden relative">
-          <h2 className="text-xl font-bold mb-10 tracking-tight flex justify-between items-center">
-            Performance Leaders
-            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest animate-pulse">Velocity Map</span>
-          </h2>
-          <div className="space-y-8">
-            {stats?.topSellers.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center group cursor-pointer">
-                <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center font-black text-cyan-400 text-lg shadow-inner group-hover:border-cyan-500 transition-all">
-                    {idx + 1}
-                  </div>
-                  <div>
-                    <p className="font-extrabold text-slate-200 group-hover:text-cyan-400 transition-colors uppercase tracking-widest text-[11px] mb-1">
-                      {item.name.slice(0, 24)}
-                    </p>
-                    <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-24 bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-cyan-500" style={{ width: `${100 - (idx * 15)}%` }}></div>
-                        </div>
-                        <p className="text-[9px] text-slate-500 font-black uppercase">{item.totalQuantity} SOLD</p>
-                    </div>
-                  </div>
-                </div>
-                <span className="font-black text-slate-100 text-sm italic">₹{item.revenue.toLocaleString()}</span>
+    <div className="container-fluid p-0">
+      {/* 1. Global Metrics Strip */}
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center">
+              <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', fontSize: '24px' }}>
+                <i className="fa-solid fa-box"></i>
               </div>
-            ))}
+              <div>
+                <h3 className="mb-0 fw-bold">{stats?.productCount || 0}</h3>
+                <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Inventory Items</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center">
+              <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #10b981, #047857)', fontSize: '24px' }}>
+                <i className="fa-solid fa-users"></i>
+              </div>
+              <div>
+                <h3 className="mb-0 fw-bold">{stats?.userCount || 0}</h3>
+                <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Verified Nodes</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center">
+              <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', fontSize: '24px' }}>
+                <i className="fa-solid fa-shopping-bag"></i>
+              </div>
+              <div>
+                <h3 className="mb-0 fw-bold">{stats?.orderCount || 0}</h3>
+                <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Active Protocols</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center">
+              <div className="rounded-circle d-flex align-items-center justify-content-center text-white me-3" style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #f43f5e, #be123c)', fontSize: '24px' }}>
+                <i className="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div>
+                <h3 className="mb-0 fw-bold">{stats?.zeroStockCount || 0}</h3>
+                <small className="text-muted text-uppercase fw-bold" style={{ letterSpacing: '1px' }}>Critical Low Stock</small>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Category Performance */}
-      <div className="mt-8 bg-slate-800/10 backdrop-blur-3xl p-10 rounded-[3.5rem] border border-slate-700/30 shadow-xl">
-          <div className="flex justify-between items-end mb-8">
-            <h2 className="text-2xl font-black tracking-tight">Market Vertical Distribution</h2>
-            <p className="text-slate-600 text-xs font-bold uppercase tracking-widest mb-1">Stock Diversification Index</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            {stats?.categorySales.map((cat, idx) => (
-              <div key={idx} className="p-8 rounded-[2.5rem] bg-slate-900/30 hover:bg-slate-900/50 transition-all border border-slate-800/10 hover:border-cyan-500/20 text-center group">
-                <p className="text-slate-500 text-[10px] font-black mb-3 uppercase tracking-[0.25em] group-hover:text-cyan-400 transition-colors">{cat._id || 'UNCLASSIFIED'}</p>
-                <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform">{cat.totalSold}</div>
-                <span className="text-slate-700 text-[9px] font-black uppercase">Units Moved</span>
-              </div>
-            ))}
-          </div>
+      {/* 2. Rapid Actions Cluster */}
+      <div className="d-flex flex-wrap gap-2 mb-4">
+        <a href="/admin/products/new" className="btn btn-primary d-flex align-items-center gap-2 shadow-sm rounded-pill px-4">
+          <i className="fa-solid fa-plus"></i> Deploy Product
+        </a>
+        <a href="/admin/marketing" className="btn btn-light border d-flex align-items-center gap-2 shadow-sm rounded-pill px-4 text-dark">
+          <i className="fa-solid fa-bullhorn text-secondary"></i> Pulse Dashboard
+        </a>
+        <a href="/admin/orders" className="btn btn-light border d-flex align-items-center gap-2 shadow-sm rounded-pill px-4 text-dark">
+          <i className="fa-solid fa-truck-fast text-secondary"></i> Ship Protocols
+        </a>
       </div>
-    </div>
-  );
-}
 
-function StatCard({ title, value, color, suffix }: { title: string; value: number; color: string, suffix: string }) {
-  return (
-    <div className="bg-slate-800/30 backdrop-blur-3xl p-10 rounded-[3rem] border border-slate-700/30 hover:border-cyan-500/50 transition-all group overflow-hidden relative shadow-lg">
-      <div className={`absolute -top-16 -right-16 w-56 h-56 bg-gradient-to-br ${color} opacity-5 blur-[80px] group-hover:opacity-10 transition-opacity duration-1000`}></div>
-      <p className="text-slate-500 font-black text-[12px] uppercase tracking-widest mb-6">{title}</p>
-      <div className="flex items-baseline gap-3">
-        <span className="text-6xl font-black text-white tracking-tighter drop-shadow-xl">{value}</span>
-        <span className="text-slate-600 font-black text-xs uppercase tracking-tighter opacity-50 group-hover:opacity-100 transition-opacity">{suffix}</span>
+      {/* 3. Deep Analysis Reports */}
+      <div className="row g-4">
+        <div className="col-lg-6">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-header bg-white border-bottom-0 pt-4 pb-0">
+              <h5 className="text-uppercase fw-bold text-muted mb-0 flex items-center gap-2" style={{ letterSpacing: '2px', fontSize: '13px' }}>
+                <i className="fa-solid fa-chart-line text-primary"></i> Financial Matrix
+              </h5>
+            </div>
+            <div className="card-body d-flex flex-column align-items-center justify-content-center py-5">
+              <div className="d-flex align-items-baseline mb-2">
+                <span className="fs-3 fw-bold text-primary opacity-75 me-1">₹</span>
+                <h2 className="display-4 fw-bold text-dark mb-0 leading-none">
+                  {Number((stats?.pipelineRevenue || 0).toFixed(2).split('.')[0]).toLocaleString()}
+                </h2>
+                <span className="fs-4 fw-bold text-muted">.{((stats?.pipelineRevenue || 0).toFixed(2).split('.')[1]) || '00'}</span>
+              </div>
+              <p className="text-primary fw-bold text-uppercase opacity-75 mb-4" style={{ fontSize: '11px', letterSpacing: '0.2em' }}>Total Pipeline Valuation</p>
+              
+              <div className="badge bg-light text-primary border border-primary border-opacity-25 rounded-pill px-4 py-2 d-flex align-items-center gap-2">
+                <div className="spinner-grow spinner-grow-sm text-primary" role="status" style={{ width: '0.5rem', height: '0.5rem' }}></div>
+                <span className="text-uppercase fw-bold" style={{ letterSpacing: '1px', fontSize: '10px' }}>Verified Matrix Sync</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-lg-6">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-header bg-white border-bottom-0 pt-4 pb-3 d-flex align-items-center justify-content-between">
+              <h5 className="text-uppercase fw-bold text-muted mb-0" style={{ letterSpacing: '2px', fontSize: '13px' }}>High Velocity Assets</h5>
+              <a href="/admin/products" className="text-primary text-decoration-none text-uppercase fw-bold" style={{ fontSize: '11px', letterSpacing: '1px' }}>Monitor All</a>
+            </div>
+            <div className="card-body p-0">
+              <div className="table-responsive">
+                <table className="table table-hover align-middle mb-0">
+                  <thead className="table-light text-muted" style={{ fontSize: '12px' }}>
+                    <tr>
+                      <th className="ps-4">Identity</th>
+                      <th>Velocity</th>
+                      <th className="pe-4 text-end">Valuation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(stats?.topSellers || []).map((prod, idx) => (
+                      <tr key={idx}>
+                        <td className="ps-4 fw-semibold text-dark">{prod.name}</td>
+                        <td>
+                          <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                            <span className="fw-bold me-1">{prod.totalQuantity}</span>
+                            <span className="text-uppercase opacity-75" style={{ fontSize: '9px', letterSpacing: '0.5px' }}>Units Flowed</span>
+                          </span>
+                        </td>
+                        <td className="pe-4 font-monospace text-end fw-bold">₹{prod.revenue.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                    {(!stats?.topSellers || stats.topSellers.length === 0) && (
+                      <tr>
+                        <td colSpan={3} className="text-center py-4 text-muted">No high velocity assets recorded.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

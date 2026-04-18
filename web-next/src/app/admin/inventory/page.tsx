@@ -1,130 +1,155 @@
 'use client';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/src/config';
+import { getImageUrl } from '@/src/utils/imagePaths';
 
-import { useEffect, useState } from 'react';
-import { API_URL } from '@/config';
-import { getImageUrl } from '@/utils/imagePaths';
-
-export default function AdminInventory() {
+export default function InventoryPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState<string | null>(null);
+  const [stockChanges, setStockChanges] = useState<Record<string, number>>({});
+  const [syncingId, setSyncingId] = useState<string | null>(null);
 
   const fetchInventory = async () => {
     const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/products`, {
+      const res = await fetch(`${API_URL}/api/v1/admin/inventory`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (data.success) {
-        setProducts(data.products);
-      }
-    } catch (err) {
-      console.error('Inventory breach detected');
+      if (data.success) setProducts(data.products);
+    } catch (e) {
+      console.error('Inventory fetch failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const updateStock = async (id: string, newStock: number) => {
+  useEffect(() => { fetchInventory(); }, []);
+
+  const handleStockUpdate = async (id: string) => {
+    const newStock = stockChanges[id];
+    if (newStock === undefined || isNaN(newStock)) return;
+    
+    setSyncingId(id);
     const token = localStorage.getItem('adminToken');
-    setSyncing(id);
+    
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/products/${id}/stock`, {
-        method: 'PATCH',
+      console.log(`Syncing Node: ${id} to ${newStock}...`);
+      const res = await fetch(`${API_URL}/api/v1/admin/inventory/update-stock/${id}`, {
+        method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ countInStock: newStock }),
+        body: JSON.stringify({ countInStock: newStock })
       });
-      if (res.ok) {
-        setProducts(products.map(p => p._id === id ? { ...p, countInStock: newStock } : p));
+      
+      const data = await res.json();
+      if (data.success) {
+        setProducts(prev => prev.map((p) => p._id === id ? { ...p, countInStock: data.newStock, status: data.newStatus } : p));
+        setStockChanges(prev => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+        });
+        console.log(`Node State Committed: ${id}`);
+      } else {
+        alert(`Sync Error: ${data.error || 'Unknown Fault'}`);
       }
-    } catch (err) {
-      console.error('Core sync failed');
+    } catch (e) {
+        console.error('Network/IO Link Fault', e);
+        alert('Critical Network Failure: Verify Backend Node.');
     } finally {
-      setSyncing(null);
+        setSyncingId(null);
     }
   };
 
-  useEffect(() => {
-    fetchInventory();
-  }, []);
-
-  if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-[#0f172a]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-emerald-400 font-black uppercase tracking-widest text-[10px]">Scanning Stock Clusters...</p>
-      </div>
-    </div>
-  );
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Initializing Inventory Cluster...</div>;
 
   return (
-    <div className="p-12 max-w-[1700px] mx-auto animate-in fade-in duration-700">
-      <header className="mb-16">
-        <div className="flex items-center gap-3 mb-2 uppercase tracking-widest text-[10px] font-black text-emerald-400">
-           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Global Supply Chain
+    <div className="container-fluid p-0">
+      <div className="d-flex justify-content-between align-items-end mb-4 pb-3 border-bottom">
+        <div>
+          <h2 className="fs-4 fw-bold text-dark text-uppercase tracking-tight mb-0">Inventory Control Hub</h2>
+          <p className="text-muted small fw-bold tracking-widest text-uppercase mb-0 mt-1" style={{ letterSpacing: '0.1em' }}>Real-time Spectral Stock Management</p>
         </div>
-        <h1 className="text-6xl font-black text-white tracking-tighter italic uppercase">Stock <span className="text-emerald-400 not-italic">Matrix</span></h1>
-        <p className="text-slate-500 font-medium text-lg mt-2 uppercase tracking-widest text-xs">Real-time inventory equilibrium monitoring</p>
-      </header>
+      </div>
 
-      <div className="bg-slate-800/10 backdrop-blur-3xl p-10 rounded-[4rem] border border-slate-700/30 shadow-2xl overflow-hidden">
-         <div className="overflow-x-auto">
-            <table className="w-full text-left">
-               <thead>
-                  <tr className="text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] border-b border-slate-800/50">
-                     <th className="px-6 py-8">SKU Identity</th>
-                     <th className="px-6 py-8">Price Point</th>
-                     <th className="px-6 py-8">Equilibrium Status</th>
-                     <th className="px-6 py-8">Calibration (Stock)</th>
-                  </tr>
-               </thead>
-               <tbody className="divide-y divide-slate-800/10">
-                  {products.map((p, idx) => (
-                    <tr key={idx} className={`group hover:bg-white/[0.02] transition-colors ${p.countInStock <= 5 ? 'bg-rose-500/5' : ''}`}>
-                       <td className="px-6 py-8">
-                          <div className="flex items-center gap-6">
-                             <div className="w-16 h-16 rounded-[2rem] bg-slate-900 border border-slate-800 overflow-hidden shadow-inner">
-                                <img src={getImageUrl(p.image)} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
-                             </div>
-                             <div>
-                                <p className="text-white font-black text-lg tracking-tighter uppercase">{p.name}</p>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{p.category}</p>
-                             </div>
-                          </div>
-                       </td>
-                       <td className="px-6 py-8">
-                           <span className="text-2xl font-black text-white italic">₹{p.price.toLocaleString()}</span>
-                       </td>
-                       <td className="px-6 py-8">
-                           <span className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest border transition-all ${
-                             p.countInStock === 0 ? 'bg-rose-500/10 border-rose-500/20 text-rose-500 animate-pulse' : 
-                             p.countInStock <= 5 ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' :
-                             'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                           }`}>
-                             {p.countInStock === 0 ? 'Depleted' : p.countInStock <= 5 ? 'Critical-Low' : 'Stable'}
-                           </span>
-                       </td>
-                       <td className="px-6 py-8">
-                           <div className="flex items-center gap-4">
-                              <input 
-                                type="number" 
-                                value={p.countInStock} 
-                                onChange={(e) => updateStock(p._id, parseInt(e.target.value))}
-                                disabled={syncing === p._id}
-                                className="bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-black w-32 focus:border-emerald-500 outline-none transition-all"
-                              />
-                              {syncing === p._id && <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>}
-                           </div>
-                       </td>
+      <div className="card shadow-sm border-0 mb-4">
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light text-muted text-uppercase" style={{ fontSize: '12px' }}>
+                <tr>
+                  <th className="ps-4" style={{ width: '80px' }}>Node</th>
+                  <th>Identity</th>
+                  <th>Sector</th>
+                  <th>Valuation</th>
+                  <th style={{ width: '150px' }}>Current Stock</th>
+                  <th>Status</th>
+                  <th className="text-end pe-4">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.length > 0 ? products.map((product) => {
+                  const hasChange = stockChanges[product._id] !== undefined;
+                  const isSyncing = syncingId === product._id;
+                  
+                  return (
+                    <tr key={product._id}>
+                      <td className="ps-4 py-3">
+                        <img src={getImageUrl(product.image)} className="img-thumbnail rounded" style={{ width: '50px', height: '50px', objectFit: 'cover' }} alt="" />
+                      </td>
+                      <td>
+                        <p className="fw-bold text-dark mb-0" style={{ fontSize: '15px' }}>{product.name}</p>
+                        <p className="text-muted small font-monospace fw-bold text-uppercase mb-0" style={{ fontSize: '10px', letterSpacing: '1px' }}>ID://{product._id?.slice(-8)}</p>
+                      </td>
+                      <td><span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1 text-uppercase">{product.category}</span></td>
+                      <td className="fw-bold text-dark font-monospace">₹{product.price.toLocaleString()}</td>
+                      <td>
+                        <input 
+                          type="number" 
+                          className="form-control form-control-sm text-center fw-bold font-monospace shadow-none"
+                          value={stockChanges[product._id] ?? product.countInStock} 
+                          min="0"
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            setStockChanges(prev => ({ ...prev, [product._id]: val }));
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <span className={`badge px-2 py-1 border text-uppercase ${product.countInStock <= 5 ? 'bg-danger bg-opacity-10 text-danger border-danger border-opacity-25' : 'bg-success bg-opacity-10 text-success border-success border-opacity-25'}`}>
+                          {product.status}
+                        </span>
+                      </td>
+                      <td className="text-end pe-4">
+                        <button 
+                          className={`btn btn-sm text-uppercase fw-bold ${
+                            isSyncing ? 'btn-warning' : 
+                            (hasChange ? 'btn-primary' : 'btn-outline-secondary opacity-50')
+                          }`}
+                          style={{ fontSize: '11px', padding: '4px 12px', letterSpacing: '1px' }}
+                          disabled={!hasChange || isSyncing}
+                          onClick={() => handleStockUpdate(product._id)}
+                        >
+                          {isSyncing ? 'Syncing...' : 'Sync Stock'}
+                        </button>
+                      </td>
                     </tr>
-                  ))}
-               </tbody>
+                  );
+                }) : (
+                  <tr>
+                    <td colSpan={7} className="py-5 text-center text-muted">
+                      <i className="fa-solid fa-satellite-dish fs-2 mb-3 opacity-50 block"></i>
+                      <p className="text-uppercase fw-bold mb-0" style={{ letterSpacing: '2px', fontSize: '12px' }}>Zero Spectral Assets Located</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
             </table>
-         </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { API_URL } from '@/config';
+import { API_URL } from '@/src/config';
 
 interface Order {
   _id: string;
@@ -10,131 +10,133 @@ interface Order {
   totalAmount: number;
   status: string;
   createdAt: string;
-  shippingAddress?: { city: string; country: string };
 }
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState<string | null>(null);
 
   const fetchOrders = async () => {
+    const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/orders`);
+      const res = await fetch(`${API_URL}/api/v1/admin/orders`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
-      if (data.success) {
-        setOrders(data.orders);
-      }
+      if (data.success) setOrders(data.orders);
     } catch (err) {
-      console.error('Logistics error:', err);
+      console.warn('Failed to fetch orders');
     } finally {
       setLoading(false);
     }
   };
 
   const updateStatus = async (id: string, status: string) => {
-    setUpdating(id);
+    const token = localStorage.getItem('adminToken');
     try {
       await fetch(`${API_URL}/api/v1/admin/orders/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ status }),
       });
       setOrders(orders.map(o => o._id === id ? { ...o, status } : o));
     } catch (err) {
-      console.error('Status sync failed');
-    } finally {
-      setUpdating(null);
+      alert('Failed to update status');
     }
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  useEffect(() => { fetchOrders(); }, []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full bg-[#0f172a]">
-        <div className="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
-        <p className="mt-8 text-emerald-400 font-black tracking-widest text-xs uppercase animate-pulse">Scanning Global Shipments...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Loading orders...</div>;
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'processing': return 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25';
+      case 'shipped': return 'bg-info bg-opacity-10 text-info border border-info border-opacity-25';
+      case 'delivered': return 'bg-success bg-opacity-10 text-success border border-success border-opacity-25';
+      case 'cancelled': return 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25';
+      default: return 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25'; // pending
+    }
+  };
 
   return (
-    <div className="p-8 max-w-[1700px] mx-auto animate-in fade-in slide-in-from-right-4 duration-500">
-      <header className="flex justify-between items-center mb-12">
-        <div>
-          <h1 className="text-5xl font-black text-white tracking-tighter italic">Logistics <span className="text-emerald-400 not-italic">Hub</span></h1>
-          <p className="text-slate-500 font-medium uppercase tracking-widest text-[10px] mt-2 ml-1">Real-Time Order Lifecycle Tracking</p>
-        </div>
-        <button onClick={fetchOrders} className="p-4 rounded-2xl bg-slate-900 border border-slate-700 hover:border-emerald-500 transition-all">🔄</button>
-      </header>
+    <div className="container-fluid p-0">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <h2 className="fs-4 fw-bold text-dark text-uppercase tracking-tight mb-0">Order Management</h2>
+        <button onClick={fetchOrders} className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2 shadow-sm">
+          <i className="fa-solid fa-sync"></i> Refresh Registry
+        </button>
+      </div>
 
-      <div className="bg-slate-800/10 backdrop-blur-3xl rounded-[3.5rem] border border-slate-700/30 shadow-2xl overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-slate-900/50 border-b border-slate-800">
-              <th className="px-10 py-8 text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Tracking ID</th>
-              <th className="px-10 py-8 text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Destination</th>
-              <th className="px-10 py-8 text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Volume</th>
-              <th className="px-10 py-8 text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Live Status</th>
-              <th className="px-10 py-8 text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Actions</th>
-              <th className="px-10 py-8 text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Timestamp</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/40">
-            {orders.map((o) => (
-              <tr key={o._id} className="group hover:bg-white/[0.02] transition-colors">
-                <td className="px-10 py-10 font-bold text-slate-400 group-hover:text-emerald-400 transition-colors uppercase tracking-tight text-xs italic">
-                  {o._id}
-                </td>
-                <td className="px-10 py-10">
-                   <p className="text-white font-black text-sm uppercase tracking-tighter">
-                     {o.shippingAddress?.city || 'HQ'}, {o.shippingAddress?.country || 'India'}
-                   </p>
-                </td>
-                <td className="px-10 py-10 font-black text-slate-100 text-xl">
-                  ₹{o.totalAmount.toLocaleString()}
-                </td>
-                <td className="px-10 py-10">
-                   <select 
-                      value={o.status}
-                      onChange={(e) => updateStatus(o._id, e.target.value)}
-                      disabled={updating === o._id}
-                      className={`px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 font-black text-[10px] uppercase tracking-widest focus:border-emerald-500 outline-none transition-all ${
-                        o.status === 'Delivered' ? 'text-emerald-500' : 
-                        o.status === 'Cancelled' ? 'text-rose-500' : 'text-orange-500'
-                      }`}
-                   >
-                     <option value="Processing">Processing</option>
-                     <option value="Shipped">Shipped</option>
-                     <option value="Delivered">Delivered</option>
-                     <option value="Cancelled">Cancelled</option>
-                   </select>
-                </td>
-                <td className="px-10 py-10">
-                   <Link 
-                      href={`/admin/orders/${o._id}`}
-                      className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-slate-400 hover:text-white hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
-                   >
-                      🔍 Deep-Dive
-                   </Link>
-                </td>
-                <td className="px-10 py-10 text-slate-500 text-xs font-bold font-mono">
-                  {new Date(o.createdAt).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        
-        {orders.length === 0 && (
-          <div className="py-24 text-center">
-             <p className="text-slate-600 font-black uppercase tracking-widest text-xs animate-pulse italic">Pipeline Empty</p>
+      <div className="card shadow-sm border-0">
+        <div className="card-header bg-white border-bottom-0 pt-4 pb-3">
+          <p className="text-muted small text-uppercase fw-bold mb-0" style={{ letterSpacing: '0.2em' }}>Transaction Ledger</p>
+        </div>
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light text-muted text-uppercase" style={{ fontSize: '12px' }}>
+                <tr>
+                  <th className="ps-4">Order ID</th>
+                  <th>Identity</th>
+                  <th>Status Protocol</th>
+                  <th>Valuation</th>
+                  <th>Deployed At</th>
+                  <th className="text-end pe-4">Ops</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr key={o._id}>
+                    <td className="ps-4 font-monospace text-muted small tracking-wider">
+                      ORD-{o._id?.slice(-8).toUpperCase() || 'UNKNOWN'}
+                    </td>
+                    <td className="text-dark fw-bold">
+                      {o.user ? `User://${o.user.slice(-6)}` : 'Guest Node'}
+                    </td>
+                    <td>
+                      <select
+                        value={o.status}
+                        onChange={(e) => updateStatus(o._id, e.target.value)}
+                        className={`form-select form-select-sm fw-bold shadow-none ${getStatusBadgeClass(o.status)}`}
+                        style={{ fontSize: '12px', minWidth: '120px' }}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                    <td>
+                      <span className="fw-bold text-dark font-monospace">₹{o.totalAmount.toLocaleString()}</span>
+                    </td>
+                    <td className="text-muted small">
+                      {new Date(o.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="text-end pe-4">
+                      <Link href={`/admin/orders/${o._id}`} className="btn btn-sm btn-outline-secondary px-3 py-1" style={{ fontSize: '11px' }}>
+                        Detail
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+                {orders.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-center py-5 text-muted">
+                      No transaction records found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
+
 }

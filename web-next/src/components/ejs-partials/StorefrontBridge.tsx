@@ -443,7 +443,7 @@ export default function StorefrontBridge() {
     }
 
     document.addEventListener('click', onDocumentClick);
-    document.addEventListener('submit', onDocumentSubmit as EventListener, true);
+    document.addEventListener('submit', onDocumentSubmit as unknown as EventListener, true);
     return () => {
       if (checkoutObserver) {
         checkoutObserver.disconnect();
@@ -452,7 +452,7 @@ export default function StorefrontBridge() {
         checkoutCleanup();
       }
       document.removeEventListener('click', onDocumentClick);
-      document.removeEventListener('submit', onDocumentSubmit as EventListener, true);
+      document.removeEventListener('submit', onDocumentSubmit as unknown as EventListener, true);
     };
   }, [pathname, router]);
 

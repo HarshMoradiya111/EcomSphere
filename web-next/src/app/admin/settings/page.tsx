@@ -1,145 +1,101 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { API_URL } from '@/config';
-import { getImageUrl } from '@/utils/imagePaths';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/src/config';
 
-export default function AdminSettings() {
-  const [formData, setFormData] = useState({
-    address: '',
-    phone: '',
-    hours: '',
-    email: '',
-    logo: ''
+export default function SettingsPage() {
+  const [settings, setSettings] = useState({
+    siteName: 'EcomSphere',
+    supportEmail: 'support@ecomsphere.com',
+    currency: 'INR',
+    maintenanceMode: false,
+    orderPrefix: 'ORD-',
+    freeShippingThreshold: 500
   });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchSettings = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/v1/admin/settings`);
-        const data = await res.json();
-        if (data.success) {
-          setFormData(data.settings);
+        const token = localStorage.getItem('adminToken');
+        try {
+            const res = await fetch(`${API_URL}/api/v1/admin/settings`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setSettings(data.settings);
+            }
+        } catch (e) {} finally {
+            setLoading(false);
         }
-      } catch (err) {
-        console.error('Core sync failed');
-      } finally {
-        setLoading(false);
-      }
     };
     fetchSettings();
   }, []);
 
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    const formDataPayload = new FormData();
-    formDataPayload.append('address', formData.address);
-    formDataPayload.append('phone', formData.phone);
-    formDataPayload.append('email', formData.email);
-    formDataPayload.append('hours', formData.hours);
-    if (logoFile) formDataPayload.append('logo', logoFile);
-
-    try {
-      await fetch(`${API_URL}/api/v1/admin/settings`, {
-        method: 'PUT',
-        body: formDataPayload,
-      });
-      alert('Global Cluster Synchronized ✅');
-    } catch (err) {
-      console.error('Update failed');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) return <div className="p-20 text-center animate-pulse text-slate-500 uppercase font-black tracking-widest text-xs">Accessing System Core...</div>;
+  if (loading) return <div className="p-4 text-muted d-flex align-items-center gap-3"><div className="spinner-border spinner-border-sm" role="status"></div>Reading configuration...</div>;
 
   return (
-    <div className="p-12 max-w-5xl mx-auto animate-in fade-in slide-in-from-top-4 duration-700">
-      <header className="mb-16">
-          <div className="flex items-center gap-3 mb-2 uppercase tracking-widest text-[10px] font-black text-rose-400">
-             <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span> Global Configuration
-          </div>
-          <h1 className="text-6xl font-black text-white tracking-tighter">System <span className="text-slate-500">Core</span></h1>
-          <p className="text-slate-500 font-medium text-lg mt-2">Modify global website attributes and contact routing</p>
-      </header>
+    <div className="container-fluid p-0">
+      <div className="d-flex justify-content-between align-items-end mb-4 pb-3 border-bottom">
+        <div>
+          <h2 className="fs-4 fw-bold text-dark text-uppercase tracking-tight mb-0">System Configuration</h2>
+          <p className="text-muted small fw-bold tracking-widest text-uppercase mb-0 mt-1" style={{ letterSpacing: '0.1em' }}>Core Store Parameters & Environmental Variables</p>
+        </div>
+      </div>
 
-      <form onSubmit={handleSubmit} className="bg-slate-800/10 backdrop-blur-3xl p-12 rounded-[4rem] border border-slate-700/30 space-y-12 shadow-2xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Headquarters Address</label>
-                  <input 
-                      type="text" 
-                      value={formData.address}
-                      onChange={(e) => setFormData({...formData, address: e.target.value})}
-                      className="w-full bg-slate-900/50 border border-slate-800 rounded-3xl px-8 py-5 text-white font-bold focus:border-rose-500 outline-none transition-all shadow-inner"
-                  />
+      <div className="card shadow-sm border-0" style={{ maxWidth: '800px' }}>
+        <div className="card-body p-4">
+          <form className="settings-form">
+              <div className="row g-4 mb-4">
+                <div className="col-md-6">
+                  <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Enterprise Identity</label>
+                  <input type="text" className="form-control" defaultValue={settings.siteName} />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Support Endpoint</label>
+                  <input type="email" className="form-control" defaultValue={settings.supportEmail} />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Financial Basis</label>
+                  <select className="form-select" defaultValue={settings.currency}>
+                    <option value="INR">Indian Rupee (₹)</option>
+                    <option value="USD">US Dollar ($)</option>
+                    <option value="EUR">Euro (€)</option>
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Logistics Threshold (₹)</label>
+                  <input type="number" className="form-control" defaultValue={settings.freeShippingThreshold} />
+                </div>
+
+                <div className="col-md-12">
+                  <label className="form-label fw-bold text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>SKU Protocol Prefix</label>
+                  <input type="text" className="form-control" defaultValue={settings.orderPrefix} />
+                </div>
               </div>
 
-              <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Secure Contact Line</label>
-                  <input 
-                      type="text" 
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full bg-slate-900/50 border border-slate-800 rounded-3xl px-8 py-5 text-white font-bold focus:border-rose-500 outline-none transition-all shadow-inner"
-                  />
+              <div className="p-4 bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded mb-4 d-flex align-items-center justify-content-between">
+                <div>
+                  <label className="text-danger fw-bold text-uppercase mb-1 d-block" style={{ fontSize: '13px', letterSpacing: '1px' }}>Maintenance Protocol</label>
+                  <p className="text-muted small fw-bold text-uppercase mb-0" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>Restricts public access during active state</p>
+                </div>
+                <div className="form-check form-switch fs-4 mb-0">
+                  <input className="form-check-input border-danger" type="checkbox" role="switch" defaultChecked={settings.maintenanceMode} style={{ cursor: 'pointer' }} />
+                </div>
               </div>
 
-              <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Support Email</label>
-                  <input 
-                      type="email" 
-                      value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="w-full bg-slate-900/50 border border-slate-800 rounded-3xl px-8 py-5 text-white font-bold focus:border-rose-500 outline-none transition-all shadow-inner"
-                  />
+              <div className="d-flex gap-3 pt-4 border-top">
+                <button type="submit" className="btn btn-primary fw-bold text-uppercase px-4 py-2" style={{ letterSpacing: '1px' }}>
+                  Commit System Changes
+                </button>
+                <button type="button" className="btn btn-light border fw-bold text-uppercase px-4 py-2" style={{ letterSpacing: '1px' }}>
+                  Discard
+                </button>
               </div>
-
-              <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Operational Hours</label>
-                  <input 
-                      type="text" 
-                      value={formData.hours}
-                      onChange={(e) => setFormData({...formData, hours: e.target.value})}
-                      className="w-full bg-slate-900/50 border border-slate-800 rounded-3xl px-8 py-5 text-white font-bold focus:border-rose-500 outline-none transition-all shadow-inner"
-                  />
-              </div>
-
-              <div className="md:col-span-2 space-y-4">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Identity Asset (Logo)</label>
-                  <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 flex items-center justify-between">
-                      <input 
-                          type="file" 
-                          onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
-                          className="text-slate-400 text-xs font-bold"
-                          accept="image/*"
-                      />
-                      {formData.logo && (
-                          <div className="flex items-center gap-4">
-                              <span className="text-[10px] font-black text-slate-600 uppercase">Current Profile:</span>
-                              <img src={getImageUrl(formData.logo)} className="h-10 w-auto rounded border border-slate-700" alt="Current Logo" />
-                          </div>
-                      )}
-                  </div>
-              </div>
-          </div>
-
-          <div className="pt-8 border-t border-slate-800/50 flex justify-end">
-              <button 
-                  type="submit"
-                  disabled={saving}
-                  className="px-12 py-5 bg-white text-black font-black rounded-3xl hover:bg-rose-500 hover:text-white transition-all uppercase tracking-tighter shadow-xl disabled:opacity-50"
-              >
-                  {saving ? 'Syncing...' : 'Commit Changes'}
-              </button>
-          </div>
-      </form>
+            </form>
+        </div>
+      </div>
     </div>
   );
 }

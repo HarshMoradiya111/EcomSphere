@@ -2,8 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { API_URL } from '@/config';
-import { useAICatalogStore } from '@/store/aiCatalogStore';
+import Link from 'next/link';
+import { API_URL } from '@/src/config';
+import { useAICatalogStore } from '@/src/store/aiCatalogStore';
 
 export default function AIUploadPage() {
   const router = useRouter();
@@ -62,114 +63,124 @@ export default function AIUploadPage() {
   };
 
   return (
-    <div className="p-12 max-w-[1200px] mx-auto min-h-screen">
-      <header className="mb-12">
-        <button 
-          onClick={() => router.back()}
-          className="text-cyan-400 font-black uppercase tracking-widest text-[10px] mb-4 hover:tracking-[0.2em] transition-all"
-        >
-          ← Return to Command Center
-        </button>
-        <h1 className="text-6xl font-black text-white tracking-tighter">
-          AI Auto-<span className="text-cyan-400 italic">Catalog</span>
-        </h1>
-        <p className="text-slate-500 font-medium text-lg mt-2 uppercase tracking-widest text-xs">
-          Neural-powered product recognition & metadata synthesis
-        </p>
-      </header>
+    <div className="container-fluid p-0">
+      <div className="d-flex justify-content-between align-items-end mb-4 pb-3 border-bottom">
+        <div>
+          <h2 className="fs-4 fw-bold text-dark text-uppercase tracking-tight mb-0">AI Auto-Catalog</h2>
+          <p className="text-muted small fw-bold tracking-widest text-uppercase mb-0 mt-1" style={{ letterSpacing: '0.1em' }}>Neural Spectral Synthesis</p>
+        </div>
+        <Link href="/admin/products" className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2 shadow-sm">
+          <i className="fa-solid fa-arrow-left"></i> Back to Inventory
+        </Link>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2">
-          <form onSubmit={handleUpload}>
-            <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="relative group cursor-pointer"
-            >
-              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-[3rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-slate-900 border-2 border-dashed border-slate-800 rounded-[3rem] p-20 flex flex-col items-center justify-center text-center transition-all hover:border-cyan-500/50">
-                <div className="w-20 h-20 bg-cyan-500/10 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                  <span className="text-4xl text-cyan-400">✨</span>
+      <div className="row g-4">
+        <div className="col-lg-8">
+          <div className="card shadow-sm border-0 mb-4">
+            <div className="card-body p-4">
+              <form onSubmit={handleUpload}>
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-5 text-center mb-4 rounded-4 border-2 border-dashed bg-light bg-opacity-50 cursor-pointer transition-all hover:bg-opacity-100"
+                  style={{ borderColor: '#dee2e6' }}
+                >
+                    <div className="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '80px', height: '80px' }}>
+                      <i className="fa-solid fa-wand-magic-sparkles fs-1 text-primary"></i>
+                    </div>
+                    <h3 className="fs-5 fw-bold text-dark text-uppercase tracking-tight mb-2">Initialize Vision Cluster</h3>
+                    <p className="text-muted small fw-bold text-uppercase mb-0" style={{ letterSpacing: '1px' }}>Drop up to 20 vision assets or click to browse</p>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      multiple 
+                      className="visually-hidden" 
+                      accept="image/*"
+                    />
                 </div>
-                <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2">Initialize Batch Upload</h3>
-                <p className="text-slate-500 font-bold text-sm uppercase tracking-widest">Drop up to 20 vision assets or click to browse</p>
-                <input 
-                  type="file" 
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  multiple 
-                  className="hidden" 
-                  accept="image/*"
-                />
-              </div>
+
+                {previews.length > 0 && (
+                  <div className="row g-2 mb-4">
+                    {previews.map((url, i) => (
+                      <div key={i} className="col-3 col-md-2">
+                        <div className="ratio ratio-1x1 rounded-3 overflow-hidden border shadow-sm">
+                          <img src={url} className="object-fit-cover" alt="preview" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {error && (
+                  <div className="alert alert-danger border-0 shadow-sm mb-4 fw-bold text-uppercase" style={{ fontSize: '11px', letterSpacing: '1px' }}>
+                    <i className="fa-solid fa-circle-exclamation me-2"></i> {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isProcessing || previews.length === 0}
+                  className="btn btn-primary btn-lg w-100 fw-bold text-uppercase py-3 shadow-sm rounded-3"
+                  style={{ fontSize: '13px', letterSpacing: '2px' }}
+                >
+                  {isProcessing ? (
+                    <span className="d-flex align-items-center justify-content-center gap-2">
+                      <span className="spinner-border spinner-border-sm" role="status"></span>
+                      CALCULATING NEURAL MATRIX...
+                    </span>
+                  ) : 'EXECUTE AI SYNTHESIS'}
+                </button>
+              </form>
             </div>
-
-            <div className="mt-10 grid grid-cols-4 md:grid-cols-6 gap-4">
-              {previews.map((url, i) => (
-                <div key={i} className="aspect-square rounded-2xl border-2 border-slate-800 overflow-hidden relative group">
-                  <img src={url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="preview" />
-                  <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-              ))}
-            </div>
-
-            {error && (
-              <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 font-black text-xs uppercase tracking-widest text-center">
-                ⚠ {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isProcessing || previews.length === 0}
-              className={`mt-10 w-full py-6 rounded-full font-black uppercase tracking-widest text-sm transition-all shadow-2xl ${
-                isProcessing || previews.length === 0
-                  ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                  : 'bg-cyan-500 text-slate-950 hover:bg-white hover:scale-[1.02] active:scale-95 shadow-cyan-500/20'
-              }`}
-            >
-              {isProcessing ? 'SYNCHRONIZING NEURAL LINK...' : 'EXECUTE AI ANALYSIS'}
-            </button>
-          </form>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[2.5rem]">
-            <h4 className="text-cyan-400 font-black text-[10px] uppercase tracking-widest mb-4">How it works</h4>
-            <div className="space-y-6">
-              {[
-                { step: '01', title: 'Recognition', desc: 'Gemini identifies objects, styles, and materials.' },
-                { step: '02', title: 'Synthesis', desc: 'Automated generation of marketing copy & pricing.' },
-                { step: '03', title: 'Integration', desc: 'Verify and launch directly to your shop.' }
-              ].map((item, idx) => (
-                <div key={idx} className="flex gap-4">
-                  <span className="font-black text-slate-800 text-2xl italic leading-none">{item.step}</span>
-                  <div>
-                    <p className="text-white font-bold uppercase text-xs tracking-tighter">{item.title}</p>
-                    <p className="text-slate-500 text-[11px] leading-relaxed mt-1">{item.desc}</p>
+        <div className="col-lg-4">
+          <div className="card shadow-sm border-0 bg-dark text-white mb-4 rounded-4">
+            <div className="card-body p-4">
+              <h4 className="fw-bold text-uppercase mb-4" style={{ fontSize: '12px', color: '#ffd700', letterSpacing: '2px' }}>Protocol Overview</h4>
+              <div className="d-grid gap-4">
+                {[
+                  { step: '01', title: 'Spectral Recognition', desc: 'Gemini AI deconstructs textures, materials, and silhouettes.' },
+                  { step: '02', title: 'Metadata Synthesis', desc: 'Automated synthesis of high-conversion marketing copy.' },
+                  { step: '03', title: 'Cluster Deployment', desc: 'Verify and initialize directly to the global shop node.' }
+                ].map((item, idx) => (
+                  <div key={idx} className="d-flex gap-3">
+                    <span className="fs-3 fw-bold text-primary opacity-50 italic">{item.step}</span>
+                    <div>
+                      <h6 className="fw-bold text-uppercase mb-1" style={{ fontSize: '12px', letterSpacing: '1px' }}>{item.title}</h6>
+                      <p className="text-muted small mb-0" style={{ lineHeight: '1.4' }}>{item.desc}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
           
-          <div className="bg-purple-500/5 border border-purple-500/10 p-8 rounded-[2.5rem]">
-             <p className="text-purple-300 text-[10px] font-black uppercase tracking-widest mb-2">Cloud-Native Storage</p>
-             <p className="text-slate-500 text-[11px] leading-relaxed">
-               All vision assets are automatically optimized and served via Cloudinary CDN for ultra-low latency globally.
-             </p>
+          <div className="card shadow-sm border-0 bg-primary bg-opacity-10 rounded-4">
+            <div className="card-body p-4">
+               <p className="text-primary fw-bold text-uppercase mb-2" style={{ fontSize: '11px', letterSpacing: '2px' }}>
+                 <i className="fa-solid fa-cloud me-2"></i> Cloud-Native
+               </p>
+               <p className="text-dark small mb-0 fw-medium">
+                 Assets are optimized through Cloudinary CDN with 99.9% uptime and global distribution.
+               </p>
+            </div>
           </div>
         </div>
       </div>
 
       {isProcessing && (
-        <div className="fixed inset-0 z-50 bg-[#0f172a]/95 backdrop-blur-xl flex flex-col items-center justify-center text-center p-10 animate-in fade-in duration-500">
-          <div className="relative w-40 h-40 flex items-center justify-center mb-10">
-            <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-t-cyan-400 rounded-full animate-spin"></div>
-            <span className="text-4xl animate-pulse">🧠</span>
+        <div className="position-fixed top-0 start-0 w-100 h-100 z-3 bg-dark bg-opacity-75 backdrop-blur d-flex flex-column align-items-center justify-content-center text-center p-4">
+          <div className="position-relative mb-4" style={{ width: '120px', height: '120px' }}>
+            <div className="position-absolute top-0 start-0 w-100 h-100 border border-4 border-white border-opacity-10 rounded-circle"></div>
+            <div className="position-absolute top-0 start-0 w-100 h-100 border border-4 border-top-primary rounded-circle animate-spin"></div>
+            <div className="position-absolute top-50 start-50 translate-middle">
+              <i className="fa-solid fa-brain fs-1 text-primary animate-pulse"></i>
+            </div>
           </div>
-          <h2 className="text-4xl font-black text-white tracking-tighter mb-4 italic uppercase">Neural Matrix <span className="text-cyan-400 not-italic">Processing</span></h2>
-          <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px] animate-pulse">Deconstructing vision assets & mapping spectral data...</p>
+          <h2 className="display-6 fw-bold text-white tracking-tighter italic mb-2 uppercase">Neural <span className="text-primary not-italic">Synchronizing</span></h2>
+          <p className="text-white opacity-50 fw-bold uppercase tracking-widest small animate-pulse">Mapping spectral data to catalog schemas...</p>
         </div>
       )}
     </div>
