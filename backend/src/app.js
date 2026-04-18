@@ -83,6 +83,15 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/debug-auth', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Latest OAuth code is active',
+    callback_url: process.env.CALLBACK_URL,
+    client_url: process.env.CLIENT_URL
+  });
+});
+
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.get('/img/placeholder.jpg', (req, res) => {
