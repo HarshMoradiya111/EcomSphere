@@ -5,18 +5,38 @@ const FlashSale = require('../../models/FlashSale');
 const HeroBanner = require('../../models/HeroBanner');
 const { dbCache } = require('../../utils/cacheManager');
 
-// GET /api/v1/products - JSON API with Pagination Support
+// GET /api/v1/products - JSON API with Search, Filter, Sort & Pagination
 router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
+    const { category, search, sort } = req.query;
+
+    // Build Query
+    let query = {};
+    if (category && category !== 'All') {
+      query.category = category;
+    }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Build Sort
+    let sortOption = { createdAt: -1 };
+    if (sort === 'priceAsc') sortOption = { price: 1 };
+    else if (sort === 'priceDesc') sortOption = { price: -1 };
+    else if (sort === 'nameAsc') sortOption = { name: 1 };
+    else if (sort === 'nameDesc') sortOption = { name: -1 };
 
     if (page && limit) {
-      // 1. Paginated Response (Standard)
+      // 1. Paginated Response
       const skip = (page - 1) * limit;
-      const totalCount = await Product.countDocuments();
-      const products = await Product.find()
-        .sort({ createdAt: -1 })
+      const totalCount = await Product.countDocuments(query);
+      const products = await Product.find(query)
+        .sort(sortOption)
         .skip(skip)
         .limit(limit);
 
@@ -29,19 +49,33 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // 2. Legacy Response (For EcomSphere V1 compatibility)
-    const products = await Product.find().sort({ createdAt: -1 });
+    // 2. Legacy/Full Response
+    const products = await Product.find(query).sort(sortOption);
 
-    // Group by category just like the EJS version
-    const categories = [...new Set(products.map(p => p.category))];
+    // Group by category for Home Page compatibility if no specific category is filtered
     const grouped = {};
-    categories.forEach(cat => {
-      grouped[cat] = products.filter(p => p.category === cat);
-    });
+    if (!category || category === 'All') {
+      const uniqueCats = [...new Set(products.map(p => p.category))];
+      uniqueCats.forEach(cat => {
+        grouped[cat] = products.filter(p => p.category === cat);
+      });
+    }
 
     res.status(200).json({ success: true, count: products.length, data: products, grouped });
   } catch (error) {
+    console.error('API Error:', error);
     res.status(500).json({ success: false, error: 'Server Error' });
+  }
+});
+
+// @desc    Get All Categories
+// @route   GET /api/v1/products/categories/list
+router.get('/categories/list', async (req, res) => {
+  try {
+    const categories = await Product.distinct('category');
+    res.status(200).json({ success: true, categories });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch categories' });
   }
 });
 
