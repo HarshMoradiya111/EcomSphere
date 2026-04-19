@@ -137,47 +137,153 @@ export default function FooterPartial({ settings, sessionUser = null }: FooterPa
       </footer>
 
       {/* FLOATING HELP WIDGET */}
-      <div className="fixed bottom-20 md:bottom-6 right-6 z-[1000] flex flex-col items-end">
-        {helpPanelOpen && (
-          <div className="mb-4 w-[300px] md:w-[350px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-             <div className="bg-[#088178] p-6 text-white flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                   <div className="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center border border-white/40">
-                      <i className="fa-solid fa-headset text-xl"></i>
-                   </div>
-                   <div>
-                      <h4 className="font-bold text-lg leading-tight">Help Center</h4>
-                      <div className="flex items-center gap-1 text-[10px] font-bold opacity-80 uppercase tracking-tighter">
-                         <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span> We're Online
-                      </div>
-                   </div>
-                </div>
-                <button onClick={() => setHelpPanelOpen(false)} className="hover:bg-black/10 p-2 rounded-full transition-colors">
-                  <i className="fa-solid fa-xmark"></i>
-                </button>
-             </div>
-             <div className="p-6">
-                <p className="text-gray-600 text-sm mb-6 font-medium leading-relaxed">👋 Hi! Need help with an order or product? Chat with our team now.</p>
-                <div className="space-y-3">
-                   <a href="https://wa.me/918160730726" target="_blank" className="flex items-center justify-center gap-3 w-full bg-[#25D366] text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-green-100 hover:scale-[1.02] transition-transform">
-                      <i className="fa-brands fa-whatsapp text-lg"></i> WhatsApp Us
-                   </a>
-                   <a href="mailto:support@ecomsphere.com" className="flex items-center justify-center gap-3 w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm hover:scale-[1.02] transition-transform">
-                      <i className="fa-solid fa-envelope"></i> Email Support
-                   </a>
-                   <Link href="/faq" onClick={() => setHelpPanelOpen(false)} className="flex items-center justify-center gap-3 w-full bg-gray-50 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition-colors">
-                      <i className="fa-solid fa-circle-question"></i> Browse FAQ
-                   </Link>
-                </div>
-             </div>
-          </div>
-        )}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .help-widget-container { position: fixed; bottom: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; font-family: 'Poppins', sans-serif; }
+        
+        .help-toggle-btn {
+          height: 64px;
+          padding: 0 28px;
+          border-radius: 32px;
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+          color: #fff;
+          border: none;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          position: relative;
+        }
+        .help-toggle-btn::before {
+          content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+          background: linear-gradient(135deg, #fb923c, #088178);
+          border-radius: 32px; z-index: -1; filter: blur(10px); opacity: 0; transition: opacity 0.4s;
+        }
+        .help-toggle-btn:hover { transform: translateY(-5px); }
+        .help-toggle-btn:hover::before { opacity: 0.6; }
+        .help-toggle-btn.open {
+          border-radius: 50%;
+          padding: 0;
+          width: 64px;
+          justify-content: center;
+          background: #ffffff;
+          color: #0f172a;
+          box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .help-toggle-icon { font-size: 22px; transition: transform 0.4s; }
+        .help-toggle-btn.open .help-toggle-icon { transform: rotate(90deg); }
+        .help-toggle-text { transition: opacity 0.2s, width 0.2s; white-space: nowrap; }
+        .help-toggle-btn.open .help-toggle-text { display: none; }
+
+        .help-panel-premium {
+          position: absolute;
+          bottom: 85px;
+          right: 0;
+          width: 360px;
+          background: #fff;
+          border-radius: 24px;
+          overflow: hidden;
+          box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+          border: 1px solid #f1f5f9;
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+          pointer-events: none;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          transform-origin: bottom right;
+        }
+        .help-panel-premium.visible {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          pointer-events: auto;
+        }
+        
+        .hp-header {
+          background: linear-gradient(135deg, #088178 0%, #06a899 100%);
+          padding: 30px 25px;
+          color: #fff;
+          position: relative;
+          overflow: hidden;
+        }
+        .hp-header::after {
+          content: ''; position: absolute; bottom: -40px; right: -40px; width: 140px; height: 140px;
+          background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
+        .hp-header-content { display: flex; align-items: center; gap: 15px; position: relative; z-index: 2; }
+        .hp-avatar {
+          width: 54px; height: 54px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .hp-avatar i { color: #088178; font-size: 26px; }
+        .hp-title h4 { margin: 0 0 6px 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .hp-status { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+        .hp-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80; animation: hpPulse 2s infinite; }
+        @keyframes hpPulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
+
+        .hp-body { padding: 25px; }
+        .hp-body p { margin: 0 0 24px 0; font-size: 14px; color: #475569; line-height: 1.6; font-weight: 500; }
+        .hp-actions { display: flex; flex-direction: column; gap: 12px; }
+        .hp-btn {
+          display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px;
+          border-radius: 14px; font-size: 14px; font-weight: 800; text-decoration: none; transition: all 0.3s;
+        }
+        .hp-btn-wa { background: #25d366; color: #fff; box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2); }
+        .hp-btn-wa:hover { background: #20b858; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(37, 211, 102, 0.3); }
+        .hp-btn-email { background: #0f172a; color: #fff; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2); }
+        .hp-btn-email:hover { background: #1e293b; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(15, 23, 42, 0.3); }
+        .hp-btn-faq { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .hp-btn-faq:hover { background: #e2e8f0; color: #0f172a; }
+        
+        @media (max-width: 768px) {
+          .help-widget-container { bottom: 80px; right: 20px; }
+          .help-panel-premium { width: calc(100vw - 40px); right: 0; }
+          .help-toggle-btn { height: 56px; padding: 0 20px; }
+          .help-toggle-btn.open { width: 56px; }
+          .help-toggle-text { display: none; }
+        }
+      `}} />
+      <div className="help-widget-container">
+        <div className={`help-panel-premium ${helpPanelOpen ? 'visible' : ''}`}>
+           <div className="hp-header">
+              <div className="hp-header-content">
+                 <div className="hp-avatar"><i className="fa-solid fa-headset"></i></div>
+                 <div className="hp-title">
+                    <h4>Help Center</h4>
+                    <div className="hp-status"><span className="hp-dot"></span> Online Now</div>
+                 </div>
+              </div>
+           </div>
+           <div className="hp-body">
+              <p>👋 Hi there! Need help with an order, sizing, or finding the perfect product? We're here for you.</p>
+              <div className="hp-actions">
+                 <a href="https://wa.me/918160730726" target="_blank" className="hp-btn hp-btn-wa">
+                    <i className="fa-brands fa-whatsapp text-xl"></i> Chat on WhatsApp
+                 </a>
+                 <a href="mailto:support@ecomsphere.com" className="hp-btn hp-btn-email">
+                    <i className="fa-solid fa-envelope text-lg"></i> Email Support
+                 </a>
+                 <Link href="/faq" onClick={() => setHelpPanelOpen(false)} className="hp-btn hp-btn-faq">
+                    <i className="fa-solid fa-book"></i> Browse FAQ
+                 </Link>
+              </div>
+           </div>
+        </div>
         <button 
           onClick={() => setHelpPanelOpen(!helpPanelOpen)}
-          className={`h-14 w-14 rounded-full flex items-center justify-center text-white shadow-2xl shadow-teal-200 transition-all duration-300 transform hover:rotate-12
-            ${helpPanelOpen ? 'bg-gray-900 scale-90' : 'bg-[#088178] hover:scale-110'}`}
+          className={`help-toggle-btn ${helpPanelOpen ? 'open' : ''}`}
+          style={{ alignSelf: 'flex-end' }}
         >
-          {helpPanelOpen ? <i className="fa-solid fa-minus text-2xl"></i> : <i className="fa-solid fa-message text-2xl"></i>}
+          {helpPanelOpen ? (
+             <i className="fa-solid fa-xmark help-toggle-icon"></i>
+          ) : (
+            <>
+              <i className="fa-solid fa-message help-toggle-icon"></i>
+              <span className="help-toggle-text">How can we help?</span>
+            </>
+          )}
         </button>
       </div>
     </>
