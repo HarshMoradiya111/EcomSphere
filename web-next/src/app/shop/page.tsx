@@ -57,18 +57,29 @@ export default async function ShopPage() {
       <div className="md:hidden h-14"></div>
 
       {/* NEWSLETTER */}
-      <section className="bg-[#041e42] py-12 px-4 md:px-20 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div className="text-center md:text-left text-white">
-          <h4 className="text-2xl font-black mb-2">Sign Up For Newsletters</h4>
-          <p className="text-gray-400 text-sm md:text-base">Get E-mail updates about our latest shop and <span className="text-[#ffbd27] font-bold">special offers.</span></p>
+      <section className="bg-[#041e42] py-16 px-4 md:px-20 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden relative">
+        {/* Background Decorative Glow */}
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#088178] opacity-10 blur-[100px] pointer-events-none"></div>
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#088178] opacity-10 blur-[100px] pointer-events-none"></div>
+
+        <div className="text-center md:text-left text-white relative z-10">
+          <h4 className="text-2xl md:text-3xl font-black mb-2" style={{ textShadow: '0 0 15px rgba(8, 129, 120, 0.6)' }}>
+            Sign Up For Newsletters
+          </h4>
+          <p className="text-gray-300 text-sm md:text-base font-medium" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.2)' }}>
+            Get E-mail updates about our latest shop and <span className="text-[#088178] font-bold" style={{ textShadow: '0 0 10px rgba(8, 129, 120, 0.8)' }}>special offers.</span>
+          </p>
         </div>
-        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-2">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 relative z-10">
           <input 
             type="email" 
             placeholder="Your email address" 
-            className="w-full md:w-[350px] px-6 py-4 rounded-md text-sm outline-none focus:ring-2 focus:ring-[#088178]"
+            className="w-full md:w-[350px] px-6 py-4 rounded-full text-sm outline-none bg-white/5 border border-white/10 text-white focus:border-[#088178] focus:ring-4 focus:ring-[#088178]/20 transition-all placeholder:text-gray-500"
+            style={{ backdropFilter: 'blur(10px)' }}
           />
-          <button className="bg-[#088178] text-white px-10 py-4 rounded-md font-bold text-sm whitespace-nowrap hover:bg-[#06665f] transition-all">
+          <button className="bg-[#088178] text-white px-10 py-4 rounded-full font-bold text-sm whitespace-nowrap hover:bg-[#0bc5b8] hover:shadow-[0_0_30px_rgba(8,129,120,0.6)] transition-all duration-300"
+            style={{ boxShadow: '0 0 20px rgba(8,129,120,0.4)' }}
+          >
             Sign Up
           </button>
         </div>
