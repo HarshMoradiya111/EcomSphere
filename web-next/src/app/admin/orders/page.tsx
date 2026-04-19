@@ -124,7 +124,7 @@ export default function AdminOrders() {
                       <span className="fw-bold text-dark font-monospace">₹{o.totalAmount.toLocaleString()}</span>
                     </td>
                     <td className="text-muted small">
-                      {new Date(o.createdAt).toLocaleDateString()}
+                      {new Date(o.createdAt).toLocaleDateString('en-IN')}
                     </td>
                     <td className="text-end pe-4">
                       <Link href={`/admin/orders/${o._id}`} className="btn btn-sm btn-outline-secondary px-3 py-1" style={{ fontSize: '11px' }}>

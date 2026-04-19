@@ -397,7 +397,8 @@ const getTrackOrder = async (req, res) => {
   const downloadInvoice = async (req, res) => {
     try {
       const order = await Order.findById(req.params.id);
-      if (!order || (order.userId.toString() !== req.session.userId && !req.session.adminId)) {
+      const userId = req.user?.id || req.session?.userId;
+      if (!order || (order.userId.toString() !== userId && !req.session?.adminId)) {
         return res.status(403).send('Unauthorized');
       }
   

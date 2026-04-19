@@ -6,6 +6,7 @@ import SafeImage from '@/components/SafeImage';
 import { getProductImageSrc, getProductImageFallbackSrc } from '@/utils/imagePaths';
 import { API_URL } from '@/config';
 import Link from 'next/link';
+import { getToken } from '@/utils/auth';
 
 const FONT = '"Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -289,10 +290,49 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
   );
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, isInitiallyWishlisted }: { product: Product, isInitiallyWishlisted: boolean }) {
   const isNew = false; // could derive from createdAt if needed
+  const [isWishlisted, setIsWishlisted] = useState(isInitiallyWishlisted);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+
+  useEffect(() => {
+    setIsWishlisted(isInitiallyWishlisted);
+  }, [isInitiallyWishlisted]);
+
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const token = getToken();
+    if (!token) {
+      window.location.href = `/auth/login?redirect=/shop`;
+      return;
+    }
+    
+    setIsWishlistLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/v1/user/wishlist/toggle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ productId: product._id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsWishlisted(data.action === 'added');
+        window.dispatchEvent(new Event('wishlist-updated'));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  };
+
   return (
-    <div className="pl-card">
+    <div className="pl-card" onClick={() => window.location.href = `/product/${product._id}`}>
       {/* Image */}
       <div className="pl-img-wrap">
         <Link href={`/product/${product._id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
@@ -308,8 +348,22 @@ function ProductCard({ product }: { product: Product }) {
         <span className="pl-badge">{product.category}</span>
         {isNew && <span className="pl-new-tag">New</span>}
 
-        {/* Hover overlay */}
         <div className="pl-overlay">
+          <button
+            className={`pl-qa-btn wish-btn ${isWishlisted ? 'wishlisted' : ''}`}
+            title="Wishlist"
+            onClick={handleWishlistToggle}
+            disabled={isWishlistLoading}
+          >
+            {isWishlistLoading ? (
+              <i className="fa-solid fa-circle-notch fa-spin" style={{ fontSize: '11px' }} />
+            ) : isWishlisted ? (
+              <i className="fa-solid fa-heart" style={{ fontSize: '11px' }} />
+            ) : (
+              <i className="fa-regular fa-heart" style={{ fontSize: '11px' }} />
+            )}
+            Wishlist
+          </button>
           <a
             href="#"
             className="pl-qa-btn cart-btn add-to-cart cart1"
@@ -318,11 +372,12 @@ function ProductCard({ product }: { product: Product }) {
             data-price={product.price}
             data-image={product.image}
             title="Add to Cart"
+            onClick={(e) => e.stopPropagation()}
           >
             <i className="fa-solid fa-bag-shopping" style={{ fontSize: '11px' }} />
             Add to Cart
           </a>
-          <Link href={`/product/${product._id}`} className="pl-qa-btn" title="View Product">
+          <Link href={`/product/${product._id}`} className="pl-qa-btn" title="View Product" onClick={(e) => e.stopPropagation()}>
             <i className="fa-solid fa-eye" style={{ fontSize: '11px' }} />
             View
           </Link>
@@ -354,7 +409,7 @@ function ProductCard({ product }: { product: Product }) {
         )}
         <div className="pl-price-row">
           <span className="pl-price">₹{Number(product.price).toLocaleString('en-IN')}</span>
-          <Link href={`/product/${product._id}`} className="pl-view-btn" title="View Details">
+          <Link href={`/product/${product._id}`} className="pl-view-btn" title="View Details" onClick={(e) => e.stopPropagation()}>
             <i className="fa-solid fa-arrow-right" />
           </Link>
         </div>
@@ -392,8 +447,24 @@ function ProductListContent() {
   const [category, setCategory] = useState(searchParams.get('category') || 'All');
   const [sort, setSort] = useState('newest');
   const [allCategories, setAllCategories] = useState<string[]>([]);
+  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
 
   const [cols, setCols] = useState(4);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    fetch(`${API_URL}/api/v1/user/wishlist`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.wishlist) {
+          setWishlistIds(data.wishlist.map((w: any) => w._id || w));
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     const updateCols = () => {
@@ -521,7 +592,11 @@ function ProductListContent() {
       ) : products.length > 0 ? (
         <div style={gridStyle}>
           {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+            <ProductCard 
+              key={product._id} 
+              product={product} 
+              isInitiallyWishlisted={wishlistIds.includes(product._id)}
+            />
           ))}
           {/* Loading skeletons for load-more */}
           {loading && Array.from({ length: cols }).map((_, i) => <SkeletonCard key={`sk-${i}`} />)}

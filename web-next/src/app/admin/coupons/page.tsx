@@ -82,7 +82,7 @@ export default function CouponsPage() {
                     <td>₹{coupon.minPurchase}</td>
                     <td>
                       <span className={new Date(coupon.expiryDate) < new Date() ? 'text-danger fw-bold' : 'text-muted'}>
-                        {new Date(coupon.expiryDate).toLocaleDateString()}
+                        {new Date(coupon.expiryDate).toLocaleDateString('en-IN')}
                       </span>
                     </td>
                     <td className="small font-monospace text-muted">{coupon.usedCount} / <span className="opacity-50">{coupon.usageLimit || '∞'}</span></td>

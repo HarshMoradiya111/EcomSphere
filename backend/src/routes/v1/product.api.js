@@ -124,4 +124,17 @@ router.get('/faqs', async (req, res) => {
   }
 });
 
+// @desc    Get Multiple Products by IDs
+// @route   GET /api/v1/products/bulk
+router.get('/bulk', async (req, res) => {
+  try {
+    const ids = req.query.ids ? req.query.ids.split(',') : [];
+    if (ids.length === 0) return res.status(200).json({ success: true, data: [] });
+    const products = await Product.find({ _id: { $in: ids } });
+    res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch bulk products' });
+  }
+});
+
 module.exports = router;

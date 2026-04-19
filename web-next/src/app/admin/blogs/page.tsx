@@ -128,7 +128,7 @@ export default function AdminBlogs() {
                     </td>
                     <td>
                       <p className="fw-bold text-dark mb-0" style={{ fontSize: '15px' }}>{blog.title}</p>
-                      <p className="text-muted small fw-bold text-uppercase mb-0" style={{ fontSize: '10px', letterSpacing: '1px' }}>{new Date(blog.date).toLocaleDateString()}</p>
+                      <p className="text-muted small fw-bold text-uppercase mb-0" style={{ fontSize: '10px', letterSpacing: '1px' }}>{new Date(blog.date).toLocaleDateString('en-IN')}</p>
                     </td>
                     <td><span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">{blog.category || 'General'}</span></td>
                     <td className="text-end pe-4">

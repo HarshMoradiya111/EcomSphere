@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { API_URL } from '@/config';
+import { getToken } from '@/utils/auth';
 
 function showToast(message: string, type: 'success' | 'error' | 'info' = 'success') {
   const existing = document.querySelector('.toast');
@@ -287,7 +288,8 @@ export default function StorefrontBridge() {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
-              'x-nextjs-bridge': 'true'
+              'x-nextjs-bridge': 'true',
+              'Authorization': `Bearer ${getToken()}`
             },
             credentials: 'include',
             body: JSON.stringify({ productId, quantity: 1 }),
@@ -332,7 +334,8 @@ export default function StorefrontBridge() {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
-              'x-nextjs-bridge': 'true'
+              'x-nextjs-bridge': 'true',
+              'Authorization': `Bearer ${getToken()}`
             },
             credentials: 'include',
             body: JSON.stringify({ productId }),
@@ -397,7 +400,8 @@ export default function StorefrontBridge() {
             method,
             credentials: 'include',
             headers: { 
-              'x-nextjs-bridge': 'true'
+              'x-nextjs-bridge': 'true',
+              'Authorization': `Bearer ${getToken()}`
             },
             body: formData,
           });
@@ -415,7 +419,8 @@ export default function StorefrontBridge() {
             credentials: 'include',
             headers: { 
               'Content-Type': 'application/x-www-form-urlencoded',
-              'x-nextjs-bridge': 'true'
+              'x-nextjs-bridge': 'true',
+              'Authorization': `Bearer ${getToken()}`
             },
             body: new URLSearchParams(formData as unknown as Record<string, string>),
           });

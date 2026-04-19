@@ -1,24 +1,35 @@
-import RemoteHtmlPage from '@/components/ejs-partials/RemoteHtmlPage';
-import { fetchRemotePagePayload } from '@/server/remotePagePayload';
-import HeaderPartial from '@/components/ejs-partials/HeaderPartial';
-import FooterPartial from '@/components/ejs-partials/FooterPartial';
+import type { Metadata } from 'next';
+import ProfileClient from '@/components/profile/ProfileClient';
 import { getSessionUsername } from '@/server/sessionUser';
 import { getSiteSettings } from '@/server/siteSettings';
+import { getFullProfile } from '@/lib/api/user';
+import { redirect } from 'next/navigation';
+
+export const metadata: Metadata = {
+  title: 'My Profile | EcomSphere',
+};
+
 export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
-  const initialPayload = await fetchRemotePagePayload('/profile');
   const sessionUser = await getSessionUsername();
+  
+  if (!sessionUser) {
+    redirect('/login');
+  }
+
+  const profileData = await getFullProfile();
+  if (!profileData) {
+    redirect('/login');
+  }
+
   const settings = await getSiteSettings();
+
   return (
-    <>
-      <HeaderPartial 
-        activePage="profile" 
-        sessionUser={sessionUser} 
-        settings={settings} 
-      />
-      <RemoteHtmlPage path="/profile" initialPayload={initialPayload} />
-      <FooterPartial settings={settings} sessionUser={sessionUser} />
-    </>
+    <ProfileClient 
+      initialData={profileData} 
+      sessionUser={sessionUser} 
+      settings={settings} 
+    />
   );
 }

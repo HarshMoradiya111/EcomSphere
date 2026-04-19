@@ -1,65 +1,36 @@
-import RemoteHtmlPage from '@/components/ejs-partials/RemoteHtmlPage';
-import { fetchRemotePagePayload } from '@/server/remotePagePayload';
-import StorefrontShell from '@/components/ejs-partials/StorefrontShell';
+import type { Metadata } from 'next';
+import { API_URL } from '@/config';
+import CompareClient from '@/components/compare/CompareClient';
 import { getSessionUsername } from '@/server/sessionUser';
 import { getSiteSettings } from '@/server/siteSettings';
 
-export const dynamic = 'force-dynamic';
-
-type CompareSearchParams = {
-  ids?: string | string[];
+export const metadata: Metadata = {
+  title: 'Compare Products | EcomSphere',
 };
 
-function safeDecodeURIComponent(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
+export const dynamic = 'force-dynamic';
+
+async function getBulkProducts(ids: string[]) {
+  if (!ids.length) return [];
+  const res = await fetch(`${API_URL}/api/v1/products/bulk?ids=${ids.join(',')}`, {
+    cache: 'no-store'
+  });
+  if (!res.ok) return [];
+  const json = await res.json();
+  return json.data || [];
 }
 
-function normalizeCompareIds(rawIds: string): string[] {
-  if (!rawIds.trim()) {
-    return [];
-  }
-
-  // Decode up to two passes to tolerate legacy double-encoded links.
-  const decoded = safeDecodeURIComponent(safeDecodeURIComponent(rawIds));
-  return decoded
-    .split(',')
-    .map((value) => value.trim())
-    .filter((value, index, all) => value.length > 0 && all.indexOf(value) === index)
-    .slice(0, 4);
-}
-
-function firstValue(value: string | string[] | undefined): string {
-  if (Array.isArray(value)) {
-    return value[0] || '';
-  }
-
-  return value || '';
-}
-
-export default async function ComparePage({
-  searchParams,
-}: {
-  searchParams?: CompareSearchParams | Promise<CompareSearchParams>;
-}) {
-  const resolvedSearchParams = await Promise.resolve(searchParams);
-  const ids = normalizeCompareIds(firstValue(resolvedSearchParams?.ids));
-  const path = ids.length > 0 ? `/compare?ids=${ids.join(',')}` : '/compare';
-  const initialPayload = await fetchRemotePagePayload(path);
+export default async function ComparePage({ searchParams }: { searchParams: { ids?: string } }) {
+  const ids = searchParams.ids ? searchParams.ids.split(',') : [];
+  const initialProducts = await getBulkProducts(ids);
   const sessionUser = await getSessionUsername();
   const settings = await getSiteSettings();
 
   return (
-    <StorefrontShell
-      header={{ activePage: 'compare', sessionUser }}
-      settings={settings}
-      sessionUser={sessionUser}
-      breadcrumbs={[{ name: 'Compare', url: '/compare' }]}
-    >
-      <RemoteHtmlPage path={path} initialPayload={initialPayload} />
-    </StorefrontShell>
+    <CompareClient 
+      initialProducts={initialProducts} 
+      sessionUser={sessionUser} 
+      settings={settings} 
+    />
   );
 }

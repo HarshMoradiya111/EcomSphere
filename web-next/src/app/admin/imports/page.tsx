@@ -92,10 +92,10 @@ export default function ImportHistory() {
                   <tr key={record._id}>
                     <td className="ps-4">
                       <div className="fw-bold text-dark" style={{ fontSize: '13px' }}>
-                        {new Date(record.createdAt).toLocaleDateString()}
+                        {new Date(record.createdAt).toLocaleDateString('en-IN')}
                       </div>
                       <small className="text-muted text-uppercase" style={{ fontSize: '10px' }}>
-                        {new Date(record.createdAt).toLocaleTimeString()}
+                        {new Date(record.createdAt).toLocaleTimeString('en-IN')}
                       </small>
                     </td>
                     <td>

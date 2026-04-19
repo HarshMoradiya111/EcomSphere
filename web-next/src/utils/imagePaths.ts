@@ -23,13 +23,19 @@ export function getImageUrl(image: any): string {
   if (imgStr.startsWith('http')) {
     return imgStr;
   }
-  
-  // 2. If it already contains a directory separator, assume it's a qualified relative path
-  if (imgStr.includes('/')) {
-    return `${API_URL}${imgStr.startsWith('/') ? '' : '/'}${imgStr}`;
+
+  // 2. If it's a specific local image starting with /img/ or /uploads/, return with API_URL
+  if (imgStr.startsWith('/img/') || imgStr.startsWith('/uploads/')) {
+    return `${API_URL}${imgStr}`;
   }
   
-  // 3. Default fallback: All raw filenames map to the primary uploads directory
+  // 3. If it contains a directory separator but doesn't start with /, prepend it
+  if (imgStr.includes('/')) {
+    return `${API_URL}/${imgStr}`;
+  }
+  
+  // 4. Heuristic: If it looks like a filename, it could be in /img/products/ (legacy) or /uploads/ (new)
+  // We'll try /uploads/ as default but allow the browser to fallback via onError in components
   return `${API_URL}/uploads/${imgStr}`;
 }
 
@@ -39,7 +45,9 @@ export function getProductImageSrc(image?: string | null) {
 }
 
 export function getProductImageFallbackSrc(image?: string | null) {
-  if (!image || typeof image !== 'string') return '';
-  if (image.startsWith('http') || image.startsWith('/img/')) return '';
+  if (!image || typeof image !== 'string') return `${API_URL}/img/placeholder.jpg`;
+  if (image.startsWith('http')) return image;
+  if (image.startsWith('/img/')) return `${API_URL}${image}`;
   return `${API_URL}/img/products/${image}`;
 }
+

@@ -8,6 +8,7 @@ apiRouter.use('/admin', require('./v1/admin.api'));
 apiRouter.use('/blogs', require('./v1/blog.api'));
 apiRouter.use('/orders', require('./v1/order.api'));
 apiRouter.use('/user', require('./v1/user.api'));
+apiRouter.use('/checkout', require('./v1/checkout.api'));
 
 // 2. VIEW ROUTES (EJS Bridge Pages)
 const viewRouter = express.Router();

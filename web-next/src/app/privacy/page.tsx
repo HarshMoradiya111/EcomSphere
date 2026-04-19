@@ -1,23 +1,74 @@
-import RemoteHtmlPage from '@/components/ejs-partials/RemoteHtmlPage';
-import { fetchRemotePagePayload } from '@/server/remotePagePayload';
+import type { Metadata } from 'next';
 import HeaderPartial from '@/components/ejs-partials/HeaderPartial';
 import FooterPartial from '@/components/ejs-partials/FooterPartial';
 import { getSessionUsername } from '@/server/sessionUser';
 import { getSiteSettings } from '@/server/siteSettings';
-export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | EcomSphere',
+};
 
 export default async function PrivacyPage() {
-  const initialPayload = await fetchRemotePagePayload('/privacy');
   const sessionUser = await getSessionUsername();
   const settings = await getSiteSettings();
+
   return (
     <>
-      <HeaderPartial 
-        activePage="" 
-        sessionUser={sessionUser} 
-        settings={settings} 
-      />
-      <RemoteHtmlPage path="/privacy" initialPayload={initialPayload} />
+      <HeaderPartial activePage="" sessionUser={sessionUser} settings={settings} />
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .legal-content { max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.8; color: #444; font-family: 'Poppins', sans-serif; }
+        .legal-content h1 { font-size: 32px; color: #1a1a1a; margin-bottom: 30px; font-weight: 700; }
+        .legal-content h2 { font-size: 22px; color: #088178; margin-top: 40px; margin-bottom: 15px; font-weight: 600; }
+        .legal-content p { margin-bottom: 20px; }
+        .legal-content ul { margin-bottom: 20px; padding-left: 20px; list-style-type: disc; }
+        .legal-content li { margin-bottom: 10px; }
+        .last-updated { font-style: italic; color: #888; margin-bottom: 40px; }
+      `}} />
+
+      <section id="page-header" className="about-header" style={{ backgroundImage: "url('/img/about/banner.png')" }}>
+        <h2>#PrivacyFirst</h2>
+        <p>Learn how we protect and manage your data</p>
+      </section>
+
+      <div className="legal-content">
+        <p className="last-updated">Last Updated: April 3, 2026</p>
+        
+        <h1>Privacy Policy</h1>
+        
+        <p>At EcomSphere, we are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This policy outlines how we collect, use, and protect your data.</p>
+
+        <h2>1. Information We Collect</h2>
+        <p>When you use our platform, we may collect the following types of information:</p>
+        <ul>
+          <li>Personal details (Name, Email, Phone number).</li>
+          <li>Shipping and billing addresses.</li>
+          <li>Order history and preferences.</li>
+          <li>Technical data (IP address, browser type, device information).</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <p>We use your data to provide a seamless shopping experience, including:</p>
+        <ul>
+          <li>Processing and fulfilling your orders.</li>
+          <li>Providing customer support and responding to inquiries.</li>
+          <li>Sending order status updates and promotional offers (if opted-in).</li>
+          <li>Improving our website performance and user experience.</li>
+        </ul>
+
+        <h2>3. Data Protection</h2>
+        <p>We implement a variety of security measures to maintain the safety of your personal information. Your sensitive data (like credit card information) is encrypted via Secure Socket Layer (SSL) technology and is never stored on our servers.</p>
+
+        <h2>4. Third-Party Sharing</h2>
+        <p>We do not sell, trade, or otherwise transfer your personally identifiable information to outside parties except for trusted partners who assist us in operating our website, conducting our business, or servicing you (e.g., courier partners).</p>
+
+        <h2>5. Your Rights</h2>
+        <p>You have the right to access, correct, or delete your personal data at any time through your profile settings or by contacting our support team.</p>
+
+        <h2>Contact Us</h2>
+        <p>If you have any questions regarding this privacy policy, you may contact us at support@ecomsphere.com.</p>
+      </div>
+
       <FooterPartial settings={settings} sessionUser={sessionUser} />
     </>
   );

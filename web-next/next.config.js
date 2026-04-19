@@ -12,6 +12,10 @@ const nextConfig = {
       },
     ],
   },
+  devIndicators: {
+    buildActivity: true,
+    buildActivityPosition: 'bottom-right',
+  },
   async rewrites() {
     return [
       // API routes should still be rewritten

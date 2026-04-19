@@ -7,14 +7,21 @@ const User = require('../models/User');
 // I will use replace_file_content carefully.
 
 // Helper to get User ID from either session (EJS) or JWT (API)
-const getUserId = (req) => req.session?.userId || req.user?.id;
+const getUserId = (req) => {
+  const id = req.user?.id || req.session?.userId;
+  if (!id) console.log(`[AUTH DEBUG] No user ID found for ${req.method} ${req.path}`);
+  return id;
+};
 
 // GET /api/cart - Fetch user's cart
 const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ userId: getUserId(req) });
+    const userId = getUserId(req);
+    console.log(`[CART DEBUG] Fetching cart for user: ${userId}`);
+    const cart = await Cart.findOne({ userId });
 
     if (!cart || cart.items.length === 0) {
+      console.log(`[CART DEBUG] Cart empty or not found for user: ${userId}`);
       return res.json({ success: true, cart: [], total: 0 });
     }
 
@@ -34,14 +41,17 @@ const getCart = async (req, res) => {
         subtotal: item.price * item.quantity,
       })),
       appliedCoupon: cart.appliedCoupon,
+      pointsUsed: cart.pointsUsed || 0,
+      pointsDiscount: cart.pointsDiscount || 0,
       discountAmount: cart.discountAmount || 0,
-      total: parseFloat((total - (cart.discountAmount || 0)).toFixed(2)),
+      total: parseFloat((total - (cart.discountAmount || 0) - (cart.pointsDiscount || 0)).toFixed(2)),
     });
   } catch (error) {
     console.error('Get cart error:', error);
     return res.status(500).json({ success: false, error: 'Failed to fetch cart' });
   }
 };
+
 
 // GET /cart - Cart page (view)
 const getCartPage = (req, res) => {
@@ -235,7 +245,7 @@ async function applyPoints(req, res) {
       message: 'Points applied!',
       pointsUsed: pointsToUse,
       pointsDiscount: pointsDiscount,
-      total: parseFloat((total - cart.discountAmount - pointsDiscount).toFixed(2))
+      total: parseFloat((total - (cart.discountAmount || 0) - pointsDiscount).toFixed(2))
     });
   } catch (error) {
     console.error('Apply points error:', error);
@@ -256,7 +266,7 @@ async function removePoints(req, res) {
     return res.json({
       success: true,
       message: 'Points removed',
-      total: parseFloat((total - cart.discountAmount).toFixed(2))
+      total: parseFloat((total - (cart.discountAmount || 0)).toFixed(2))
     });
   } catch (error) {
     console.error('Remove points error:', error);
@@ -311,7 +321,7 @@ async function removePoints(req, res) {
      await cart.save();
      
      const total = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-     return res.json({ success: true, message: 'Coupon removed', total });
+     return res.json({ success: true, message: 'Coupon removed', total: parseFloat((total - (cart.pointsDiscount || 0)).toFixed(2)) });
    } catch (error) {
      console.error('Remove coupon error:', error);
      return res.status(500).json({ success: false, error: 'Failed to remove coupon' });

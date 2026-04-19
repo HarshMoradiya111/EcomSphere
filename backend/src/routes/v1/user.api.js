@@ -111,4 +111,38 @@ router.post('/profile/photo', isAuthenticatedApi, upload.single('profilePhoto'),
   }
 });
 
+// GET /api/v1/user/wishlist - Get wishlist products
+router.get('/wishlist', isAuthenticatedApi, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('wishlist');
+    res.json({ success: true, wishlist: user ? user.wishlist : [] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch wishlist' });
+  }
+});
+
+// POST /api/v1/user/wishlist/toggle - Toggle product in wishlist
+router.post('/wishlist/toggle', isAuthenticatedApi, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const user = await User.findById(req.user.id);
+    
+    const index = user.wishlist.indexOf(productId);
+    let action = '';
+
+    if (index > -1) {
+      user.wishlist.splice(index, 1);
+      action = 'removed';
+    } else {
+      user.wishlist.push(productId);
+      action = 'added';
+    }
+
+    await user.save();
+    res.json({ success: true, action, wishlistCount: user.wishlist.length });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to toggle wishlist' });
+  }
+});
+
 module.exports = router;

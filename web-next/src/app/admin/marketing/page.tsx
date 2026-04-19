@@ -248,7 +248,7 @@ export default function MarketingPage() {
                       <span className={`badge px-2 py-1 text-uppercase ${sale.isActive ? 'bg-primary' : 'bg-secondary'}`}>{sale.isActive ? 'ON-AIR' : 'DARK'}</span>
                     </div>
                     <p className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>{sale.discountText}</p>
-                    <p className="text-muted small fw-bold text-uppercase mb-0" style={{ fontSize: '10px', letterSpacing: '1px' }}>EXP: {new Date(sale.endTime).toLocaleString()}</p>
+                    <p className="text-muted small fw-bold text-uppercase mb-0" style={{ fontSize: '10px', letterSpacing: '1px' }}>EXP: {new Date(sale.endTime).toLocaleString('en-IN')}</p>
                   </div>
                 )) : (
                   <p className="text-center text-muted small py-3 text-uppercase fw-bold mb-0" style={{ letterSpacing: '2px' }}>No Temporal Anomalies</p>
@@ -279,7 +279,7 @@ export default function MarketingPage() {
                 {subscribers.length > 0 ? subscribers.map((sub: any) => (
                   <tr key={sub._id}>
                     <td className="ps-4 fw-bold text-dark">{sub.email}</td>
-                    <td className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '1px', fontSize: '11px' }}>{new Date(sub.subscribedAt).toLocaleDateString()}</td>
+                    <td className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '1px', fontSize: '11px' }}>{new Date(sub.subscribedAt).toLocaleDateString('en-IN')}</td>
                     <td className="text-end pe-4">
                       <button className="btn btn-sm btn-outline-danger fw-bold text-uppercase" style={{ fontSize: '11px', padding: '4px 12px' }}>Terminate</button>
                     </td>

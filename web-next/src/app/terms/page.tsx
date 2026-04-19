@@ -1,23 +1,67 @@
-import RemoteHtmlPage from '@/components/ejs-partials/RemoteHtmlPage';
-import { fetchRemotePagePayload } from '@/server/remotePagePayload';
+import type { Metadata } from 'next';
 import HeaderPartial from '@/components/ejs-partials/HeaderPartial';
 import FooterPartial from '@/components/ejs-partials/FooterPartial';
 import { getSessionUsername } from '@/server/sessionUser';
 import { getSiteSettings } from '@/server/siteSettings';
-export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Terms & Conditions | EcomSphere',
+};
 
 export default async function TermsPage() {
-  const initialPayload = await fetchRemotePagePayload('/terms');
   const sessionUser = await getSessionUsername();
   const settings = await getSiteSettings();
+
   return (
     <>
-      <HeaderPartial 
-        activePage="" 
-        sessionUser={sessionUser} 
-        settings={settings} 
-      />
-      <RemoteHtmlPage path="/terms" initialPayload={initialPayload} />
+      <HeaderPartial activePage="" sessionUser={sessionUser} settings={settings} />
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .legal-content { max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.8; color: #444; font-family: 'Poppins', sans-serif; }
+        .legal-content h1 { font-size: 32px; color: #1a1a1a; margin-bottom: 30px; font-weight: 700; }
+        .legal-content h2 { font-size: 22px; color: #088178; margin-top: 40px; margin-bottom: 15px; font-weight: 600; }
+        .legal-content p { margin-bottom: 20px; }
+        .legal-content ul { margin-bottom: 20px; padding-left: 20px; list-style-type: disc; }
+        .legal-content li { margin-bottom: 10px; }
+        .last-updated { font-style: italic; color: #888; margin-bottom: 40px; }
+      `}} />
+
+      <section id="page-header" className="about-header" style={{ backgroundImage: "url('/img/about/banner.png')" }}>
+        <h2>#OurAgreement</h2>
+        <p>Guidelines for using the EcomSphere platform</p>
+      </section>
+
+      <div className="legal-content">
+        <p className="last-updated">Last Updated: April 3, 2026</p>
+        
+        <h1>Terms & Conditions</h1>
+        
+        <p>Welcome to EcomSphere. By accesssing or using our website, you agree to be bound by the following terms and conditions. If you do not agree with any part of these terms, please do not use our services.</p>
+
+        <h2>1. Order Process & Payment</h2>
+        <p>By placing an order on EcomSphere, you represent that you are at least 18 years of age and that all information provided is accurate and complete.</p>
+        <ul>
+          <li>All orders are subject to availability and payment confirmation.</li>
+          <li>We reserve the right to refuse or cancel any order for any reason, including errors in pricing or availability.</li>
+          <li>Payments are processed securely via our trusted payment gateways.</li>
+        </ul>
+
+        <h2>2. Pricing & Descriptions</h2>
+        <p>We strive for accuracy, but errors may occasionally occur in product descriptions or pricing. If an error is detected, we will notify you as soon as possible and offer the option to reconfirm the order at the correct price or cancel it.</p>
+
+        <h2>3. Intellectual Property</h2>
+        <p>All content on EcomSphere, including text, graphics, logos, and images, is the property of EcomSphere and is protected by copyright and intellectual property laws. Unauthorized use of this content is strictly prohibited.</p>
+
+        <h2>4. Limitation of Liability</h2>
+        <p>EcomSphere shall not be liable for any direct, indirect, incidental, or consequential damages resulting from your use of this website or any products purchased through it.</p>
+
+        <h2>5. Changes to Terms</h2>
+        <p>We reserve the right to modify these terms at any time without prior notice. Any changes will be posted on this page, and your continued use of the website signifies your acceptance of the updated terms.</p>
+
+        <h2>Contact Us</h2>
+        <p>If you have any questions regarding these terms, you may contact us at support@ecomsphere.com.</p>
+      </div>
+
       <FooterPartial settings={settings} sessionUser={sessionUser} />
     </>
   );

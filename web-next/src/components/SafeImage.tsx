@@ -43,9 +43,9 @@ export default function SafeImage({
           source.startsWith('/uploads/') ? `/img/products/${fileName}` : `/uploads/${fileName}`,
           fallbackSrc,
           getProductImageFallbackSrc(source),
-          placeholderImage,
+          placeholderImage || '/img/placeholder.jpg',
         ]
-      : [source, fallbackSrc, getProductImageFallbackSrc(source), placeholderImage].filter(Boolean);
+      : [source, fallbackSrc, getProductImageFallbackSrc(source), placeholderImage || '/img/placeholder.jpg'].filter(Boolean);
 
     return uniqueSources(alternateSources).filter(Boolean);
   }, [fallbackSrc, source, placeholderImage]);
