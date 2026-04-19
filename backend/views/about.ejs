@@ -114,26 +114,34 @@
 
     /* Features / Stats Bar */
     .classic-stats {
-      background: var(--classic-teal);
-      padding: 60px 20px;
+      background: #041e42; /* Darker navy background for better glow contrast */
+      padding: 80px 20px;
       display: flex;
       justify-content: space-around;
       text-align: center;
       color: #fff;
-      border-radius: 8px;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     }
 
     .stat-box h3 {
-      font-size: 2.5rem;
-      margin-bottom: 5px;
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: #ffbd27; /* Glowing Gold */
+      text-shadow: 0 0 15px rgba(255, 189, 39, 0.4);
+      letter-spacing: -1px;
     }
 
     .stat-box p {
       text-transform: uppercase;
-      font-size: 12px;
-      font-weight: 600;
-      opacity: 0.8;
-      letter-spacing: 1px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      opacity: 0.9;
+      letter-spacing: 1.5px;
     }
 
     /* Heritage Section */
