@@ -57,28 +57,28 @@ export default async function ShopPage() {
       <div className="md:hidden h-14"></div>
 
       {/* NEWSLETTER */}
-      <section className="bg-[#041e42] py-16 px-4 md:px-20 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden relative">
-        {/* Background Decorative Glow */}
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#088178] opacity-10 blur-[100px] pointer-events-none"></div>
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#088178] opacity-10 blur-[100px] pointer-events-none"></div>
+      <section className="bg-[#041e42] py-20 px-4 md:px-20 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden relative">
+        {/* Background Decorative Glow - Increased intensity */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#088178] opacity-20 blur-[120px] pointer-events-none"></div>
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#088178] opacity-20 blur-[120px] pointer-events-none"></div>
 
         <div className="text-center md:text-left text-white relative z-10">
-          <h4 className="text-2xl md:text-3xl font-black mb-2" style={{ textShadow: '0 0 15px rgba(8, 129, 120, 0.6)' }}>
+          <h4 className="text-3xl md:text-4xl font-black mb-3 tracking-tight" style={{ color: '#ffffff', textShadow: '0 0 20px rgba(8, 129, 120, 0.8)' }}>
             Sign Up For Newsletters
           </h4>
-          <p className="text-gray-300 text-sm md:text-base font-medium" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.2)' }}>
-            Get E-mail updates about our latest shop and <span className="text-[#088178] font-bold" style={{ textShadow: '0 0 10px rgba(8, 129, 120, 0.8)' }}>special offers.</span>
+          <p className="text-white/90 text-sm md:text-lg font-medium max-w-[500px]" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+            Get E-mail updates about our latest shop and <span className="text-[#ffbd27] font-bold" style={{ textShadow: '0 0 10px rgba(255, 189, 39, 0.5)' }}>special offers.</span>
           </p>
         </div>
-        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 relative z-10">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-4 relative z-10">
           <input 
             type="email" 
             placeholder="Your email address" 
-            className="w-full md:w-[350px] px-6 py-4 rounded-full text-sm outline-none bg-white/5 border border-white/10 text-white focus:border-[#088178] focus:ring-4 focus:ring-[#088178]/20 transition-all placeholder:text-gray-500"
-            style={{ backdropFilter: 'blur(10px)' }}
+            className="w-full md:w-[400px] px-8 py-5 rounded-full text-base outline-none bg-white/10 border border-white/20 text-white focus:border-[#088178] focus:ring-4 focus:ring-[#088178]/30 transition-all placeholder:text-gray-400"
+            style={{ backdropFilter: 'blur(15px)' }}
           />
-          <button className="bg-[#088178] text-white px-10 py-4 rounded-full font-bold text-sm whitespace-nowrap hover:bg-[#0bc5b8] hover:shadow-[0_0_30px_rgba(8,129,120,0.6)] transition-all duration-300"
-            style={{ boxShadow: '0 0 20px rgba(8,129,120,0.4)' }}
+          <button className="bg-[#088178] text-white px-12 py-5 rounded-full font-black text-base uppercase tracking-wider whitespace-nowrap hover:bg-[#0bc5b8] hover:shadow-[0_0_40px_rgba(8,129,120,0.8)] transition-all duration-300 transform hover:-translate-y-1 active:scale-95"
+            style={{ boxShadow: '0 10px 30px rgba(8,129,120,0.5)' }}
           >
             Sign Up
           </button>
