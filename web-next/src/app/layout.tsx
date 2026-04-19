@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import StorefrontBridge from '@/components/ejs-partials/StorefrontBridge';
 import './globals.css';
 
+
 export const metadata: Metadata = {
   title: 'EcomSphere',
   description: 'Your one-stop e-commerce destination',

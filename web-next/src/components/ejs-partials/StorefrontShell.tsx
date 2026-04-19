@@ -30,9 +30,7 @@ export default function StorefrontShell({
 
   return (
     <>
-      <link rel="stylesheet" href="/css/style.css" />
-      <link href="https://fonts.googleapis.com/css2?family=Spartan:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-      <HeaderPartial {...header} settings={settings || header.settings} sessionUser={resolvedSessionUser} />
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" /><HeaderPartial {...header} settings={settings || header.settings} sessionUser={resolvedSessionUser} />
       <FlashPartial success={success} errors={errors} />
       <BreadcrumbsPartial breadcrumbs={breadcrumbs} />
       {children}

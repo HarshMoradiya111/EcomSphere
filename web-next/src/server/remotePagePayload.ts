@@ -78,9 +78,13 @@ export async function fetchRemotePagePayload(path: string): Promise<RemoteHtmlPa
       .map((cookie) => `${cookie.name}=${cookie.value}`)
       .join('; ');
 
-    const response = await fetch(`${API_URL}${path}`, {
+    const separator = path.includes('?') ? '&' : '?';
+    const response = await fetch(`${API_URL}${path}${separator}bridge=true`, {
       cache: 'no-store',
-      headers: cookieHeader ? { cookie: cookieHeader } : undefined,
+      headers: {
+        ...(cookieHeader ? { cookie: cookieHeader } : {}),
+        'x-nextjs-bridge': 'true',
+      },
     });
 
     const html = await response.text();

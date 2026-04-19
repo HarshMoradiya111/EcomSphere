@@ -15,7 +15,7 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       setMessage({ type: 'error', text: "Passwords do not match" });
       return;
@@ -117,23 +117,23 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
           )}
 
           <form onSubmit={handleSubmit}>
-            <input 
-              type="password" 
-              name="password" 
-              className="input-field" 
-              placeholder="New Password (min 6 chars)" 
-              required 
-              minLength={6} 
+            <input
+              type="password"
+              name="password"
+              className="input-field"
+              placeholder="New Password (min 6 chars)"
+              required
+              minLength={6}
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <input 
-              type="password" 
-              name="confirmPassword" 
-              className="input-field" 
-              placeholder="Confirm New Password" 
-              required 
+            <input
+              type="password"
+              name="confirmPassword"
+              className="input-field"
+              placeholder="Confirm New Password"
+              required
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

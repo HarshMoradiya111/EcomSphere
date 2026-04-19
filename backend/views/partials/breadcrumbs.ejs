@@ -1,23 +1,27 @@
-<% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
-  <nav aria-label="breadcrumb" class="breadcrumb-container">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="/">
-          <i class="fa-solid fa-house"></i> Home
-        </a>
-      </li>
-      <% breadcrumbs.forEach((crumb, index) => { %>
-        <li class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></li>
-        <li class="breadcrumb-item <%= index === breadcrumbs.length - 1 ? 'active' : '' %>" <%= index === breadcrumbs.length - 1 ? 'aria-current="page"' : '' %>>
-          <% if (index === breadcrumbs.length - 1) { %>
-            <span><%= crumb.name %></span>
-          <% } else { %>
-            <a href="<%= crumb.url %>">
-              <%= crumb.name %>
-            </a>
-          <% } %>
+<% if (locals.__forceSuppressLegacyUI__ || locals.isBridge) { %>
+  <!-- SUPPRESSING LEGACY BREADCRUMBS FOR NEXTJS BRIDGE -->
+<% } else { %>
+  <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
+    <nav aria-label="breadcrumb" class="breadcrumb-container">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="/">
+            <i class="fa-solid fa-house"></i> Home
+          </a>
         </li>
-      <% }) %>
-    </ol>
-  </nav>
+        <% breadcrumbs.forEach((crumb, index) => { %>
+          <li class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></li>
+          <li class="breadcrumb-item <%= index === breadcrumbs.length - 1 ? 'active' : '' %>" <%= index === breadcrumbs.length - 1 ? 'aria-current="page"' : '' %>>
+            <% if (index === breadcrumbs.length - 1) { %>
+              <span><%= crumb.name %></span>
+            <% } else { %>
+              <a href="<%= crumb.url %>">
+                <%= crumb.name %>
+              </a>
+            <% } %>
+          </li>
+        <% }) %>
+      </ol>
+    </nav>
+  <% } %>
 <% } %>

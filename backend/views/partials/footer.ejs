@@ -1,7 +1,9 @@
-<%# Footer partial - shared footer %>
+<% if (locals.__forceSuppressLegacyUI__ || locals.isBridge) { %>
+  <!-- SUPPRESSING LEGACY FOOTER FOR NEXTJS BRIDGE -->
+<% } else { %>
   <footer class="section-p1">
     <div class="col">
-      <!-- <img class="logo" src="<%= locals.settings ? locals.settings.logo : '/img/logo1.png' %>" height="50" alt="EcomSphere Logo"> -->
+      <!-- <img class="logo" src="<%= locals.settings ? locals.settings.logo : '/img/logo.png' %>" height="50" alt="EcomSphere Logo"> -->
       <h4>Contact</h4>
       <p><strong>Address:</strong>
         <%= locals.settings ? locals.settings.address : 'SSCCS' %>
@@ -67,7 +69,7 @@
     <div id="help-panel" class="hidden">
       <div class="help-header">
         <div style="display:flex; align-items:center; gap:10px;">
-          <img src="/img/logo1.png" height="30" onerror="this.src='/img/logo1.png'" alt="EcomSphere">
+          <img src="/img/logo.png" height="30" onerror="this.src='/img/logo.png'" alt="EcomSphere">
           <div>
             <h4 style="margin:0; font-size:16px;">Help Center</h4>
             <small style="color:#22c55e;"><i class="fa-solid fa-circle" style="font-size:8px;"></i> We're online!</small>
@@ -129,6 +131,7 @@
   <script>
     function toggleHelpPanel() {
       const panel = document.getElementById('help-panel');
-      panel.classList.toggle('hidden');
+      if (panel) panel.classList.toggle('hidden');
     }
   </script>
+<% } %>

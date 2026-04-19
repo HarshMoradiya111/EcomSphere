@@ -14,6 +14,18 @@ type Props = {
 function parseRemoteDocument(html: string) {
   const parser = new DOMParser();
   const documentElement = parser.parseFromString(html, 'text/html');
+
+  // STRIP EJS HEADER/FOOTER/NAVBAR/OVERLAYS
+  const toRemove = [
+    'header', 'footer',
+    'div#header', 'ul#navbar',
+    'div#drawer-overlay',
+    '.help-widget', '#help-widget'
+  ];
+  toRemove.forEach(sel => {
+    documentElement.querySelectorAll(sel).forEach(el => el.remove());
+  });
+
   const styles = Array.from(documentElement.querySelectorAll('style'))
     .map((style) => style.textContent || '')
     .filter((style) => style.trim().length > 0);
@@ -27,14 +39,24 @@ function parseRemoteDocument(html: string) {
     );
   };
 
-  const bodyHtml = documentElement.body.innerHTML.replace(/<script\b([^>]*)>[\s\S]*?<\/script>/gi, (fullMatch, attrs: string) => {
+  let bodyHtml = documentElement.body.innerHTML.replace(/<script\b([^>]*)>[\s\S]*?<\/script>/gi, (fullMatch, attrs: string) => {
     const typeMatch = (attrs || '').match(/type=["']([^"']+)["']/i);
     const scriptType = typeMatch?.[1] || '';
     return isExecutableScriptType(scriptType) ? '' : fullMatch;
   });
 
+  let cleanHtml = bodyHtml;
+  cleanHtml = cleanHtml.replace(/<header\b[\s\S]*?<\/header>/gi, '');
+  cleanHtml = cleanHtml.replace(/<footer\b[\s\S]*?<\/footer>/gi, '');
+  cleanHtml = cleanHtml.replace(/<div[^>]+id=["']header["'][\s\S]*?<\/div>/gi, '');
+  cleanHtml = cleanHtml.replace(/<ul[^>]+id=["']navbar["'][\s\S]*?<\/ul>/gi, '');
+  cleanHtml = cleanHtml.replace(/<div[^>]+id=["']drawer-overlay["'][^>]*>[\s\S]*?<\/div>/gi, '');
+
+  cleanHtml = cleanHtml.replace(/src="\/img\//g, `src="${API_URL}/img/`);
+  cleanHtml = cleanHtml.replace(/src="\/uploads\//g, `src="${API_URL}/uploads/`);
+
   return {
-    bodyHtml,
+    bodyHtml: cleanHtml,
     styles,
     scripts: Array.from(documentElement.querySelectorAll('script'))
       .map((scriptNode) => ({
@@ -64,7 +86,13 @@ export default function RemoteHtmlPage({ path, credentials = 'include', initialP
 
     async function load() {
       try {
-        const response = await fetch(`${API_URL}${path}`, { credentials });
+        const separator = path.includes('?') ? '&' : '?';
+        const response = await fetch(`${API_URL}${path}${separator}bridge=true`, { 
+          credentials,
+          headers: {
+            'x-nextjs-bridge': 'true'
+          }
+        });
         const text = await response.text();
         if (cancelled) return;
         const parsed = parseRemoteDocument(text);
@@ -92,28 +120,40 @@ export default function RemoteHtmlPage({ path, credentials = 'include', initialP
 
     const externalScriptElements: HTMLScriptElement[] = [];
     const timer = window.setTimeout(() => {
-      scripts.forEach((scriptNode) => {
-        const scriptText = scriptNode.text || '';
+      console.log(`[RemoteHtmlPage] Executing ${scripts.length} scripts for ${path}`);
+      scripts.forEach((scriptNode, idx) => {
         const scriptElement = document.createElement('script');
-
+        
         if (scriptNode.src) {
           scriptElement.src = scriptNode.src;
-          if (scriptNode.type === 'module') {
-            scriptElement.type = 'module';
-          }
+          scriptElement.async = false;
           externalScriptElements.push(scriptElement);
-        } else if (scriptText.trim()) {
-          scriptElement.text = `(function(){try{${scriptText}}catch(error){const message=String((error&&error.message)||error||'');if(message.includes("Cannot read properties of null (reading 'addEventListener')")||message.includes('Cannot read properties of null')||message.includes('Cannot set properties of null')){return;}console.error('Remote inline script error:', error);}})();`;
         } else {
-          return;
+          const scriptText = scriptNode.text || '';
+          // Wrapped in a try-catch to avoid breaking the whole page on a minor script error
+          // Added a filter for common null-reference errors in legacy scripts
+          scriptElement.text = `(function(){
+            try {
+              ${scriptText}
+            } catch(error) {
+              const msg = String((error && error.message) || error || '');
+              const ignore = msg.includes("reading 'addEventListener'") || 
+                            msg.includes("properties of null") || 
+                            msg.includes("properties of undefined");
+              if (!ignore) {
+                console.error('Remote inline script error [${idx}]:', error);
+              }
+            }
+          })();`;
         }
-
+        
         document.body.appendChild(scriptElement);
+        // Only remove inline scripts to keep the body clean; external ones stay for loading
         if (!scriptNode.src) {
           document.body.removeChild(scriptElement);
         }
       });
-    }, 0);
+    }, 50); // Increased delay slightly to ensure DOM is settled
 
     return () => {
       window.clearTimeout(timer);

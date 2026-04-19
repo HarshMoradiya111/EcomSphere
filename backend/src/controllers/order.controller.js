@@ -405,7 +405,7 @@ const getTrackOrder = async (req, res) => {
         address: "SSCCS Mumbai",
         phone: "+91 8160730726",
         email: "support@ecomsphere.com",
-        logo: '/img/logo1.png'
+        logo: '/img/logo.png'
       };
   
       const doc = new PDFDocument({ margin: 40, size: 'A4' });

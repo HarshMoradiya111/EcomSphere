@@ -3,6 +3,8 @@ import SafeImage from '@/components/SafeImage';
 import { API_URL } from '@/config';
 import { getSiteSettings } from '@/server/siteSettings';
 import { getProductImageSrc, getProductImageFallbackSrc } from '@/utils/imagePaths';
+import Link from 'next/link';
+import AddToCartButton from '@/features/cart/AddToCartButton';
 
 type Product = {
   _id: string;
@@ -40,15 +42,17 @@ export default async function ProductPage({ params }: { params: { id: string } }
         breadcrumbs={[{ name: 'Shop', url: '/shop' }, { name: 'Product', url: `/product/${params.id}` }]}
         errors={['Product not found']}
       >
-        <section className="section-p1">
-          <h2>Product not found</h2>
-          <a href="/shop">Back to Shop</a>
+        <section className="px-4 py-20 text-center">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-full bg-red-50 mb-6">
+            <i className="fa-solid fa-triangle-exclamation text-4xl text-red-400"></i>
+          </div>
+          <h2 className="text-3xl font-black text-gray-900 mb-4">Product not found</h2>
+          <Link href="/shop" className="text-[#088178] font-bold hover:underline">Return to collection</Link>
         </section>
       </StorefrontShell>
     );
   }
 
-  const productStatus = (product.status || 'In Stock').toLowerCase().replace(/ /g, '-');
   const productStock = Number(product.countInStock || 0);
 
   return (
@@ -61,94 +65,128 @@ export default async function ProductPage({ params }: { params: { id: string } }
         { name: product.name, url: `/product/${product._id}` },
       ]}
     >
-      <section id="prodetails" className="section-p1">
-        <div className="single-pro-image" style={{ position: 'relative' }}>
-          <SafeImage
-            src={getProductImageSrc(product.image)}
-            fallbackSrc={getProductImageFallbackSrc(product.image)}
-            alt={product.name}
-            width="100%"
-            id="main-product-image"
-          />
-          <div className="small-img-group">
-            <div className="small-img-col">
+      <main className="md:px-20 md:py-12 bg-white">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-16">
+          
+          {/* IMAGE SECTION: FULL WIDTH ON MOBILE */}
+          <div className="w-full md:w-1/2">
+            <div className="relative aspect-[4/5] bg-gray-50 overflow-hidden md:rounded-2xl border border-gray-100 shadow-sm">
               <SafeImage
                 src={getProductImageSrc(product.image)}
                 fallbackSrc={getProductImageFallbackSrc(product.image)}
-                alt="Main Image"
-                className="small-img active-thumb"
+                alt={product.name}
+                className="w-full h-full object-cover"
               />
+              {productStock === 0 && (
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                  <span className="bg-white text-black px-6 py-2 rounded-full font-black uppercase tracking-widest text-sm">Sold Out</span>
+                </div>
+              )}
+            </div>
+            
+            {/* THUMBNAILS (Simplified) */}
+            <div className="mt-4 flex gap-2 px-4 md:px-0">
+               <div className="h-20 w-16 border-2 border-[#088178] rounded-md overflow-hidden bg-gray-50 p-1">
+                 <img src={getProductImageSrc(product.image)} className="w-full h-full object-cover" alt="Thumb" />
+               </div>
+            </div>
+          </div>
+
+          {/* DETAILS SECTION */}
+          <div className="flex-1 px-4 md:px-0 pb-24 md:pb-0">
+            <div className="mb-6">
+              <Link href={`/shop?category=${product.category}`} className="inline-block text-[11px] font-black tracking-widest text-[#088178] uppercase mb-2 bg-teal-50 px-3 py-1 rounded">
+                {product.category}
+              </Link>
+              <h1 className="text-2xl md:text-4xl font-black text-gray-900 leading-tight mb-2">{product.name}</h1>
+              <div className="flex items-center gap-4">
+                 <h2 className="text-2xl md:text-3xl font-black text-[#088178]">₹{Number(product.price).toLocaleString('en-IN')}</h2>
+                 <span className="text-sm text-gray-400 line-through">₹{Number(product.price * 1.3).toLocaleString('en-IN')}</span>
+                 <span className="bg-orange-100 text-orange-600 text-[10px] font-bold px-2 py-0.5 rounded">30% OFF</span>
+              </div>
+            </div>
+
+            <div className="h-[1px] bg-gray-100 my-6"></div>
+
+            {/* PRODUCT OPTIONS */}
+            <div className="space-y-6">
+              {product.sizes && product.sizes.length > 0 && (
+                <div>
+                  <h6 className="text-xs font-black uppercase text-gray-400 tracking-wider mb-3">Select Size</h6>
+                  <div className="flex flex-wrap gap-2">
+                    {product.sizes.map((size) => (
+                      <button key={size} className="h-10 min-w-[3rem] px-3 border border-gray-200 rounded text-sm font-bold hover:border-[#088178] hover:text-[#088178] transition-all">
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {product.colors && product.colors.length > 0 && (
+                <div>
+                  <h6 className="text-xs font-black uppercase text-gray-400 tracking-wider mb-3">Available Colors</h6>
+                  <div className="flex flex-wrap gap-3">
+                    {product.colors.map((color) => (
+                      <button 
+                        key={color} 
+                        className="h-8 w-8 rounded-full border border-gray-200 shadow-sm ring-offset-2 focus:ring-2 focus:ring-[#088178]"
+                        title={color}
+                        style={{ backgroundColor: color.toLowerCase() }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <h6 className="text-xs font-black uppercase text-gray-400 tracking-wider mb-3">Product Description</h6>
+                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                  {product.description || 'No description available for this item.'}
+                </p>
+                
+                {/* Product Highlights */}
+                <ul className="grid grid-cols-2 gap-y-3 text-xs font-bold text-gray-700">
+                  <li className="flex items-center gap-2"><i className="fa-solid fa-truck-fast text-[#088178]"></i> Free Delivery</li>
+                  <li className="flex items-center gap-2"><i className="fa-solid fa-rotate-left text-[#088178]"></i> 7-Day Returns</li>
+                  <li className="flex items-center gap-2"><i className="fa-solid fa-shield-halved text-[#088178]"></i> Secure Checkout</li>
+                  <li className="flex items-center gap-2"><i className="fa-solid fa-tag text-[#088178]"></i> Best Price</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* DESKTOP ADD TO CART */}
+            <div className="hidden md:flex gap-4 mt-10">
+              <AddToCartButton 
+                productId={product._id}
+                productName={product.name}
+                price={product.price}
+                image={product.image}
+              />
+              <button className="h-14 w-14 flex items-center justify-center border-2 border-[#088178] rounded-xl text-[#088178] hover:bg-teal-50 transition-colors">
+                <i className="fa-regular fa-heart text-xl"></i>
+              </button>
             </div>
           </div>
         </div>
+      </main>
 
-        <div className="single-pro-details">
-          <h6>{product.category}</h6>
-          <h2>{product.name}</h2>
-          <h4>₹{Number(product.price).toLocaleString('en-IN')}</h4>
-
-          <div className="stock-status" style={{ marginBottom: '20px' }}>
-            <span className={`order-status status-${productStatus}`}>
-              <i className={`fa-solid ${productStock > 0 ? 'fa-check-circle' : 'fa-circle-xmark'}`}></i>
-              {' '}
-              {product.status || 'In Stock'}
-              {productStock > 0 && productStock <= 5 ? ` (${productStock} left)` : ''}
-            </span>
-          </div>
-
-          <p>{product.description || ''}</p>
-
-          {product.sizes && product.sizes.length > 0 && (
-            <div style={{ margin: '20px 0' }}>
-              <label style={{ fontWeight: 600, marginRight: '10px' }}>Size:</label>
-              <select id="product-size" style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '15px', outline: 'none' }}>
-                {product.sizes.map((size) => (
-                  <option value={size} key={size}>{size}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {product.colors && product.colors.length > 0 && (
-            <div style={{ margin: '20px 0' }}>
-              <label style={{ fontWeight: 600, marginRight: '10px' }}>Color:</label>
-              <select id="product-color" style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '15px', outline: 'none' }}>
-                {product.colors.map((color) => (
-                  <option value={color} key={color}>{color}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div style={{ margin: '20px 0' }}>
-            <label style={{ fontWeight: 600, marginRight: '10px' }}>Quantity:</label>
-            <input type="number" id="product-quantity" defaultValue={1} min={1} max={10} style={{ width: '60px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }} />
-          </div>
-
-          <button
-            className="add-to-cart normal"
-            id="add-to-cart-btn"
-            data-product-id={product._id}
-            data-name={product.name}
-            data-price={product.price}
-            data-image={product.image}
-            disabled={productStock === 0}
-            style={{
-              background: productStock === 0 ? '#ccc' : '#088178',
-              color: '#fff',
-              padding: '14px 35px',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '15px',
-              fontWeight: 600,
-              cursor: productStock === 0 ? 'not-allowed' : 'pointer',
-              transition: '0.3s',
-            }}
-          >
-            <i className="fa-solid fa-cart-shopping"></i> {productStock === 0 ? 'Out of Stock' : 'Add to Cart'}
+      {/* MOBILE STICKY BOTTOM ACTION BAR (Meesho Style) */}
+      <div className="md:hidden fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-100 z-[999] shadow-[0_-10px_25px_rgba(0,0,0,0.08)]">
+        <div className="flex gap-3">
+          <button className="h-12 px-5 border border-gray-200 rounded-lg text-gray-500 font-bold active:bg-gray-50">
+            <i className="fa-regular fa-heart text-xl"></i>
           </button>
+          <div className="flex-1 h-12">
+             <AddToCartButton 
+              productId={product._id}
+              productName={product.name}
+              price={product.price}
+              image={product.image}
+            />
+          </div>
         </div>
-      </section>
+      </div>
     </StorefrontShell>
   );
 }

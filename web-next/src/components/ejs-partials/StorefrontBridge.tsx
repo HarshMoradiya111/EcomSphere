@@ -283,9 +283,12 @@ export default function StorefrontBridge() {
         icon?.classList.add('fa-spinner', 'fa-spin');
 
         try {
-          const response = await fetch(`${API_URL}/api/cart/add`, {
+          const response = await fetch(`${API_URL}/api/cart/add?bridge=true`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'x-nextjs-bridge': 'true'
+            },
             credentials: 'include',
             body: JSON.stringify({ productId, quantity: 1 }),
           });
@@ -325,9 +328,12 @@ export default function StorefrontBridge() {
         if (!productId) return;
 
         try {
-          const response = await fetch(`${API_URL}/api/wishlist/toggle`, {
+          const response = await fetch(`${API_URL}/api/wishlist/toggle?bridge=true`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'x-nextjs-bridge': 'true'
+            },
             credentials: 'include',
             body: JSON.stringify({ productId }),
           });
@@ -386,22 +392,31 @@ export default function StorefrontBridge() {
         let response: Response;
         if ((form.enctype || '').includes('multipart/form-data')) {
           const formData = new FormData(form);
-          response = await fetch(`${API_URL}${action}`, {
+          const separator = action.includes('?') ? '&' : '?';
+          response = await fetch(`${API_URL}${action}${separator}bridge=true`, {
             method,
             credentials: 'include',
+            headers: { 
+              'x-nextjs-bridge': 'true'
+            },
             body: formData,
           });
         } else if (method === 'GET') {
           const url = new URL(action, window.location.origin);
           new FormData(form).forEach((value, key) => url.searchParams.set(key, String(value)));
+          url.searchParams.set('bridge', 'true');
           window.location.href = url.pathname + url.search;
           return;
         } else {
           const formData = new FormData(form);
-          response = await fetch(`${API_URL}${action}`, {
+          const separator = action.includes('?') ? '&' : '?';
+          response = await fetch(`${API_URL}${action}${separator}bridge=true`, {
             method,
             credentials: 'include',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'x-nextjs-bridge': 'true'
+            },
             body: new URLSearchParams(formData as unknown as Record<string, string>),
           });
         }

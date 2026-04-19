@@ -1,5 +1,9 @@
+<% if (locals.__forceSuppressLegacyUI__ || locals.isBridge) { %>
+  <!-- SUPPRESSING LEGACY HEADER FOR NEXTJS BRIDGE -->
+<% } else { %>
+<!-- Bridge Status: <%= locals.isBridge %> -->
 <section id="header">
-  <a href="/"><img src="<%= locals.settings ? locals.settings.logo : '/img/logo1.png' %>" class="logo" alt="EcomSphere" height="60"></a>
+  <a href="/"><img src="<%= locals.settings ? locals.settings.logo : '/img/logo.png' %>" class="logo" alt="EcomSphere" height="60"></a>
 
   <!-- Search Bar -->
   <form action="/shop" method="GET" id="search-bar-desktop" style="position: relative;">
@@ -37,13 +41,7 @@
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════
-     Mobile Sidebar — OUTSIDE #header to avoid stacking context
-     issue where header's z-index:999 caps all child z-indexes.
-     ══════════════════════════════════════════════════════════ -->
 <nav id="navbar" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
-
-  <!-- Profile Header -->
   <div id="drawer-profile">
     <div id="drawer-profile-icon">
       <% if (locals.sessionPhoto) { %>
@@ -64,7 +62,6 @@
     <a href="#" id="close" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></a>
   </div>
 
-  <!-- Nav Links -->
   <ul>
     <li style="padding: 10px 25px;">
       <form action="/shop" method="GET" id="search-bar-mobile" style="position: relative;">
@@ -96,3 +93,4 @@
 </nav>
 
 <div id="drawer-overlay"></div>
+<% } %>

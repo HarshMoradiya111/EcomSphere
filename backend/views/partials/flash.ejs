@@ -1,3 +1,4 @@
+<% if (!locals.isBridge && !locals.__isBridge__) { %>
 <%# Flash messages partial %>
 <% if (locals.success && success.length > 0) { %>
   <div class="flash-message flash-success">
@@ -12,4 +13,5 @@
       <p><i class="fa-solid fa-circle-exclamation"></i> <%= msg %></p>
     <% }) %>
   </div>
+<% } %>
 <% } %>

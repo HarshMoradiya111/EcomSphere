@@ -1,5 +1,10 @@
 import RemoteHtmlPage from '@/components/ejs-partials/RemoteHtmlPage';
 import { fetchRemotePagePayload } from '@/server/remotePagePayload';
+import StorefrontShell from '@/components/ejs-partials/StorefrontShell';
+import { getSessionUsername } from '@/server/sessionUser';
+import { getSiteSettings } from '@/server/siteSettings';
+
+export const dynamic = 'force-dynamic';
 
 type CompareSearchParams = {
   ids?: string | string[];
@@ -44,6 +49,17 @@ export default async function ComparePage({
   const ids = normalizeCompareIds(firstValue(resolvedSearchParams?.ids));
   const path = ids.length > 0 ? `/compare?ids=${ids.join(',')}` : '/compare';
   const initialPayload = await fetchRemotePagePayload(path);
+  const sessionUser = await getSessionUsername();
+  const settings = await getSiteSettings();
 
-  return <RemoteHtmlPage path={path} initialPayload={initialPayload} />;
+  return (
+    <StorefrontShell
+      header={{ activePage: 'compare', sessionUser }}
+      settings={settings}
+      sessionUser={sessionUser}
+      breadcrumbs={[{ name: 'Compare', url: '/compare' }]}
+    >
+      <RemoteHtmlPage path={path} initialPayload={initialPayload} />
+    </StorefrontShell>
+  );
 }

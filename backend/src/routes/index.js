@@ -15,7 +15,7 @@ viewRouter.use('/auth', require('./v1/auth.routes'));
 viewRouter.use('/admin', require('./v1/admin.routes'));
 viewRouter.use('/cart', require('./v1/cart.routes'));
 viewRouter.use('/orders', require('./v1/order.routes'));
-viewRouter.use('/products', require('./v1/product.routes'));
 viewRouter.use('/wishlist', require('./v1/wishlist.routes'));
+viewRouter.use('/', require('./v1/product.routes'));
 
 module.exports = { apiRouter, viewRouter };

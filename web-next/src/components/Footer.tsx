@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { API_URL } from '@/config';
 
 export default function Footer() {
   return (
@@ -58,7 +59,7 @@ export default function Footer() {
             </p>
             <div className="pt-6 border-t border-gray-100">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-teal-800 mb-4 text-left">Gateway Integrity</h3>
-                <img src="${API_URL}/img/pay/pay.png" className="w-48 opacity-40 hover:opacity-100 transition-opacity" alt="Secure Pay" />
+                <img src={`${API_URL}/img/pay/pay.png`} className="w-48 opacity-40 hover:opacity-100 transition-opacity" alt="Secure Pay" />
             </div>
         </div>
       </div>

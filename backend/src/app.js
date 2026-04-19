@@ -8,6 +8,9 @@ const morgan = require('morgan');
 const path = require('path');
 const cors = require('cors');
 const passport = require('passport');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const flash = require('connect-flash');
 try {
   require('./config/passport');
   console.log('✅ Passport Strategy Loaded');
@@ -19,6 +22,10 @@ try {
 const routesV1 = require('./routes');
 
 const app = express();
+
+// 0. VIEW ENGINE CONFIG
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -69,6 +76,47 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// 1.5 SESSION & FLASH CONFIG
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'ecomsphere_secret_key_12345',
+  resave: false,
+  saveUninitialized: false,
+  store: (MongoStore.create ? MongoStore : MongoStore.default).create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions',
+    ttl: 14 * 24 * 60 * 60, // 14 days
+  }),
+  cookie: {
+    maxAge: parseInt(process.env.SESSION_MAX_AGE || '1800000'), // Default 30 mins
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  }
+}));
+
+app.use(flash());
+
+// GLOBAL VIEW LOCALS
+app.use((req, res, next) => {
+  res.locals.user = req.session.username || null;
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
+  
+  // Resilient bridge detection (Header or Query Param)
+  const bridgeHeader = req.headers['x-nextjs-bridge'];
+  const bridgeQuery = req.query.bridge;
+  const isBridge = bridgeHeader === 'true' || bridgeQuery === 'true';
+  
+  res.locals.isBridge = isBridge;
+  res.locals.__forceSuppressLegacyUI__ = isBridge;
+  
+  if (isBridge) {
+    console.log(`[BRIDGE DETECTED] ${req.method} ${req.path}`);
+  }
+  
+  next();
+});
+
 // 2. STATIC FILES (For uploads and images)
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -77,7 +125,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 4. API & VIEW ROUTES
+app.use((req, res, next) => {
+  if (req.headers['x-nextjs-bridge']) {
+    console.log(`Bridge Request: ${req.method} ${req.url}`);
+  }
+  next();
+});
+
 app.use('/api/v1', routesV1.apiRouter);
+app.use('/api/cart', require('./routes/v1/cart.api'));
 app.use('/', routesV1.viewRouter);
 
 // 4b. ROOT-LEVEL GOOGLE AUTH ROUTES

@@ -6,12 +6,12 @@ const DEFAULT_SETTINGS: SettingsLike = {
   phone: '+91 8160730726, +91 6359401196',
   hours: '10:00 - 18:00, Mon - Sat',
   email: '',
-  logo: '/img/logo1.png',
+  logo: '/img/logo.png',
 };
 
 function normalizeLogoPath(logo?: string | null): string {
   if (!logo || !logo.trim()) {
-    return '/img/logo1.png';
+    return '/img/logo.png';
   }
 
   const value = logo.trim();

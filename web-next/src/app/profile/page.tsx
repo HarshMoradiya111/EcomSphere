@@ -1,11 +1,24 @@
 import RemoteHtmlPage from '@/components/ejs-partials/RemoteHtmlPage';
-import ProfileEnhancer from '@/components/ProfileEnhancer';
+import { fetchRemotePagePayload } from '@/server/remotePagePayload';
+import HeaderPartial from '@/components/ejs-partials/HeaderPartial';
+import FooterPartial from '@/components/ejs-partials/FooterPartial';
+import { getSessionUsername } from '@/server/sessionUser';
+import { getSiteSettings } from '@/server/siteSettings';
+export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
+  const initialPayload = await fetchRemotePagePayload('/profile');
+  const sessionUser = await getSessionUsername();
+  const settings = await getSiteSettings();
   return (
     <>
-      <RemoteHtmlPage path="/profile" executeScripts={false} />
-      <ProfileEnhancer />
+      <HeaderPartial 
+        activePage="profile" 
+        sessionUser={sessionUser} 
+        settings={settings} 
+      />
+      <RemoteHtmlPage path="/profile" initialPayload={initialPayload} />
+      <FooterPartial settings={settings} sessionUser={sessionUser} />
     </>
   );
 }
