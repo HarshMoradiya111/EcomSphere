@@ -112,4 +112,16 @@ const { isAuthenticatedApi } = require('../../middleware/auth.api.middleware');
 // @route   POST /api/v1/products/review
 router.post('/review', isAuthenticatedApi, postAddReview);
 
+// @desc    Get All FAQs (Public)
+// @route   GET /api/v1/products/faqs
+router.get('/faqs', async (req, res) => {
+  try {
+    const FAQ = require('../../models/FAQ');
+    const faqs = await FAQ.find({ isVisible: true }).sort({ category: 1, order: 1 });
+    res.status(200).json({ success: true, data: faqs });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch FAQs' });
+  }
+});
+
 module.exports = router;

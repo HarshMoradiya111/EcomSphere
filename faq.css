@@ -1,0 +1,115 @@
+/* web-next/src/app/faq/faq.css  — or add to your global styles */
+
+.faq-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* Hero */
+.faq-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.faq-hero-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.faq-hero-subtitle {
+  color: var(--color-text-muted, #6b7280);
+  font-size: 1rem;
+}
+.faq-hero-subtitle a {
+  color: var(--color-primary, #111);
+  text-decoration: underline;
+}
+
+/* Search */
+.faq-search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 2.5rem;
+  background: var(--color-surface, #fff);
+  color: var(--color-text-muted, #9ca3af);
+}
+.faq-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  background: transparent;
+  color: var(--color-text, #111);
+}
+.faq-search-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted, #9ca3af);
+  font-size: 0.875rem;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Category */
+.faq-category {
+  margin-bottom: 2rem;
+}
+.faq-category-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+/* Accordion item */
+.faq-item {
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.faq-item:hover,
+.faq-item--open {
+  border-color: var(--color-primary, #111);
+}
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  font-weight: 500;
+  user-select: none;
+}
+.faq-chevron {
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+  color: var(--color-text-muted, #6b7280);
+}
+.faq-chevron--open {
+  transform: rotate(180deg);
+}
+.faq-answer-wrapper {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.faq-answer {
+  padding: 0 1.25rem 1rem;
+  color: var(--color-text-secondary, #374151);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+/* Empty state */
+.faq-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-muted, #6b7280);
+}
